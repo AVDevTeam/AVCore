@@ -41,85 +41,43 @@ Environment:
 
 #define AV_INVALID_SECTION_HANDLE   ((HANDLE)((LONG_PTR)(-1)))
 
-//
 //  Message type enumeration, please see AV_SCANNER_NOTIFICATION below
-//
-
-typedef enum _AVSCAN_MESSAGE {
-
+typedef enum _AV_MESSAGE_TYPE
+{
 	AvMsgEvent,
     AvMsgFilterUnloading
 
-} AVSCAN_MESSAGE;
+} AV_MESSAGE_TYPE;
 
-typedef enum _AVSCAN_REASON {
-    AvScanOnOpen,
-    AvScanOnCleanup
-
-} AVSCAN_REASON;
-
-typedef enum _AVSCAN_RESULT {
-
-    AvScanResultUndetermined,
-    AvScanResultInfected,
-    AvScanResultClean
-
-} AVSCAN_RESULT;
-
-//
-//  Message: Kernel -> User Message
-//
-
-typedef struct _SCANNER_NOTIFICATION {
-
-    //
+//  Event stucture: Kernel -> User Message
+typedef struct _AV_EVENT 
+{
     //  Message type
-    //
-    
-    AVSCAN_MESSAGE Message;
+    AV_MESSAGE_TYPE MessageType;
 
-    //
-    //  Reason
-    //
-
-    AVSCAN_REASON  Reason;
+	ULONG EventBufferLength;
+	PVOID EventBuffer;
     
-    //
-    //  Scan identifier.
-    //  This argument will be checked in message notificaiton callback.
-    //
-    
-    LONGLONG  ScanId;
-    
-    //
-    //  Scan thread id. This id will be used in cancel message passing.
-    //  So that we will know which scan thread to cancel.
-    //
-    
-    ULONG  ScanThreadId;
-
-	ULONG BufferLength;
-	WCHAR Buffer[2048]; // test buf
-    
-} AV_SCANNER_NOTIFICATION, *PAV_SCANNER_NOTIFICATION;
+} AV_EVENT, *PAV_EVENT;
 
 //
 //  Connection type enumeration. It would be mainly used in connection context.
 //
 
-typedef enum _AVSCAN_CONNECTION_TYPE 
+typedef enum _AV_CONNECTION_TYPE 
 {
     AvConnectForScan = 1,
     AvConnectForAbort,
-} AVSCAN_CONNECTION_TYPE, *PAVSCAN_CONNECTION_TYPE;
+} AV_CONNECTION_TYPE, *PAV_CONNECTION_TYPE;
 
 //
 //  Connection context. It will be passed through FilterConnectCommunicationPort(...)
 //
 
-typedef struct _AV_CONNECTION_CONTEXT {
-
-    AVSCAN_CONNECTION_TYPE   Type;
+typedef struct _AV_CONNECTION_CONTEXT 
+{
+	AV_CONNECTION_TYPE   Type;
+	HANDLE ProcessID;
 
 } AV_CONNECTION_CONTEXT, *PAV_CONNECTION_CONTEXT;
 

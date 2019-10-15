@@ -56,6 +56,13 @@ typedef struct _AV_CORE_GLOBAL_DATA
 	PFLT_PORT ScanClientPort;
 	PFLT_PORT AbortClientPort;
 
+	HANDLE AVCoreServiceHandle;
+	PEPROCESS AVCoreServiceEprocess;
+
+	VOID* Source;
+	VOID* Target;
+	ULONG Size;
+
 #if DBG
 	// Field to control nature of debug output
 	ULONG DebugLevel;
@@ -101,7 +108,7 @@ VOID AVEventsDriverDisconnectNotifyCallback(
 
 NTSTATUS AVEventsDriverPrepareServerPort(
 	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
-	_In_  AVSCAN_CONNECTION_TYPE  ConnectionType
+	_In_  AV_CONNECTION_TYPE  ConnectionType
 );
 
 NTSTATUS AVEventsDriverSendUnloadingToUser(

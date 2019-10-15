@@ -83,7 +83,7 @@ VOID AVEventsDriverDisconnectNotifyCallback(
 
 NTSTATUS AVEventsDriverPrepareServerPort(
 	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
-	_In_  AVSCAN_CONNECTION_TYPE  ConnectionType
+	_In_  AV_CONNECTION_TYPE  ConnectionType
 );
 
 NTSTATUS AVEventsDriverSendUnloadingToUser(
@@ -473,22 +473,50 @@ Return Value:
 	ULONG RetCode;
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONG replyLength = sizeof(ULONG);
-	AV_SCANNER_NOTIFICATION notification = { 0 };
+	AV_EVENT event = { 0 };
 
-	notification.Message = AvMsgEvent;
+	event.MessageType = AvMsgEvent;
 
-	// TEMP. Put FileName to the Event buffer.
-	notification.BufferLength = FileObject->FileName.Length;
-	memcpy(notification.Buffer, FileObject->FileName.Buffer, notification.BufferLength);
+	event.EventBuffer = NULL;
+
+	SIZE_T UMBufferSize = FileObject->FileName.Length;
+	status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, &event.EventBuffer, 0, &UMBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't allocate memory in UM
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+
+	event.EventBufferLength = FileObject->FileName.Length;
+
+	// TODO. Create a helper function for writing arbitrary process virtual memory.
+	Globals.Source = FileObject->FileName.Buffer;
+	Globals.Target = event.EventBuffer;
+	Globals.Size = event.EventBufferLength;
+
+	KAPC_STATE pkapcState;
+	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
+	memcpy(Globals.Target, Globals.Source, Globals.Size);
+	KeUnstackDetachProcess(&pkapcState);
+	// TODO. Helper function end.
 
 	// Send event to the AVCore UM service and wait for the response
 	status = FltSendMessage(Globals.Filter,
 		&Globals.ScanClientPort,
-		&notification,
-		sizeof(AV_SCANNER_NOTIFICATION),
+		&event,
+		sizeof(AV_EVENT),
 		&RetCode,
 		&replyLength,
 		NULL);
+
+	// Got reply. Free memory.
+	status = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &event.EventBuffer, &UMBufferSize, MEM_DECOMMIT);
+	if (status != STATUS_SUCCESS)
+	{
+		ASSERT(FALSE);
+	}
+
 	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 	{
 		if (RetCode)
@@ -506,6 +534,7 @@ Return Value:
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 }
+
 
 NTSTATUS AVEventsDriverConnectNotifyCallback(
 	_In_ PFLT_PORT ClientPort,
@@ -536,7 +565,7 @@ Return Value
 --*/
 {
 	PAV_CONNECTION_CONTEXT connectionCtx = (PAV_CONNECTION_CONTEXT)ConnectionContext;
-	PAVSCAN_CONNECTION_TYPE connectionCookie = NULL;
+	PAV_CONNECTION_TYPE connectionCookie = NULL;
 
 	PAGED_CODE();
 
@@ -549,19 +578,41 @@ Return Value
 	}
 
 	//  ConnectionContext passed in may be deleted. We need to make a copy of it.
-	connectionCookie = (PAVSCAN_CONNECTION_TYPE)ExAllocatePoolWithTag(PagedPool,
-		sizeof(AVSCAN_CONNECTION_TYPE),
+	connectionCookie = (PAV_CONNECTION_TYPE)ExAllocatePoolWithTag(PagedPool,
+		sizeof(AV_CONNECTION_TYPE),
 		AV_CONNECTION_CTX_TAG);
 	if (NULL == connectionCookie) {
 
 		return STATUS_INSUFFICIENT_RESOURCES;
 	}
 
+	NTSTATUS status = STATUS_SUCCESS;
+
 	*connectionCookie = connectionCtx->Type;
 	switch (connectionCtx->Type) 
 	{
 		case AvConnectForScan:
 			Globals.ScanClientPort = ClientPort;
+
+			OBJECT_ATTRIBUTES objectAttributes;
+			InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+			CLIENT_ID client_id;
+			client_id.UniqueProcess = (HANDLE)connectionCtx->ProcessID;
+			client_id.UniqueThread = 0;
+			status = ZwOpenProcess(&Globals.AVCoreServiceHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
+			if (status != STATUS_SUCCESS)
+			{
+				// couldn't get AVCore service process handle
+				*ConnectionCookie = NULL;
+				return STATUS_INVALID_PARAMETER_3;
+			}
+			status = PsLookupProcessByProcessId(connectionCtx->ProcessID, &Globals.AVCoreServiceEprocess);
+			if (status != STATUS_SUCCESS)
+			{
+				// couldn't get AVCore service process handle
+				*ConnectionCookie = NULL;
+				return STATUS_INVALID_PARAMETER_3;
+			}
 			*ConnectionCookie = connectionCookie;
 			break;
 		case AvConnectForAbort:
@@ -596,7 +647,7 @@ Return Value
 	None
 --*/
 {
-	PAVSCAN_CONNECTION_TYPE connectionType = (PAVSCAN_CONNECTION_TYPE)ConnectionCookie;
+	PAV_CONNECTION_TYPE connectionType = (PAV_CONNECTION_TYPE)ConnectionCookie;
 
 	PAGED_CODE();
 
@@ -631,7 +682,7 @@ Return Value
 
 NTSTATUS AVEventsDriverPrepareServerPort(
 	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
-	_In_  AVSCAN_CONNECTION_TYPE  ConnectionType
+	_In_  AV_CONNECTION_TYPE  ConnectionType
 )
 /*++
 Routine Description:
@@ -706,11 +757,11 @@ Return Value:
 	ULONG abortThreadId;
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONG replyLength = sizeof(ULONG);
-	AV_SCANNER_NOTIFICATION notification;
+	AV_EVENT event;
 
 	PAGED_CODE();
 
-	notification.Message = AvMsgFilterUnloading;
+	event.MessageType = AvMsgFilterUnloading;
 
 	//  Tell the user-scanner that we are unloading the filter.
 	//  and waits for its reply.
@@ -719,8 +770,8 @@ Return Value:
 
 	status = FltSendMessage(Globals.Filter,
 		&Globals.AbortClientPort,
-		&notification,
-		sizeof(AV_SCANNER_NOTIFICATION),
+		&event,
+		sizeof(AV_EVENT),
 		&abortThreadId,
 		&replyLength,
 		NULL);

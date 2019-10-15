@@ -34,7 +34,7 @@ typedef struct _SCANNER_MESSAGE
 	FILTER_MESSAGE_HEADER MessageHeader;
 
 	//  Private scanner-specific fields begin here.
-	AV_SCANNER_NOTIFICATION Notification;
+	AV_EVENT Event;
 
 	//  Overlapped structure: this is not really part of the message
 	//  However we embed it here so that when we get pOvlp in 
@@ -44,7 +44,7 @@ typedef struct _SCANNER_MESSAGE
 
 } SCANNER_MESSAGE, * PSCANNER_MESSAGE;
 
-#define SCANNER_MESSAGE_SIZE   (sizeof(FILTER_MESSAGE_HEADER) + sizeof(AV_SCANNER_NOTIFICATION))
+#define SCANNER_MESSAGE_SIZE   (sizeof(FILTER_MESSAGE_HEADER) + sizeof(AV_EVENT))
 
 typedef struct _SCANNER_REPLY_MESSAGE 
 {
@@ -167,6 +167,7 @@ Return Value:
 
 	//  Prepare the scan communication port.
 	connectionCtx.Type = AvConnectForScan;
+	connectionCtx.ProcessID = (HANDLE)GetCurrentProcessId();
 	hr = FilterConnectCommunicationPort(AV_SCAN_PORT_NAME,
 		0,
 		&connectionCtx,
@@ -552,7 +553,7 @@ Return Value:
 		//  is asynchronously and not guranteed in order. 
 		message = CONTAINING_RECORD(pOvlp, SCANNER_MESSAGE, Ovlp);
 
-		if (AvMsgEvent == message->Notification.Message) 
+		if (AvMsgEvent == message->Event.MessageType) 
 		{
 			//  Reply the scanning worker thread handle to the filter
 			//  This is important because the filter will also wait for the scanning thread 
@@ -561,8 +562,8 @@ Return Value:
 			ZeroMemory(&replyMsg, SCANNER_REPLY_MESSAGE_SIZE);
 			replyMsg.ReplyHeader.MessageId = message->MessageHeader.MessageId;
 
-			printf("FILE: %ls\n", message->Notification.Buffer);
-			if (wcsstr(message->Notification.Buffer, L"block_access.txt"))
+			printf("FILE: %ls\n", message->Event.EventBuffer);
+			if (wcsstr((wchar_t*)message->Event.EventBuffer, L"block_access.txt"))
 			{
 				replyMsg.ReturnStatus = 0;
 			}
@@ -700,7 +701,7 @@ Return Value:
 
 		printf("[UserScanListenAbortProc]: Got message %llu. \n", message.MessageHeader.MessageId);
 
-		if (AvMsgFilterUnloading == message.Notification.Message) 
+		if (AvMsgFilterUnloading == message.Event.MessageType) 
 		{
 			//  After this thread receives AvMsgFilterUnloading
 			//  it does

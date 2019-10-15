@@ -10,7 +10,7 @@ Signature   = "$Windows NT$"
 Class = "ContentScreener"
 ClassGuid = {3e3f0674-c83c-4558-bb26-9820e1eba5c5}
 Provider    = %ManufacturerName%
-DriverVer   = 15/10/2019,0.0.0.1
+DriverVer   = 01/01/2018,0.0.0.1
 CatalogFile = AVEventsDriver.cat
 
 [DestinationDirs]
