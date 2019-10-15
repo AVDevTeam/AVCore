@@ -80,11 +80,11 @@ typedef struct _USER_SCAN_CONTEXT {
 
 } USER_SCAN_CONTEXT, * PUSER_SCAN_CONTEXT;
 
-HRESULT UserScanInit(
+HRESULT KMCommInit(
 	_Inout_  PUSER_SCAN_CONTEXT Context
 );
 
-HRESULT UserScanFinalize(
+HRESULT KMCommFinalize(
 	_In_  PUSER_SCAN_CONTEXT Context
 );
 

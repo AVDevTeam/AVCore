@@ -139,13 +139,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="communication.cpp" />
+    <ClCompile Include="KMcommunication.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="communication.h" />
-    <ClInclude Include="utility.h" />
+    <ClInclude Include="KMcommunication.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
