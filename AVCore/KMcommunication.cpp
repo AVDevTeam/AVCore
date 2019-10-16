@@ -1,13 +1,8 @@
 /*++
-
-Copyright (c) 2011  Microsoft Corporation
-
 Module Name:
-
-	userscan.c
-
+	KMcommunication.c
 Abstract:
-
+	TODO! DOCUMENTATION!
 	The implementation of user space scanning module. You have to install filter driver first, and
 	have filter manager load the minifilter. When filter driver is in its position, after calling
 	UserScanInit(...) all the subsequent CreateFile or CloseHandle would trigger the data scan if
@@ -15,91 +10,58 @@ Abstract:
 
 	Before the user space scanner exit, it must call UserScanFinalize(...) to cleanup the data structure
 	and close the listening threads.
-
 Environment:
-
 	User mode
-
 --*/
 
 #include <stdio.h>
 #include <assert.h>
 #include "KMcommunication.h"
 
-#define  KM_EVENTS_LISTENER_THREAD_COUNT   6      // the number of scanning worker threads.
 
-typedef struct _SCANNER_MESSAGE 
-{
-	//  Required structure header.
-	FILTER_MESSAGE_HEADER MessageHeader;
-
-	//  Private scanner-specific fields begin here.
-	AV_EVENT Event;
-
-	//  Overlapped structure: this is not really part of the message
-	//  However we embed it here so that when we get pOvlp in 
-	//  GetQueuedCompletionStatus(...), we can restore the message 
-	//  via CONTAINING_RECORD macro.
-	OVERLAPPED Ovlp;
-
-} SCANNER_MESSAGE, * PSCANNER_MESSAGE;
-
-#define SCANNER_MESSAGE_SIZE   (sizeof(FILTER_MESSAGE_HEADER) + sizeof(AV_EVENT))
-
-typedef struct _SCANNER_REPLY_MESSAGE 
-{
-	//  Required structure header.
-	FILTER_REPLY_HEADER ReplyHeader;
-
-	//  Private scanner-specific fields begin here.
-	ULONG   ReturnStatus;
-
-} SCANNER_REPLY_MESSAGE, * PSCANNER_REPLY_MESSAGE;
-
-#define SCANNER_REPLY_MESSAGE_SIZE   (sizeof(FILTER_REPLY_HEADER) + sizeof(ULONG))
 
 #pragma region Local routines declarations
 HRESULT
 KMEventListener(
-	_Inout_ PUSER_SCAN_CONTEXT Context
+	_Inout_ PAV_CORE_CONTEXT Context
 );
 
 HRESULT
 KMCommListenAbortProc(
-	_Inout_ PUSER_SCAN_CONTEXT Context
+	_Inout_ PAV_CORE_CONTEXT Context
 );
 
 DWORD
 WaitForAll(
-	_In_  PSCANNER_THREAD_CONTEXT  ScanThreadCtxes
+	_In_  PLISTENER_THREAD_CONTEXT  ScanThreadCtxes
 );
 
 HRESULT
 KMCommGetThreadContextById(
 	_In_  DWORD   ThreadId,
-	_In_  PUSER_SCAN_CONTEXT Context,
-	_Out_ PSCANNER_THREAD_CONTEXT* ScanThreadCtx
+	_In_  PAV_CORE_CONTEXT Context,
+	_Out_ PLISTENER_THREAD_CONTEXT* ScanThreadCtx
 );
 
 VOID
 KMCommSynchronizedCancel(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 );
 
 HRESULT
 KMCommClosePorts(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 );
 
 HRESULT
 KMCommCleanup(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 );
 #pragma endregion Local routines
 
 //  Implementation of exported routines.
 //  Declared in KMcommunication.h
-HRESULT KMCommInit(_Inout_  PUSER_SCAN_CONTEXT Context)
+HRESULT KMCommInit(_Inout_  PAV_CORE_CONTEXT Context)
 /*++
 Routine Description:
 	This routine initializes all the necessary data structures and forks listening threads.
@@ -114,7 +76,7 @@ Return Value:
 	HRESULT  hr = S_OK;
 	ULONG    i = 0;
 	HANDLE   hEvent = NULL;
-	PSCANNER_THREAD_CONTEXT  scanThreadCtxes = NULL;
+	PLISTENER_THREAD_CONTEXT  scanThreadCtxes = NULL;
 	HANDLE   hListenAbort = NULL;
 	AV_CONNECTION_CONTEXT connectionCtx;
 
@@ -139,14 +101,14 @@ Return Value:
 	}
 
 	//  Initialize scan thread contexts.
-	scanThreadCtxes = (PSCANNER_THREAD_CONTEXT)HeapAlloc(GetProcessHeap(), 0, sizeof(SCANNER_THREAD_CONTEXT) * KM_EVENTS_LISTENER_THREAD_COUNT);
+	scanThreadCtxes = (PLISTENER_THREAD_CONTEXT)HeapAlloc(GetProcessHeap(), 0, sizeof(LISTENER_THREAD_CONTEXT) * KM_EVENTS_LISTENER_THREAD_COUNT);
 	if (NULL == scanThreadCtxes) 
 	{
 		hr = MAKE_HRESULT(SEVERITY_ERROR, 0, E_OUTOFMEMORY);
 		goto Cleanup;
 	}
 
-	ZeroMemory(scanThreadCtxes, sizeof(SCANNER_THREAD_CONTEXT) * KM_EVENTS_LISTENER_THREAD_COUNT);
+	ZeroMemory(scanThreadCtxes, sizeof(LISTENER_THREAD_CONTEXT) * KM_EVENTS_LISTENER_THREAD_COUNT);
 
 	//  Create scan listening threads.
 	for (i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; i++) 
@@ -217,7 +179,7 @@ Return Value:
 	//  Pump messages into queue of completion port.
 	for (i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; i++) 
 	{
-		PSCANNER_MESSAGE msg = (PSCANNER_MESSAGE)HeapAlloc(GetProcessHeap(), 0, sizeof(SCANNER_MESSAGE));
+		PKM_MESSAGE msg = (PKM_MESSAGE)HeapAlloc(GetProcessHeap(), 0, sizeof(KM_MESSAGE));
 
 		if (NULL == msg) 
 		{
@@ -228,7 +190,7 @@ Return Value:
 		FillMemory(&msg->Ovlp, sizeof(OVERLAPPED), 0);
 		hr = FilterGetMessage(Context->ConnectionPort,
 			&msg->MessageHeader,
-			FIELD_OFFSET(SCANNER_MESSAGE, Ovlp),
+			FIELD_OFFSET(KM_MESSAGE, Ovlp),
 			&msg->Ovlp);
 
 		if (hr == HRESULT_FROM_WIN32(ERROR_IO_PENDING)) 
@@ -277,7 +239,7 @@ Cleanup:
 }
 
 HRESULT KMCommFinalize(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 )
 /*++
 Routine Description:
@@ -307,7 +269,7 @@ Return Value:
 
 
 DWORD WaitForAll(
-	_In_  PSCANNER_THREAD_CONTEXT  ScanThreadCtxes
+	_In_  PLISTENER_THREAD_CONTEXT  ScanThreadCtxes
 )
 /*++
 Routine Description:
@@ -329,8 +291,8 @@ Return Value:
 
 HRESULT KMCommGetThreadContextById(
 	_In_  DWORD   ThreadId,
-	_In_  PUSER_SCAN_CONTEXT Context,
-	_Out_ PSCANNER_THREAD_CONTEXT* ScanThreadCtx
+	_In_  PAV_CORE_CONTEXT Context,
+	_Out_ PLISTENER_THREAD_CONTEXT* ScanThreadCtx
 )
 /*++
 Routine Description:
@@ -345,7 +307,7 @@ Return Value:
 {
 	HRESULT hr = S_OK;
 	ULONG i;
-	PSCANNER_THREAD_CONTEXT kmListenerThreadCtx = Context->ScanThreadCtxes;
+	PLISTENER_THREAD_CONTEXT kmListenerThreadCtx = Context->ScanThreadCtxes;
 
 	*ScanThreadCtx = NULL;
 
@@ -361,7 +323,7 @@ Return Value:
 }
 
 VOID KMCommSynchronizedCancel(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 )
 /*++
 Routine Description:
@@ -373,7 +335,7 @@ Return Value:
 --*/
 {
 	ULONG i;
-	PSCANNER_THREAD_CONTEXT  scanThreadCtxes = Context->ScanThreadCtxes;
+	PLISTENER_THREAD_CONTEXT  scanThreadCtxes = Context->ScanThreadCtxes;
 
 	if (NULL == scanThreadCtxes) 
 	{
@@ -395,7 +357,7 @@ Return Value:
 }
 
 HRESULT KMCommClosePorts(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 )
 /*++
 Routine Description:
@@ -428,7 +390,7 @@ Return Value:
 }
 
 HRESULT KMCommCleanup(
-	_In_  PUSER_SCAN_CONTEXT Context
+	_In_  PAV_CORE_CONTEXT Context
 )
 /*++
 Routine Description:
@@ -443,7 +405,7 @@ Return Value:
 {
 	ULONG i = 0;
 	HRESULT  hr = S_OK;
-	PSCANNER_THREAD_CONTEXT  scanThreadCtxes = Context->ScanThreadCtxes;
+	PLISTENER_THREAD_CONTEXT  scanThreadCtxes = Context->ScanThreadCtxes;
 
 	if (NULL == scanThreadCtxes) 
 	{
@@ -472,7 +434,7 @@ Return Value:
 }
 
 HRESULT KMEventListener(
-	_Inout_   PUSER_SCAN_CONTEXT Context
+	_Inout_   PAV_CORE_CONTEXT Context
 )
 /*++
 Routine Description:
@@ -495,15 +457,15 @@ Return Value:
 {
 	HRESULT hr = S_OK;
 
-	PSCANNER_MESSAGE  message = NULL;
-	SCANNER_REPLY_MESSAGE replyMsg;
+	PKM_MESSAGE  message = NULL;
+	UM_REPLY_MESSAGE replyMsg;
 	LPOVERLAPPED pOvlp = NULL;
 
 	DWORD outSize;
 	ULONG_PTR key;
 	BOOL  success = FALSE;
 
-	PSCANNER_THREAD_CONTEXT threadCtx = NULL;
+	PLISTENER_THREAD_CONTEXT threadCtx = NULL;
 
 	hr = KMCommGetThreadContextById(GetCurrentThreadId(), Context, &threadCtx);
 	if (FAILED(hr)) 
@@ -512,7 +474,7 @@ Return Value:
 		return hr;
 	}
 
-	ZeroMemory(&replyMsg, SCANNER_REPLY_MESSAGE_SIZE);
+	ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 
 	printf("Current thread handle %p, id:%u\n", threadCtx->Handle, threadCtx->ThreadId);
 
@@ -551,7 +513,7 @@ Return Value:
 		//  Remember we embedded overlapped structure inside SCANNER_MESSAGE.
 		//  This is because the overlapped structure obtained from GetQueuedCompletionStatus(...)
 		//  is asynchronously and not guranteed in order. 
-		message = CONTAINING_RECORD(pOvlp, SCANNER_MESSAGE, Ovlp);
+		message = CONTAINING_RECORD(pOvlp, KM_MESSAGE, Ovlp);
 
 		if (AvMsgEvent == message->Event.MessageType) 
 		{
@@ -559,29 +521,35 @@ Return Value:
 			//  This is important because the filter will also wait for the scanning thread 
 			//  in case that the scanning thread is killed before telling filter 
 			//  the scan is done or aborted.
-			ZeroMemory(&replyMsg, SCANNER_REPLY_MESSAGE_SIZE);
+			ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 			replyMsg.ReplyHeader.MessageId = message->MessageHeader.MessageId;
+			replyMsg.EventResponse.Status = AvEventStatusAllow;
 
-			printf("FILE: %ls\n", message->Event.EventBuffer);
-			if (wcsstr((wchar_t*)message->Event.EventBuffer, L"block_access.txt"))
+			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// !!!!!!!!!!!!!!!!!!!!  TODO! EVENT PROCESSING. !!!!!!!!!!!!!!!!!!!!
+			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			if (message->Event.EventType == AvFileCreate)
 			{
-				replyMsg.ReturnStatus = 0;
-			}
-			else
-			{
-				replyMsg.ReturnStatus = 1;
+				// Get pointer to Event structure buffer
+				PAV_EVENT_FILE_CREATE eventFileCreate = (PAV_EVENT_FILE_CREATE)message->Event.EventBuffer;
+
+				//printf("AvFileCreate: %ls%ls\n", eventFileCreate->VolumeName, eventFileCreate->FileName);
+				printf("AvFileCreate: %ls\n", eventFileCreate->FileName);
+				if (wcsstr(eventFileCreate->FileName, L"eicar.com"))
+				{
+					replyMsg.EventResponse.Status = AvEventStatusBlock;
+				}
 			}
 
 			hr = FilterReplyMessage(Context->ConnectionPort,
 				&replyMsg.ReplyHeader,
-				SCANNER_REPLY_MESSAGE_SIZE);
+				UM_REPLY_MESSAGE_SIZE);
 
 			if (FAILED(hr)) 
 			{
 				fprintf(stderr, "[UserScanWorker]: Failed to reply thread handle to the minifilter, %lu\n", hr);
 				break;
 			}
-			fprintf(stderr, "[UserScanWorker]: Sent reply.\n");
 		}
 		else 
 		{
@@ -604,7 +572,7 @@ Return Value:
 		//  After we process the message, pump a overlapped structure into completion port again.
 		hr = FilterGetMessage(Context->ConnectionPort,
 			&message->MessageHeader,
-			FIELD_OFFSET(SCANNER_MESSAGE, Ovlp),
+			FIELD_OFFSET(KM_MESSAGE, Ovlp),
 			&message->Ovlp);
 
 		if (hr == HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED)) 
@@ -633,7 +601,7 @@ Return Value:
 }
 
 HRESULT KMCommListenAbortProc(
-	_Inout_   PUSER_SCAN_CONTEXT Context
+	_Inout_   PAV_CORE_CONTEXT Context
 )
 /*++
 Routine Description:
@@ -654,13 +622,13 @@ Return Value:
 {
 	HRESULT hr = S_OK;
 	HANDLE abortPort = NULL;  //  A port for listening the abort notification from driver.
-	SCANNER_MESSAGE message;
+	KM_MESSAGE message;
 	DWORD  dwThisThread = GetCurrentThreadId();
-	SCANNER_REPLY_MESSAGE replyMsg;
+	UM_REPLY_MESSAGE replyMsg;
 	AV_CONNECTION_CONTEXT connectionCtx;
-	PSCANNER_THREAD_CONTEXT threadCtx = NULL;
+	PLISTENER_THREAD_CONTEXT threadCtx = NULL;
 
-	ZeroMemory(&message, SCANNER_MESSAGE_SIZE);
+	ZeroMemory(&message, KM_MESSAGE_SIZE);
 
 	//  Prepare the abort communication port.
 	connectionCtx.Type = AvConnectForAbort;
@@ -683,7 +651,7 @@ Return Value:
 		//  Wait until an abort command is sent from filter.
 		hr = FilterGetMessage(abortPort,
 			&message.MessageHeader,
-			SCANNER_MESSAGE_SIZE,
+			KM_MESSAGE_SIZE,
 			NULL);
 
 		if (hr == HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED)) 
@@ -712,12 +680,12 @@ Return Value:
 			//    5) Exit the process
 			KMCommSynchronizedCancel(Context);
 			printf("The filter is unloading, exit!\n");
-			ZeroMemory(&replyMsg, SCANNER_REPLY_MESSAGE_SIZE);
+			ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 			replyMsg.ReplyHeader.MessageId = message.MessageHeader.MessageId;
-			replyMsg.ReturnStatus = dwThisThread;
+			replyMsg.EventResponse.Status = AvEventStatusAllow;
 			hr = FilterReplyMessage(abortPort,
 				&replyMsg.ReplyHeader,
-				SCANNER_REPLY_MESSAGE_SIZE);
+				UM_REPLY_MESSAGE_SIZE);
 
 			if (FAILED(hr)) 
 			{

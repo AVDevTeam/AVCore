@@ -612,7 +612,6 @@ Return Value:
 	ULONG_PTR stackHigh;
 	PFILE_OBJECT FileObject = Data->Iopb->TargetFileObject;
 
-
 	PAGED_CODE();
 
 	//  Stack file objects are never scanned.
@@ -624,62 +623,102 @@ Return Value:
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
-	ULONG RetCode;
-	NTSTATUS status = STATUS_SUCCESS;
-	ULONG replyLength = sizeof(ULONG);
-	AV_EVENT event = { 0 };
-
-	if (!Globals.AVCoreServiceHandle)
+		if (!Globals.AVCoreServiceHandle)
 	{
 		// AVCore service is not listening skip event.
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
-	event.MessageType = AvMsgEvent;
-	event.EventBuffer = NULL;
-	event.EventBufferLength = FileObject->FileName.Length;
 
-	// copy data to UM event buffer
-	SIZE_T umBuffSize = FileObject->FileName.Length;
-	status = memmoveUM(FileObject->FileName.Buffer, &umBuffSize, &event.EventBuffer);
+	UCHAR volumeInformationBuffer[256];
+	SIZE_T volumeInformationSize = sizeof(volumeInformationBuffer);
+
+	NTSTATUS status = STATUS_SUCCESS;
+	status = FltGetVolumeInformation(FltObjects->Volume, FilterVolumeBasicInformation, &volumeInformationBuffer, (ULONG)volumeInformationSize, (PULONG)&volumeInformationSize);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't get volume information
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	PFILTER_VOLUME_BASIC_INFORMATION volumeInformation = (PFILTER_VOLUME_BASIC_INFORMATION)volumeInformationBuffer;
+
+	// Start forming Event structure on KM stack
+	AV_EVENT_FILE_CREATE eventFileCreate = { 0 };
+	/*
+	eventFileCreate.FileName = NULL;
+	eventFileCreate.VolumeName = NULL;
+	*/
+
+	// Put file name information to UM memory and save address in Event stucture.
+	eventFileCreate.FileNameSize = FileObject->FileName.Length;
+	SIZE_T umBuffFileNameSize = eventFileCreate.FileNameSize;
+	status = memmoveUM(FileObject->FileName.Buffer, &umBuffFileNameSize, &eventFileCreate.FileName);
 	if (status != STATUS_SUCCESS)
 	{
 		// couldn't allocate memory in UM
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
+	// Put volume name information to UM memory and save address in Event stucture.
+	eventFileCreate.VolumeNameSize = volumeInformation->FilterVolumeNameLength;
+	SIZE_T umBuffVolumeNameSize = eventFileCreate.VolumeNameSize;
+	status = memmoveUM(volumeInformation->FilterVolumeName, &umBuffVolumeNameSize, &eventFileCreate.VolumeName);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't allocate memory in UM
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	// Prepare AV_MESSAGE structure that will be sent to UM via comm port.
+	AV_MESSAGE avMessage = { 0 };
+	avMessage.MessageType = AvMsgEvent;
+	avMessage.EventBuffer = NULL;
+	avMessage.EventBufferLength = sizeof(AV_EVENT_FILE_CREATE);
+	
+	// Put Event structure to UM memory and save address in AV_MESSAGE structure.
+	SIZE_T umBuffEventSize = avMessage.EventBufferLength;
+	status = memmoveUM(&eventFileCreate, &umBuffEventSize, &avMessage.EventBuffer);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't allocate memory in UM
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	AV_EVENT_RESPONSE UMResponse;
+	ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
 	// Send event to the AVCore UM service and wait for the response
 	status = FltSendMessage(Globals.Filter,
 		&Globals.ScanClientPort,
-		&event,
-		sizeof(AV_EVENT),
-		&RetCode,
+		&avMessage,
+		sizeof(AV_MESSAGE),
+		&UMResponse,
 		&replyLength,
 		NULL);
 
-	// Got reply. Free memory.
-	status = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &event.EventBuffer, &umBuffSize, MEM_DECOMMIT);
-	if (status != STATUS_SUCCESS)
-	{
-		ASSERT(FALSE);
-	}
+	// Got reply. Free memory. We need to free all UM-allocated buffers.
+#pragma region free UM memory
+	NTSTATUS freeStatus = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &eventFileCreate.FileName, &umBuffFileNameSize, MEM_DECOMMIT);
+	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
+
+	freeStatus = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &eventFileCreate.VolumeName, &umBuffVolumeNameSize, MEM_DECOMMIT);
+	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
+
+	freeStatus = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &avMessage.EventBuffer, &umBuffEventSize, MEM_DECOMMIT);
+	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
+#pragma endregion free UM memory
 
 	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 	{
-		if (RetCode)
-		{
-			return FLT_PREOP_SUCCESS_NO_CALLBACK;
-		}
-		else // block access if status 0 was returned from UM.
+		if (UMResponse.Status == AvEventStatusBlock)
 		{
 			Data->IoStatus.Status = STATUS_ACCESS_DENIED;
 			return FLT_PREOP_COMPLETE;
 		}
 	}
-	else // allow access if we were not able to communicate with UM.
-	{
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
+	// allow access if we were not able to communicate with UM.
+	return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }
 
 NTSTATUS AVEventsDriverPrepareServerPort(
@@ -755,10 +794,8 @@ NTSTATUS AVEventsDriverSendUnloadingToUser(
 		The return value is the status of the operation.
 	--*/
 {
-	ULONG abortThreadId;
 	NTSTATUS status = STATUS_SUCCESS;
-	ULONG replyLength = sizeof(ULONG);
-	AV_EVENT event;
+	AV_MESSAGE event;
 
 	PAGED_CODE();
 
@@ -772,9 +809,9 @@ NTSTATUS AVEventsDriverSendUnloadingToUser(
 	status = FltSendMessage(Globals.Filter,
 		&Globals.AbortClientPort,
 		&event,
-		sizeof(AV_EVENT),
-		&abortThreadId,
-		&replyLength,
+		sizeof(AV_MESSAGE),
+		NULL,
+		NULL,
 		NULL);
 
 	if (!NT_SUCCESS(status))

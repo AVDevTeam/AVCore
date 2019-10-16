@@ -27,13 +27,29 @@ Environment:
 #define AV_VISTA    (NTDDI_VERSION >= NTDDI_VISTA)
 
 #include "Globals.h"
-#include "avlib.h"
+#include "KMUMcomm.h"
+#include "Events.h"
 
 #define AV_CONNECTION_CTX_TAG                'cCvA'
 
+#if DBG
 
-//#pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
+//  Debugging level flags.
+#define AVDBG_TRACE_ROUTINES            0x00000001
+#define AVDBG_TRACE_OPERATION_STATUS    0x00000002
+#define AVDBG_TRACE_DEBUG               0x00000004
+#define AVDBG_TRACE_ERROR               0x00000008
 
+#define AV_DBG_PRINT( _dbgLevel, _string )          \
+    if(FlagOn(Globals.DebugLevel,(_dbgLevel))) {    \
+        DbgPrint _string;                           \
+    }
+
+#else
+
+#define AV_DBG_PRINT(_dbgLevel, _string)            {NOTHING;}
+
+#endif
 
 #endif
 

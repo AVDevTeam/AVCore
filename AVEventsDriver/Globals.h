@@ -25,6 +25,8 @@ typedef struct _AV_CORE_GLOBAL_DATA
 	HANDLE AVCoreServiceHandle;
 	PEPROCESS AVCoreServiceEprocess;
 
+	// Global variables that are used to store
+	// parameters of memmoveUM before the stack switch.
 	VOID* Source;
 	VOID* Target;
 	SIZE_T Size;
@@ -38,21 +40,3 @@ typedef struct _AV_CORE_GLOBAL_DATA
 
 } AV_SCANNER_GLOBAL_DATA, * PAV_SCANNER_GLOBAL_DATA;
 
-#if DBG
-
-//  Debugging level flags.
-#define AVDBG_TRACE_ROUTINES            0x00000001
-#define AVDBG_TRACE_OPERATION_STATUS    0x00000002
-#define AVDBG_TRACE_DEBUG               0x00000004
-#define AVDBG_TRACE_ERROR               0x00000008
-
-#define AV_DBG_PRINT( _dbgLevel, _string )          \
-    if(FlagOn(Globals.DebugLevel,(_dbgLevel))) {    \
-        DbgPrint _string;                           \
-    }
-
-#else
-
-#define AV_DBG_PRINT(_dbgLevel, _string)            {NOTHING;}
-
-#endif

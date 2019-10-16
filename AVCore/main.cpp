@@ -1,7 +1,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <fltUser.h>
-#include "avlib.h"
+#include "KMUMcomm.h"
 #include "KMcommunication.h"
 
 int _cdecl
@@ -13,13 +13,14 @@ main(
 
 	UCHAR c;
 	HRESULT hr = S_OK;
-	USER_SCAN_CONTEXT userScanCtx = { 0 };
+	AV_CORE_CONTEXT userScanCtx = { 0 };
 
 	UNREFERENCED_PARAMETER(argc);
 	UNREFERENCED_PARAMETER(argv);
 
 	hr = KMCommInit(&userScanCtx);
-	if (FAILED(hr)) {
+	if (FAILED(hr)) 
+	{
 		fprintf(stderr, "Failed to initialize user scan data\n");
 		return 255;
 	}
@@ -28,13 +29,15 @@ main(
 	{
 		printf("press 'q' to quit: ");
 		c = (unsigned char)getchar();
-		if (c == 'q') {
+		if (c == 'q') 
+		{
 			break;
 		}
 	}
 
 	hr = KMCommFinalize(&userScanCtx);
-	if (FAILED(hr)) {
+	if (FAILED(hr)) 
+	{
 		fprintf(stderr, "Failed to finalize the user scan data.\n");
 	}
 
