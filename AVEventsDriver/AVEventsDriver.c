@@ -7,6 +7,7 @@ Environment:
     Kernel mode
 --*/
 
+#include "Globals.h"
 #include "AVEventsDriver.h"
 
 #pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
@@ -90,6 +91,8 @@ NTSTATUS AVEventsDriverSendUnloadingToUser(
 	VOID
 );
 
+NTSTATUS memmoveUM(void* srcBuffer, PSIZE_T size, void* outUmBuffer);
+
 EXTERN_C_END
 #pragma endregion Prototypes
 
@@ -104,6 +107,7 @@ EXTERN_C_END
 #pragma alloc_text(PAGE, AVEventsDriverDisconnectNotifyCallback)
 #pragma alloc_text(PAGE, AVEventsDriverPrepareServerPort)
 #pragma alloc_text(PAGE, AVEventsDriverSendUnloadingToUser)
+#pragma alloc_text(PAGE, memmoveUM)
 #endif
 
 //  operation registration
@@ -142,6 +146,7 @@ CONST FLT_REGISTRATION FilterRegistration = {
 
 };
 
+AV_SCANNER_GLOBAL_DATA Globals;
 
 NTSTATUS AVEventsDriverInstanceSetup (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
@@ -300,6 +305,9 @@ Return Value:
 
 #endif
 
+	Globals.AVCoreServiceHandle = NULL;
+	Globals.AVCoreServiceEprocess = NULL;
+
 	try 
 	{
 		//  Register with FltMgr to tell it our callback routines
@@ -422,120 +430,6 @@ NTSTATUS AVEventsDriverUnload (
 }
 
 
-/*************************************************************************
-    MiniFilter callback routines.
-*************************************************************************/
-
-FLT_PREOP_CALLBACK_STATUS AVEventsDriverPreMjCreate(
-    _Inout_ PFLT_CALLBACK_DATA Data,
-    _In_ PCFLT_RELATED_OBJECTS FltObjects,
-    _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
-    )
-/*++
-Routine Description:
-    This routine is a pre-operation dispatch routine for this miniFilter.
-    This is non-pageable because it could be called on the paging path
-Arguments:
-    Data - Pointer to the filter callbackData that is passed to us.
-
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance, its associated volume and
-        file object.
-
-    CompletionContext - The context for the completion routine for this
-        operation.
-
-Return Value:
-
-    The return value is the status of the operation.
-
---*/
-{
-	UNREFERENCED_PARAMETER(CompletionContext);
-	UNREFERENCED_PARAMETER(FltObjects);
-
-	ULONG_PTR stackLow;
-	ULONG_PTR stackHigh;
-	PFILE_OBJECT FileObject = Data->Iopb->TargetFileObject;
-
-
-	PAGED_CODE();
-
-	//  Stack file objects are never scanned.
-	IoGetStackLimits(&stackLow, &stackHigh);
-
-	if (((ULONG_PTR)FileObject > stackLow) &&
-		((ULONG_PTR)FileObject < stackHigh)) 
-	{
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	ULONG RetCode;
-	NTSTATUS status = STATUS_SUCCESS;
-	ULONG replyLength = sizeof(ULONG);
-	AV_EVENT event = { 0 };
-
-	event.MessageType = AvMsgEvent;
-
-	event.EventBuffer = NULL;
-
-	SIZE_T UMBufferSize = FileObject->FileName.Length;
-	status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, &event.EventBuffer, 0, &UMBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't allocate memory in UM
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-
-	event.EventBufferLength = FileObject->FileName.Length;
-
-	// TODO. Create a helper function for writing arbitrary process virtual memory.
-	Globals.Source = FileObject->FileName.Buffer;
-	Globals.Target = event.EventBuffer;
-	Globals.Size = event.EventBufferLength;
-
-	KAPC_STATE pkapcState;
-	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
-	memcpy(Globals.Target, Globals.Source, Globals.Size);
-	KeUnstackDetachProcess(&pkapcState);
-	// TODO. Helper function end.
-
-	// Send event to the AVCore UM service and wait for the response
-	status = FltSendMessage(Globals.Filter,
-		&Globals.ScanClientPort,
-		&event,
-		sizeof(AV_EVENT),
-		&RetCode,
-		&replyLength,
-		NULL);
-
-	// Got reply. Free memory.
-	status = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &event.EventBuffer, &UMBufferSize, MEM_DECOMMIT);
-	if (status != STATUS_SUCCESS)
-	{
-		ASSERT(FALSE);
-	}
-
-	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
-	{
-		if (RetCode)
-		{
-			return FLT_PREOP_SUCCESS_NO_CALLBACK;
-		}
-		else // block access if status 0 was returned from UM.
-		{
-			Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-			return FLT_PREOP_COMPLETE;
-		}
-	}
-	else // allow access if we were not able to communicate with UM.
-	{
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-}
-
-
 NTSTATUS AVEventsDriverConnectNotifyCallback(
 	_In_ PFLT_PORT ClientPort,
 	_In_ PVOID ServerPortCookie,
@@ -589,43 +483,43 @@ Return Value
 	NTSTATUS status = STATUS_SUCCESS;
 
 	*connectionCookie = connectionCtx->Type;
-	switch (connectionCtx->Type) 
+	switch (connectionCtx->Type)
 	{
-		case AvConnectForScan:
-			Globals.ScanClientPort = ClientPort;
+	case AvConnectForScan:
+		Globals.ScanClientPort = ClientPort;
 
-			OBJECT_ATTRIBUTES objectAttributes;
-			InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
-			CLIENT_ID client_id;
-			client_id.UniqueProcess = (HANDLE)connectionCtx->ProcessID;
-			client_id.UniqueThread = 0;
-			status = ZwOpenProcess(&Globals.AVCoreServiceHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
-			if (status != STATUS_SUCCESS)
-			{
-				// couldn't get AVCore service process handle
-				*ConnectionCookie = NULL;
-				return STATUS_INVALID_PARAMETER_3;
-			}
-			status = PsLookupProcessByProcessId(connectionCtx->ProcessID, &Globals.AVCoreServiceEprocess);
-			if (status != STATUS_SUCCESS)
-			{
-				// couldn't get AVCore service process handle
-				*ConnectionCookie = NULL;
-				return STATUS_INVALID_PARAMETER_3;
-			}
-			*ConnectionCookie = connectionCookie;
-			break;
-		case AvConnectForAbort:
-			Globals.AbortClientPort = ClientPort;
-			*ConnectionCookie = connectionCookie;
-			break;
-		default:
-			AV_DBG_PRINT(AVDBG_TRACE_ERROR,
-				("[AV]: AvConnectNotifyCallback: No such connection type. \n"));
-			ExFreePoolWithTag(connectionCookie,
-				AV_CONNECTION_CTX_TAG);
+		OBJECT_ATTRIBUTES objectAttributes;
+		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+		CLIENT_ID client_id;
+		client_id.UniqueProcess = (HANDLE)connectionCtx->ProcessID;
+		client_id.UniqueThread = 0;
+		status = ZwOpenProcess(&Globals.AVCoreServiceHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
+		if (status != STATUS_SUCCESS)
+		{
+			// couldn't get AVCore service process handle
 			*ConnectionCookie = NULL;
 			return STATUS_INVALID_PARAMETER_3;
+		}
+		status = PsLookupProcessByProcessId(connectionCtx->ProcessID, &Globals.AVCoreServiceEprocess);
+		if (status != STATUS_SUCCESS)
+		{
+			// couldn't get AVCore service process handle
+			*ConnectionCookie = NULL;
+			return STATUS_INVALID_PARAMETER_3;
+		}
+		*ConnectionCookie = connectionCookie;
+		break;
+	case AvConnectForAbort:
+		Globals.AbortClientPort = ClientPort;
+		*ConnectionCookie = connectionCookie;
+		break;
+	default:
+		AV_DBG_PRINT(AVDBG_TRACE_ERROR,
+			("[AV]: AvConnectNotifyCallback: No such connection type. \n"));
+		ExFreePoolWithTag(connectionCookie,
+			AV_CONNECTION_CTX_TAG);
+		*ConnectionCookie = NULL;
+		return STATUS_INVALID_PARAMETER_3;
 	}
 
 	AV_DBG_PRINT(AVDBG_TRACE_DEBUG,
@@ -633,6 +527,7 @@ Return Value
 
 	return STATUS_SUCCESS;
 }
+
 
 VOID AVEventsDriverDisconnectNotifyCallback(
 	_In_opt_ PVOID ConnectionCookie
@@ -651,26 +546,26 @@ Return Value
 
 	PAGED_CODE();
 
-	if (NULL == connectionType) 
+	if (NULL == connectionType)
 	{
 		return;
 	}
 
 	//  Close communication handle
-	switch (*connectionType) 
+	switch (*connectionType)
 	{
-		case AvConnectForScan:
-			FltCloseClientPort(Globals.Filter, &Globals.ScanClientPort);
-			Globals.ScanClientPort = NULL;
-			break;
-		case AvConnectForAbort:
-			FltCloseClientPort(Globals.Filter, &Globals.AbortClientPort);
-			Globals.AbortClientPort = NULL;
-			break;
-		default:
-			AV_DBG_PRINT(AVDBG_TRACE_ERROR,
-				("[AV]: AvDisconnectNotifyCallback: No such connection type. \n"));
-			return;
+	case AvConnectForScan:
+		FltCloseClientPort(Globals.Filter, &Globals.ScanClientPort);
+		Globals.ScanClientPort = NULL;
+		break;
+	case AvConnectForAbort:
+		FltCloseClientPort(Globals.Filter, &Globals.AbortClientPort);
+		Globals.AbortClientPort = NULL;
+		break;
+	default:
+		AV_DBG_PRINT(AVDBG_TRACE_ERROR,
+			("[AV]: AvDisconnectNotifyCallback: No such connection type. \n"));
+		return;
 	}
 
 	AV_DBG_PRINT(AVDBG_TRACE_DEBUG,
@@ -680,20 +575,126 @@ Return Value
 		AV_CONNECTION_CTX_TAG);
 }
 
+
+/*************************************************************************
+    MiniFilter callback routines.
+*************************************************************************/
+
+FLT_PREOP_CALLBACK_STATUS AVEventsDriverPreMjCreate(
+    _Inout_ PFLT_CALLBACK_DATA Data,
+    _In_ PCFLT_RELATED_OBJECTS FltObjects,
+    _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
+    )
+/*++
+Routine Description:
+    This routine is a pre-operation dispatch routine for this miniFilter.
+    This is non-pageable because it could be called on the paging path
+Arguments:
+    Data - Pointer to the filter callbackData that is passed to us.
+
+    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
+        opaque handles to this filter, instance, its associated volume and
+        file object.
+
+    CompletionContext - The context for the completion routine for this
+        operation.
+
+Return Value:
+
+    The return value is the status of the operation.
+
+--*/
+{
+	UNREFERENCED_PARAMETER(CompletionContext);
+	UNREFERENCED_PARAMETER(FltObjects);
+
+	ULONG_PTR stackLow;
+	ULONG_PTR stackHigh;
+	PFILE_OBJECT FileObject = Data->Iopb->TargetFileObject;
+
+
+	PAGED_CODE();
+
+	//  Stack file objects are never scanned.
+	IoGetStackLimits(&stackLow, &stackHigh);
+
+	if (((ULONG_PTR)FileObject > stackLow) &&
+		((ULONG_PTR)FileObject < stackHigh)) 
+	{
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	ULONG RetCode;
+	NTSTATUS status = STATUS_SUCCESS;
+	ULONG replyLength = sizeof(ULONG);
+	AV_EVENT event = { 0 };
+
+	if (!Globals.AVCoreServiceHandle)
+	{
+		// AVCore service is not listening skip event.
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	event.MessageType = AvMsgEvent;
+	event.EventBuffer = NULL;
+	event.EventBufferLength = FileObject->FileName.Length;
+
+	// copy data to UM event buffer
+	SIZE_T umBuffSize = FileObject->FileName.Length;
+	status = memmoveUM(FileObject->FileName.Buffer, &umBuffSize, &event.EventBuffer);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't allocate memory in UM
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+
+	// Send event to the AVCore UM service and wait for the response
+	status = FltSendMessage(Globals.Filter,
+		&Globals.ScanClientPort,
+		&event,
+		sizeof(AV_EVENT),
+		&RetCode,
+		&replyLength,
+		NULL);
+
+	// Got reply. Free memory.
+	status = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &event.EventBuffer, &umBuffSize, MEM_DECOMMIT);
+	if (status != STATUS_SUCCESS)
+	{
+		ASSERT(FALSE);
+	}
+
+	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+	{
+		if (RetCode)
+		{
+			return FLT_PREOP_SUCCESS_NO_CALLBACK;
+		}
+		else // block access if status 0 was returned from UM.
+		{
+			Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+			return FLT_PREOP_COMPLETE;
+		}
+	}
+	else // allow access if we were not able to communicate with UM.
+	{
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
+}
+
 NTSTATUS AVEventsDriverPrepareServerPort(
 	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
 	_In_  AV_CONNECTION_TYPE  ConnectionType
 )
-/*++
-Routine Description:
-	A wrapper function that prepare the communicate port.
-Arguments:
-	SecurityDescriptor - Specifies a security descriptor to InitializeObjectAttributes(...).
-
-	ConnectionType - The type of connection: AvConnectForScan, AvConnectForAbort, AvConnectForQuery
-Return Value:
-	Returns the status of the prepartion.
---*/
+	/*++
+	Routine Description:
+		A wrapper function that prepare the communicate port.
+	Arguments:
+		SecurityDescriptor - Specifies a security descriptor to InitializeObjectAttributes(...).
+		ConnectionType - The type of connection: AvConnectForScan, AvConnectForAbort, AvConnectForQuery
+	Return Value:
+		Returns the status of the prepartion.
+	--*/
 {
 	NTSTATUS status;
 	OBJECT_ATTRIBUTES oa;
@@ -707,19 +708,19 @@ Return Value:
 	AV_DBG_PRINT(AVDBG_TRACE_DEBUG,
 		("[AV]: AvPrepareServerPort entered. \n"));
 
-	switch (ConnectionType) 
+	switch (ConnectionType)
 	{
-		case AvConnectForScan:
-			portName = AV_SCAN_PORT_NAME;
-			pServerPort = &Globals.EventsServerPort;
-			break;
-		case AvConnectForAbort:
-			portName = AV_ABORT_PORT_NAME;
-			pServerPort = &Globals.AbortServerPort;
-			break;
-		default:
-			FLT_ASSERTMSG("No such connection type.\n", FALSE);
-			return STATUS_INVALID_PARAMETER;
+	case AvConnectForScan:
+		portName = AV_SCAN_PORT_NAME;
+		pServerPort = &Globals.EventsServerPort;
+		break;
+	case AvConnectForAbort:
+		portName = AV_ABORT_PORT_NAME;
+		pServerPort = &Globals.AbortServerPort;
+		break;
+	default:
+		FLT_ASSERTMSG("No such connection type.\n", FALSE);
+		return STATUS_INVALID_PARAMETER;
 	}
 
 	RtlInitUnicodeString(&uniString, portName);
@@ -745,14 +746,14 @@ Return Value:
 NTSTATUS AVEventsDriverSendUnloadingToUser(
 	VOID
 )
-/*++
-Routine Description:
-	This routine sends unloading message to the user program.
-Arguments:
-	None.
-Return Value:
-	The return value is the status of the operation.
---*/
+	/*++
+	Routine Description:
+		This routine sends unloading message to the user program.
+	Arguments:
+		None.
+	Return Value:
+		The return value is the status of the operation.
+	--*/
 {
 	ULONG abortThreadId;
 	NTSTATUS status = STATUS_SUCCESS;
@@ -776,7 +777,7 @@ Return Value:
 		&replyLength,
 		NULL);
 
-	if (!NT_SUCCESS(status)) 
+	if (!NT_SUCCESS(status))
 	{
 		AV_DBG_PRINT(AVDBG_TRACE_ERROR,
 			("[Av]: AvSendUnloadingToUser: Failed to FltSendMessage.\n, 0x%08x\n",
@@ -787,4 +788,41 @@ Return Value:
 		("[Av]: AvSendUnloadingToUser: After...\n"));
 
 	return status;
+}
+
+
+NTSTATUS memmoveUM(void* srcBuffer, PSIZE_T size, void** outUmBuffer)
+	/*
+	Routine Description:
+		Allocates a block of memory in UM AVCore service and transferes 
+		given KM memory block there.
+	Arguments:
+		_in_ srcBuffer - pointer to the source buffer located in KM address space.
+		_in_ size - number of bytes to move from srcBuffer to UM.
+		_out_ outUmBuffer - pointer to the pointer that will recieve the address
+		of the buffer allocated in the UM address space.
+	*/
+{
+	SIZE_T originalSize = *size;
+	NTSTATUS status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, outUmBuffer, 0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't allocate memory in UM
+		return status;
+	}
+
+	// Save operands to global kernel address space because
+	// they might be unavailable after stack switch.
+	Globals.Target = *outUmBuffer;
+	Globals.Source = srcBuffer;
+	Globals.Size = originalSize;
+
+	// Chnage stack to that of the target UM process (AVCore service)
+	KAPC_STATE pkapcState;
+	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
+	memcpy(Globals.Target, Globals.Source, Globals.Size);
+	// Restore stack
+	KeUnstackDetachProcess(&pkapcState);
+
+	return STATUS_SUCCESS;
 }
