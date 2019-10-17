@@ -17,11 +17,17 @@ typedef enum _AV_EVENT_RETURN_STATUS
 
 } AV_EVENT_RETURN_STATUS;
 
+typedef struct _TEST
+{
+	int test1;
+	int test2;
+} TEST, *PTEST;
+
 // Format of user mode response to the event.
 typedef struct _AV_EVENT_RESPONSE
 {
 	AV_EVENT_RETURN_STATUS Status;
-	PVOID UMMessage; // RESERVED for passing info from UM -> KM
+	void* UMMessage; // RESERVED for passing info from UM -> KM
 
 } AV_EVENT_RESPONSE, *PAV_EVENT_RESPONSE;
 
@@ -31,10 +37,13 @@ typedef struct _AV_EVENT_RESPONSE
 // Defines parameters of AvFileCreate (KMUMcomm.h) event
 typedef struct _AV_EVENT_FILE_CREATE
 {
-    ULONG VolumeNameSize;
-    PWCHAR VolumeName;
-    ULONG FileNameSize;
-    PWCHAR FileName;
+	int RequestorPID;
+	char RequestorMode;
+
+    int VolumeNameSize;
+    wchar_t* VolumeName;
+    int FileNameSize;
+    wchar_t* FileName;
 
 } AV_EVENT_FILE_CREATE, *PAV_EVENT_FILE_CREATE;
 

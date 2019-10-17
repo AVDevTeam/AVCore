@@ -11,6 +11,9 @@ main(
 )
 {
 
+	printf("press any key to start\n");
+	getchar();
+
 	UCHAR c;
 	HRESULT hr = S_OK;
 	AV_CORE_CONTEXT userScanCtx = { 0 };

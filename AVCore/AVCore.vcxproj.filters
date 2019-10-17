@@ -21,9 +21,15 @@
     <ClCompile Include="KMcommunication.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EventsUM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="KMcommunication.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EventsUM.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

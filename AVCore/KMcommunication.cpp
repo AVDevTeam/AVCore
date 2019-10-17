@@ -531,12 +531,14 @@ Return Value:
 			if (message->Event.EventType == AvFileCreate)
 			{
 				// Get pointer to Event structure buffer
-				PAV_EVENT_FILE_CREATE eventFileCreate = (PAV_EVENT_FILE_CREATE)message->Event.EventBuffer;
+				PAV_EVENT_FILE_CREATE KMeventFileCreate = (PAV_EVENT_FILE_CREATE)message->Event.EventBuffer;
+				AvFSEventCreate* UMeventCreate = new AvFSEventCreate(KMeventFileCreate);
 
 				//printf("AvFileCreate: %ls%ls\n", eventFileCreate->VolumeName, eventFileCreate->FileName);
-				printf("AvFileCreate: %ls\n", eventFileCreate->FileName);
-				if (wcsstr(eventFileCreate->FileName, L"eicar.com"))
+				std::cout << "AvFileCreate: " << UMeventCreate->FilePath << "\n";
+				if (UMeventCreate->FilePath.find("eicar.com", sizeof("eicar.com")) != std::string::npos)
 				{
+					std::cout << "BOCKED\n";
 					replyMsg.EventResponse.Status = AvEventStatusBlock;
 				}
 			}

@@ -16,7 +16,9 @@ Environment:
 #include <windows.h>
 #include <fltUser.h>
 #include "KMUMcomm.h"
-#include "Events.h"
+#include "EventsKM.h"
+#include "EventsUM.h"
+#include <iostream>
 
 #ifndef MAKE_HRESULT
 #define MAKE_HRESULT(sev,fac,code) \
@@ -52,7 +54,7 @@ typedef struct _AV_CORE_CONTEXT
 
 } AV_CORE_CONTEXT, * PAV_CORE_CONTEXT;
 
-#define  KM_EVENTS_LISTENER_THREAD_COUNT   6      // the number of scanning worker threads.
+#define  KM_EVENTS_LISTENER_THREAD_COUNT   1 // DEBUG !!!      // the number of scanning worker threads.
 
 typedef struct _KM_MESSAGE
 {

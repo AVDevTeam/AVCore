@@ -645,10 +645,9 @@ Return Value:
 
 	// Start forming Event structure on KM stack
 	AV_EVENT_FILE_CREATE eventFileCreate = { 0 };
-	/*
-	eventFileCreate.FileName = NULL;
-	eventFileCreate.VolumeName = NULL;
-	*/
+
+	eventFileCreate.RequestorMode = Data->RequestorMode;
+	eventFileCreate.RequestorPID = (int)(__int64)PsGetCurrentProcessId();
 
 	// Put file name information to UM memory and save address in Event stucture.
 	eventFileCreate.FileNameSize = FileObject->FileName.Length;
