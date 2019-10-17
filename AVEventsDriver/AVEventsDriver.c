@@ -491,7 +491,8 @@ Return Value
 		OBJECT_ATTRIBUTES objectAttributes;
 		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
 		CLIENT_ID client_id;
-		client_id.UniqueProcess = (HANDLE)connectionCtx->ProcessID;
+		Globals.AVCoreServicePID = connectionCtx->ProcessID;
+		client_id.UniqueProcess = connectionCtx->ProcessID;
 		client_id.UniqueThread = 0;
 		status = ZwOpenProcess(&Globals.AVCoreServiceHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
 		if (status != STATUS_SUCCESS)
@@ -623,12 +624,18 @@ Return Value:
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
-		if (!Globals.AVCoreServiceHandle)
+	if (!Globals.AVCoreServiceHandle)
 	{
 		// AVCore service is not listening skip event.
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
+	HANDLE curProcess = PsGetCurrentProcessId();
+	if (curProcess == Globals.AVCoreServicePID)
+	{
+		// ignore events triggered by AVCore.exe
+		return FLT_PREOP_SUCCESS_NO_CALLBACK;
+	}
 
 	UCHAR volumeInformationBuffer[256];
 	SIZE_T volumeInformationSize = sizeof(volumeInformationBuffer);
@@ -647,7 +654,9 @@ Return Value:
 	AV_EVENT_FILE_CREATE eventFileCreate = { 0 };
 
 	eventFileCreate.RequestorMode = Data->RequestorMode;
-	eventFileCreate.RequestorPID = (int)(__int64)PsGetCurrentProcessId();
+	eventFileCreate.RequestorPID = (int)(__int64)curProcess;
+
+	
 
 	// Put file name information to UM memory and save address in Event stucture.
 	eventFileCreate.FileNameSize = FileObject->FileName.Length;

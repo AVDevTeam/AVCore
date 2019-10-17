@@ -19,6 +19,10 @@ Environment:
 #include "EventsKM.h"
 #include "EventsUM.h"
 #include <iostream>
+#include <fstream>
+#include <iterator>
+#include <algorithm>
+#include <vector>
 
 #ifndef MAKE_HRESULT
 #define MAKE_HRESULT(sev,fac,code) \

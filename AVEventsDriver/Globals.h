@@ -22,6 +22,7 @@ typedef struct _AV_CORE_GLOBAL_DATA
 	PFLT_PORT ScanClientPort;
 	PFLT_PORT AbortClientPort;
 
+	HANDLE AVCoreServicePID;
 	HANDLE AVCoreServiceHandle;
 	PEPROCESS AVCoreServiceEprocess;
 

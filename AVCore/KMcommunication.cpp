@@ -536,10 +536,26 @@ Return Value:
 
 				//printf("AvFileCreate: %ls%ls\n", eventFileCreate->VolumeName, eventFileCreate->FileName);
 				std::cout << "AvFileCreate: " << UMeventCreate->FilePath << "\n";
-				if (UMeventCreate->FilePath.find("eicar.com", sizeof("eicar.com")) != std::string::npos)
+				if (UMeventCreate->FilePath.rfind("C:\\Users\\user", 0) == 0)
 				{
-					std::cout << "BOCKED\n";
-					replyMsg.EventResponse.Status = AvEventStatusBlock;
+					std::ifstream input(UMeventCreate->FilePath, std::ios::binary);
+					if (!input.fail())
+					{
+						std::string eicar_string = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
+						std::vector<unsigned char> eicar_signature(eicar_string.begin(), eicar_string.end());
+						std::vector<unsigned char> file_binary(std::istreambuf_iterator<char>(input), {});
+						auto res = std::search(
+							file_binary.begin(),
+							file_binary.end(),
+							eicar_signature.begin(),
+							eicar_signature.end()
+						);
+						auto found = res != file_binary.end();
+						if (found)
+						{
+							replyMsg.EventResponse.Status = AvEventStatusBlock;
+						}
+					}
 				}
 			}
 

@@ -33,4 +33,7 @@ public:
 	std::string FilePath;
 	int RequestorPID;
 	char RequestorMode;
+
+private:
+	wchar_t* getVoluemLetter(wchar_t*);
 };
