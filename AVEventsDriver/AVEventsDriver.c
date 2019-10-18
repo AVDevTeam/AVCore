@@ -845,7 +845,7 @@ NTSTATUS memmoveUM(void* srcBuffer, PSIZE_T size, void** outUmBuffer)
 		_in_ srcBuffer - pointer to the source buffer located in KM address space.
 		_in_ size - number of bytes to move from srcBuffer to UM.
 		_out_ outUmBuffer - pointer to the pointer that will recieve the address
-		of the buffer allocated in the UM address space.
+		of the buffer allocated in the UM address space. Should be zero.
 	*/
 {
 	SIZE_T originalSize = *size;
