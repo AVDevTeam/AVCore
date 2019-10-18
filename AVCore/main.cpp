@@ -5,6 +5,7 @@
 #include "KMcommunication.h"
 #include "PipeServer.h"
 
+/*
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -28,9 +29,9 @@ main(
 
 	getchar();
 }
+*/
 
 
-/*
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -73,4 +74,3 @@ main(
 
 	return 0;
 }
-*/

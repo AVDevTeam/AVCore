@@ -22,6 +22,11 @@ Environment:
 #define AV_SCAN_PORT_NAME                    L"\\AVCoreEventsPort"
 #define AV_ABORT_PORT_NAME                   L"\\AVCoreAbortPort"
 
+// Exports from AVCommDriver
+#pragma region Exports from AVCommDriver
+DECLSPEC_IMPORT ULONG Summ(ULONG, ULONG);
+#pragma endregion Exports from AVCommDriver
+
 //  Message type enumeration, please see AV_SCANNER_NOTIFICATION below
 typedef enum _AV_MESSAGE_TYPE
 {

@@ -536,8 +536,8 @@ Return Value:
 
 				//printf("AvFileCreate: %ls%ls\n", eventFileCreate->VolumeName, eventFileCreate->FileName);
 				std::cout << "AvFileCreate: " << UMeventCreate->FilePath << "\n";
-				if (UMeventCreate->FilePath.rfind("C:\\Users\\user", 0) == 0)
-				{
+				//if (UMeventCreate->FilePath.rfind("C:\\Users\\user\\testfile.txt", 0) == 0)
+				//{
 					std::ifstream input(UMeventCreate->FilePath, std::ios::binary);
 					if (!input.fail())
 					{
@@ -556,7 +556,7 @@ Return Value:
 							replyMsg.EventResponse.Status = AvEventStatusBlock;
 						}
 					}
-				}
+				//}
 			}
 
 			hr = FilterReplyMessage(Context->ConnectionPort,

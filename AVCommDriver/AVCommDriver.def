@@ -1,0 +1,7 @@
+NAME AVCOMMDRIVER.SYS
+
+EXPORTS
+	Summ
+    DllUnload PRIVATE
+	DllInitialize PRIVATE
+

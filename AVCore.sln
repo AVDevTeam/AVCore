@@ -1,13 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.438
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29306.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVCore", "AVCore\AVCore.vcxproj", "{EFC43127-BD26-4522-9888-119872A335C5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVEventsDriver", "AVEventsDriver\AVEventsDriver.vcxproj", "{8B2686FB-631C-47DC-B922-30BF57554287}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVGUI", "AVGUI\AVGUI.csproj", "{91C17956-5860-49F6-94A8-1DB37DDF056D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVCommDriver", "AVCommDriver\AVCommDriver.vcxproj", "{CAE2DAC6-A407-41A6-A943-11156A103D14}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utils", "utils", "{7F1B02CF-31B1-4D01-B411-E4C198141C00}"
+	ProjectSection(SolutionItems) = preProject
+		utils\install.bat = utils\install.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +90,24 @@ Global
 		{91C17956-5860-49F6-94A8-1DB37DDF056D}.Release|x64.Build.0 = Release|Any CPU
 		{91C17956-5860-49F6-94A8-1DB37DDF056D}.Release|x86.ActiveCfg = Release|Any CPU
 		{91C17956-5860-49F6-94A8-1DB37DDF056D}.Release|x86.Build.0 = Release|Any CPU
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|ARM.ActiveCfg = Debug|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|x64.ActiveCfg = Debug|x64
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|x64.Build.0 = Debug|x64
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|x64.Deploy.0 = Debug|x64
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|x86.ActiveCfg = Debug|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|x86.Build.0 = Debug|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Debug|x86.Deploy.0 = Debug|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|Any CPU.ActiveCfg = Release|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|ARM.ActiveCfg = Release|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|ARM64.ActiveCfg = Release|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|x64.ActiveCfg = Release|x64
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|x64.Build.0 = Release|x64
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|x64.Deploy.0 = Release|x64
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|x86.ActiveCfg = Release|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|x86.Build.0 = Release|Win32
+		{CAE2DAC6-A407-41A6-A943-11156A103D14}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,1 @@
+xcopy /Y AVCommDriver.sys %WINDIR%\System32\DRIVERS\

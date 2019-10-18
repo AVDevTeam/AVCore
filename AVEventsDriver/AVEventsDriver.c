@@ -91,7 +91,7 @@ NTSTATUS AVEventsDriverSendUnloadingToUser(
 	VOID
 );
 
-NTSTATUS memmoveUM(void* srcBuffer, PSIZE_T size, void* outUmBuffer);
+NTSTATUS memmoveUM(void* srcBuffer, PSIZE_T size, void** outUmBuffer);
 
 EXTERN_C_END
 #pragma endregion Prototypes
@@ -292,6 +292,11 @@ Return Value:
 	PSECURITY_DESCRIPTOR sd = NULL;
 
 	UNREFERENCED_PARAMETER(RegistryPath);
+
+	ULONG arg1 = 4;
+	ULONG arg2 = 6;
+	ULONG summ = 0;
+	summ = Summ(arg1, arg2);
 
 	AV_DBG_PRINT(AVDBG_TRACE_ROUTINES,
 		("[AV] DriverEntry: Entered\n"));
@@ -655,8 +660,6 @@ Return Value:
 
 	eventFileCreate.RequestorMode = Data->RequestorMode;
 	eventFileCreate.RequestorPID = (int)(__int64)curProcess;
-
-	
 
 	// Put file name information to UM memory and save address in Event stucture.
 	eventFileCreate.FileNameSize = FileObject->FileName.Length;
