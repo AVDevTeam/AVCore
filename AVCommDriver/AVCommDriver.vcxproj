@@ -100,7 +100,7 @@
     <ClCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc;..\..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CLASS_GLOBAL_BREAK_ON_LOST_IRPS=0</PreprocessorDefinitions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CLASS_GLOBAL_SECONDS_TO_WAIT_FOR_SYNCHRONOUS_SRB=100</PreprocessorDefinitions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CLASS_GLOBAL_USE_DELAYED_RETRY=1</PreprocessorDefinitions>
@@ -131,7 +131,7 @@
     <ClCompile>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc;..\..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CLASS_GLOBAL_BREAK_ON_LOST_IRPS=0</PreprocessorDefinitions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CLASS_GLOBAL_SECONDS_TO_WAIT_FOR_SYNCHRONOUS_SRB=100</PreprocessorDefinitions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);CLASS_GLOBAL_USE_DELAYED_RETRY=1</PreprocessorDefinitions>
@@ -234,6 +234,7 @@
     </ResourceCompile>
     <Link>
       <ModuleDefinitionFile>AVCommDriver.def</ModuleDefinitionFile>
+      <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)AVEventsDriver\$(TargetName).lib"</Command>
@@ -253,6 +254,7 @@
     </ResourceCompile>
     <Link>
       <ModuleDefinitionFile>AVCommDriver.def</ModuleDefinitionFile>
+      <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>if not exist "$(SolutionDir)lib" mkdir "$(SolutionDir)lib"
@@ -304,6 +306,7 @@ copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib"
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AVComm.h" />
+    <ClInclude Include="Globals.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

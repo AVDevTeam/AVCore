@@ -26,9 +26,10 @@ Environment:
 
 #define AV_VISTA    (NTDDI_VERSION >= NTDDI_VISTA)
 
-#include "Globals.h"
+#include <fltKernel.h>
 #include "KMUMcomm.h"
 #include "EventsKM.h"
+#include "EventsAPI.h"
 
 #define AV_CONNECTION_CTX_TAG                'cCvA'
 
@@ -50,6 +51,41 @@ Environment:
 #define AV_DBG_PRINT(_dbgLevel, _string)            {NOTHING;}
 
 #endif
+
+#pragma region EventsAPI import
+DECLSPEC_IMPORT NTSTATUS AVCommConnectNotifyCallback(
+	_In_ PFLT_PORT ClientPort,
+	_In_ PVOID ServerPortCookie,
+	_In_reads_bytes_(SizeOfContext) PVOID ConnectionContext,
+	_In_ ULONG SizeOfContext,
+	_Outptr_result_maybenull_ PVOID* ConnectionCookie
+);
+
+DECLSPEC_IMPORT VOID AVCommDisconnectNotifyCallback(
+	_In_opt_ PVOID ConnectionCookie
+);
+
+DECLSPEC_IMPORT NTSTATUS AVCommPrepareServerPort(
+	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
+	_In_  AV_CONNECTION_TYPE  ConnectionType
+);
+
+DECLSPEC_IMPORT NTSTATUS AVCommSendUnloadingToUser(
+	VOID
+);
+
+DECLSPEC_IMPORT NTSTATUS memmoveUM(void*, PSIZE_T, void**);
+
+DECLSPEC_IMPORT void setFilter(PFLT_FILTER);
+
+DECLSPEC_IMPORT void closeCommunicationPorts(VOID);
+
+DECLSPEC_IMPORT HANDLE getAVCorePID(VOID);
+
+DECLSPEC_IMPORT HANDLE getAVCoreHandle(VOID);
+
+DECLSPEC_IMPORT NTSTATUS sendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
+#pragma endregion EventsAPI import
 
 #endif
 

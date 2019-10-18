@@ -58,7 +58,7 @@ typedef struct _AV_CORE_CONTEXT
 
 } AV_CORE_CONTEXT, * PAV_CORE_CONTEXT;
 
-#define  KM_EVENTS_LISTENER_THREAD_COUNT   4 // DEBUG !!!      // the number of scanning worker threads.
+#define  KM_EVENTS_LISTENER_THREAD_COUNT   6 // DEBUG !!!      // the number of scanning worker threads.
 
 typedef struct _KM_MESSAGE
 {

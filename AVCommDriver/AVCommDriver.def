@@ -1,7 +1,16 @@
 NAME AVCOMMDRIVER.SYS
 
 EXPORTS
-	Summ
+	AVCommConnectNotifyCallback
+	AVCommDisconnectNotifyCallback
+	AVCommPrepareServerPort
+	AVCommSendUnloadingToUser
+	memmoveUM
+	setFilter
+	closeCommunicationPorts
+	getAVCorePID
+	getAVCoreHandle
+	sendEvent
     DllUnload PRIVATE
 	DllInitialize PRIVATE
 

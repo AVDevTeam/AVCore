@@ -433,6 +433,13 @@ Return Value:
 	return hr;
 }
 
+long GetFileSize(std::string filename)
+{
+	struct stat stat_buf;
+	int rc = stat(filename.c_str(), &stat_buf);
+	return rc == 0 ? stat_buf.st_size : -1;
+}
+
 HRESULT KMEventListener(
 	_Inout_   PAV_CORE_CONTEXT Context
 )
@@ -538,6 +545,9 @@ Return Value:
 				std::cout << "AvFileCreate: " << UMeventCreate->FilePath << "\n";
 				//if (UMeventCreate->FilePath.rfind("C:\\Users\\user\\testfile.txt", 0) == 0)
 				//{
+				long size = GetFileSize(UMeventCreate->FilePath);
+				if (size < 4096)
+				{
 					std::ifstream input(UMeventCreate->FilePath, std::ios::binary);
 					if (!input.fail())
 					{
@@ -556,6 +566,7 @@ Return Value:
 							replyMsg.EventResponse.Status = AvEventStatusBlock;
 						}
 					}
+				}
 				//}
 			}
 
