@@ -13,27 +13,18 @@ namespace AVGUI
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += Main;
+        }
 
-            Console.WriteLine("WIK");
+        public void Main(Object sender, EventArgs e)
+        {
+            Loaded -= Main;
 
-            //Client
-            var client = new NamedPipeClientStream("AVCorePipe");
-            client.Connect();
-            StreamReader reader = new StreamReader(client);
-            StreamWriter writer = new StreamWriter(client);
+            PipeClient pipe = new PipeClient("AVCorePipe");
+            pipe.Connect();
 
-            string input = Console.ReadLine();
-            input = "asd";
-            /*
-            if (String.IsNullOrEmpty(input))
-            {
-                break;
-            }
-            */
-            writer.WriteLine(input);
-            writer.Flush();
-
-
+            string message = pipe.ReciveMessage();
+            pipe.SendMessage("HELLO");
         }
     }
 }

@@ -5,7 +5,7 @@
 #include "KMcommunication.h"
 #include "PipeServer.h"
 
-/*
+
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -13,24 +13,20 @@ main(
 )
 {
 	const std::string pipeName = "\\\\.\\pipe\\AVCorePipe";
-
 	PipeServer pipe(pipeName);
 
-	int status = pipe.createNamedPipe();
-	std::cout << "Pipe was created" << std::endl;
-
+	pipe.createNamedPipe();
 	pipe.waitForClient();
-	std::cout << "Pipe is waiting" << std::endl;
+
+	pipe.sendMessage("HELLO");
 	
 	std::string message;
 	pipe.receiveMessage(message);
-
-	std::cout << "Recived: " << message;
-
+	
 	getchar();
 }
-*/
 
+/*
 
 int _cdecl
 main(
@@ -74,3 +70,5 @@ main(
 
 	return 0;
 }
+
+*/

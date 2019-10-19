@@ -149,13 +149,13 @@ int PipeServer::sendMessage(const std::string & _message)
 	DWORD cbWritten;
 
 	fSuccess = WriteFile(
-		this->hPipe,		// handle to pipe 
-		_message.c_str(),	// buffer to write from 
-		_message.length(),	// number of bytes to write 
-		&cbWritten,			// number of bytes written 
-		nullptr);			// not overlapped I/O 
+		this->hPipe,				// handle to pipe 
+		(_message + "\n").c_str(),	// buffer to write from 
+		_message.length() + 1,		// number of bytes to write 
+		&cbWritten,					// number of bytes written 
+		nullptr);					// not overlapped I/O 
 
-	if (!fSuccess || _message.length() != cbWritten) 
+	if (!fSuccess || _message.length() + 1 != cbWritten) 
 	{
 		std::cout << "WriteFile failed: " << GetLastError() << std::endl;
 		return -1;
