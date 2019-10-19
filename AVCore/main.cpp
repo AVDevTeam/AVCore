@@ -22,7 +22,7 @@ main(
 	
 	std::string message;
 	pipe.receiveMessage(message);
-	
+
 	getchar();
 }
 
