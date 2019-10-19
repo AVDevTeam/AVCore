@@ -5,8 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AVGUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="600" ResizeMode="NoResize">
     <Grid>
         
+        
+        <Button Width="Auto" Height="Auto" Name="SettingsButton" Margin="45,25,449,296" Click="SettingsButton_Click" >
+            <TextBlock Name="SettingsButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">SETTINGS</TextBlock>
+
+            <Button.Template>
+                <ControlTemplate  TargetType="Button">
+                    <Grid>
+                        <Ellipse Stroke="Black" StrokeThickness="3" Fill="White" />
+                        <Label Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
+
+        <!-- Кнопка сканирования -->
+        <Button Width="150" Height="150" Name="ScanButton" Click="ScanButton_Click">
+            <TextBlock Name="ScanButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">БЫСТРОЕ СКАНИРОВАНИЕ</TextBlock>
+
+            <Button.Template>
+                <ControlTemplate  TargetType="Button">
+                    <Grid>
+                        <Ellipse Stroke="Black" StrokeThickness="3" Fill="White" />
+                        <Label Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
+        <Slider Orientation="Horizontal"
+                Minimum="0" Maximum="2" Value="1"
+                IsSnapToTickEnabled="True"
+                TickFrequency="1" 
+                Margin="222,305,222,66" 
+                Name="ScanModeSlider"
+                ValueChanged="ScanModeSlider_ValueChanged"/>
+
     </Grid>
 </Window>
