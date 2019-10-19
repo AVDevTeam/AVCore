@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVCore", "AVCore\AVCore.vcxproj", "{EFC43127-BD26-4522-9888-119872A335C5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AVEventsDriver", "AVEventsDriver\AVEventsDriver.vcxproj", "{8B2686FB-631C-47DC-B922-30BF57554287}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CAE2DAC6-A407-41A6-A943-11156A103D14} = {CAE2DAC6-A407-41A6-A943-11156A103D14}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AVGUI", "AVGUI\AVGUI.csproj", "{91C17956-5860-49F6-94A8-1DB37DDF056D}"
 EndProject
