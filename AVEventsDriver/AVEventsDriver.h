@@ -20,7 +20,6 @@ Environment:
 #include <fltKernel.h>
 #include "KMUMcomm.h"
 #include "EventsKM.h"
-#include "EventsAPI.h"
 
 #define AV_CONNECTION_CTX_TAG                'cCvA'
 
@@ -43,11 +42,12 @@ Environment:
 
 #endif
 
+// Exports from AVCommDriver
 #pragma region EventsAPI import
 
 DECLSPEC_IMPORT NTSTATUS AVCommInit(PFLT_FILTER Filter);
 DECLSPEC_IMPORT void AVCommStop(VOID);
-DECLSPEC_IMPORT NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize);
+DECLSPEC_IMPORT NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID* outUmBuffer, PSIZE_T outUmSize);
 DECLSPEC_IMPORT NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
 DECLSPEC_IMPORT NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
 DECLSPEC_IMPORT HANDLE AVCommGetUmPID(VOID);

@@ -20,13 +20,11 @@ Environment:
 
 //  Name of AV filter server ports
 #define AV_SCAN_PORT_NAME                    L"\\AVCoreEventsPort"
-#define AV_ABORT_PORT_NAME                   L"\\AVCoreAbortPort"
 
 //  Message type enumeration, please see AV_SCANNER_NOTIFICATION below
 typedef enum _AV_MESSAGE_TYPE
 {
-	AvMsgEvent,
-    AvMsgFilterUnloading
+	AvMsgEvent
 } AV_MESSAGE_TYPE;
 
 typedef enum _AV_EVENT_TYPE
@@ -51,7 +49,6 @@ typedef struct _AV_MESSAGE
 typedef enum _AV_CONNECTION_TYPE 
 {
     AvConnectForScan = 1,
-    AvConnectForAbort,
 } AV_CONNECTION_TYPE, *PAV_CONNECTION_TYPE;
 
 //  Connection context. It will be passed through FilterConnectCommunicationPort(...)

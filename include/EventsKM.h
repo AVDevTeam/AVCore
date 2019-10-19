@@ -17,12 +17,6 @@ typedef enum _AV_EVENT_RETURN_STATUS
 
 } AV_EVENT_RETURN_STATUS;
 
-typedef struct _TEST
-{
-	int test1;
-	int test2;
-} TEST, *PTEST;
-
 // Format of user mode response to the event.
 typedef struct _AV_EVENT_RESPONSE
 {

@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <fltUser.h>
 #include "KMUMcomm.h"
-#include "KMcommunication.h"
 #include "PipeServer.h"
+#include "CommPortServer.h"
 
 /*
 int _cdecl
@@ -44,12 +44,19 @@ main(
 	UNREFERENCED_PARAMETER(argc);
 	UNREFERENCED_PARAMETER(argv);
 
+	/*
+
 	hr = KMCommInit(&userScanCtx);
 	if (FAILED(hr)) 
 	{
 		fprintf(stderr, "Failed to initialize user scan data\n");
 		return 255;
 	}
+
+	*/
+
+	CommPortServer portServer;
+	portServer.start();
 
 	for (;;) 
 	{
@@ -61,7 +68,8 @@ main(
 		}
 	}
 
-	hr = KMCommFinalize(&userScanCtx);
+	// hr = KMCommFinalize(&userScanCtx);
+	portServer.stop();
 	if (FAILED(hr)) 
 	{
 		fprintf(stderr, "Failed to finalize the user scan data.\n");

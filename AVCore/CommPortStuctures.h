@@ -1,33 +1,7 @@
-#pragma once
-/*++
-Module Name:
-	KMcommunication.h
-Abstract:
-	TODO! DOCUMENTATION!
-	The scanning module. This module defines the thread contexts,
-	and user scan contexts, and the definitions of functions.
-Environment:
-	User mode
---*/
-
-#ifndef __USERSCAN_H__
-#define __USERSCAN_H__
-
 #include <windows.h>
 #include <fltUser.h>
-#include "KMUMcomm.h"
-#include "EventsKM.h"
 #include "EventsUM.h"
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <algorithm>
-#include <vector>
-
-#ifndef MAKE_HRESULT
-#define MAKE_HRESULT(sev,fac,code) \
-    ((HRESULT) (((unsigned long)(sev)<<31) | ((unsigned long)(fac)<<16) | ((unsigned long)(code))) )
-#endif
+#include "KMUMcomm.h"
 
 typedef struct _LISTENER_THREAD_CONTEXT
 {
@@ -89,14 +63,3 @@ typedef struct _UM_REPLY_MESSAGE
 } UM_REPLY_MESSAGE, * PUM_REPLY_MESSAGE;
 
 #define UM_REPLY_MESSAGE_SIZE   (sizeof(FILTER_REPLY_HEADER) + sizeof(ULONG))
-
-HRESULT KMCommInit(
-	_Inout_  PAV_CORE_CONTEXT Context
-);
-
-HRESULT KMCommFinalize(
-	_In_  PAV_CORE_CONTEXT Context
-);
-
-#endif
-

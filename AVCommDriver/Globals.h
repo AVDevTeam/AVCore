@@ -8,11 +8,9 @@ typedef struct _AV_COMM_GLOBAL_DATA
 	PFLT_FILTER Filter;
 
 	PFLT_PORT EventsClientPort;
-	PFLT_PORT AbortClientPort;
 
 	//  Server-side communicate ports.
 	PFLT_PORT EventsServerPort;
-	PFLT_PORT AbortServerPort;
 
 	HANDLE AVCoreServicePID;
 	HANDLE AVCoreServiceHandle;

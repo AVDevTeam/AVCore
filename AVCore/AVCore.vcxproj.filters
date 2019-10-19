@@ -16,30 +16,36 @@
     <Filter Include="Pipes">
       <UniqueIdentifier>{11945e8c-ebd5-4799-b092-f36971b4e56e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CommPortServer">
+      <UniqueIdentifier>{2aa6c985-1dde-4262-9f24-6c0c1328558f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KMcommunication.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="EventsUM.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PipeServer.cpp">
       <Filter>Pipes</Filter>
     </ClCompile>
+    <ClCompile Include="CommPortServer.cpp">
+      <Filter>CommPortServer</Filter>
+    </ClCompile>
+    <ClCompile Include="EventsUM.cpp">
+      <Filter>CommPortServer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="KMcommunication.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EventsUM.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PipeServer.h">
       <Filter>Pipes</Filter>
+    </ClInclude>
+    <ClInclude Include="CommPortServer.h">
+      <Filter>CommPortServer</Filter>
+    </ClInclude>
+    <ClInclude Include="CommPortStuctures.h">
+      <Filter>CommPortServer</Filter>
+    </ClInclude>
+    <ClInclude Include="EventsUM.h">
+      <Filter>CommPortServer</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

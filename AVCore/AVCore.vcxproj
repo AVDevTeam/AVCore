@@ -145,14 +145,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommPortServer.cpp" />
     <ClCompile Include="EventsUM.cpp" />
-    <ClCompile Include="KMcommunication.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipeServer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommPortServer.h" />
+    <ClInclude Include="CommPortStuctures.h" />
     <ClInclude Include="EventsUM.h" />
-    <ClInclude Include="KMcommunication.h" />
     <ClInclude Include="PipeServer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

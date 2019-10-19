@@ -33,15 +33,9 @@ NTSTATUS AVCommPrepareServerPort(
 	_In_  AV_CONNECTION_TYPE  ConnectionType
 );
 
-NTSTATUS AVCommSendUnloadingToUser(
-	VOID
-);
-
 NTSTATUS AVCommInit(PFLT_FILTER Filter);
 
 void AVCommStop(VOID);
-
-//NTSTATUS memmoveUM(void*, PSIZE_T, void**);
 
 NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize);
 
@@ -58,7 +52,6 @@ HANDLE AVCommGetUmPID(VOID);
 	#pragma alloc_text(PAGE, AVCommConnectNotifyCallback)
 	#pragma alloc_text(PAGE, AVCommDisconnectNotifyCallback)
 	#pragma alloc_text(PAGE, AVCommPrepareServerPort)
-	#pragma alloc_text(PAGE, AVCommSendUnloadingToUser)
 	#pragma alloc_text(PAGE, AVCommInit)
 	#pragma alloc_text(PAGE, AVCommStop)
 	#pragma alloc_text(PAGE, AVCommCreateBuffer)
@@ -199,10 +192,6 @@ Return Value
 		}
 		*ConnectionCookie = connectionCookie;
 		break;
-	case AvConnectForAbort:
-		Globals.AbortClientPort = ClientPort;
-		*ConnectionCookie = connectionCookie;
-		break;
 	default:
 		ExFreePoolWithTag(connectionCookie,
 			AV_CONNECTION_CTX_TAG);
@@ -242,10 +231,6 @@ Return Value
 		FltCloseClientPort(Globals.Filter, &Globals.EventsClientPort);
 		Globals.EventsClientPort = NULL;
 		break;
-	case AvConnectForAbort:
-		FltCloseClientPort(Globals.Filter, &Globals.AbortClientPort);
-		Globals.AbortClientPort = NULL;
-		break;
 	default:
 		return;
 	}
@@ -282,10 +267,6 @@ Return Value:
 	case AvConnectForScan:
 		portName = AV_SCAN_PORT_NAME;
 		pServerPort = &Globals.EventsServerPort;
-		break;
-	case AvConnectForAbort:
-		portName = AV_ABORT_PORT_NAME;
-		pServerPort = &Globals.AbortServerPort;
 		break;
 	default:
 		FLT_ASSERTMSG("No such connection type.\n", FALSE);
@@ -344,12 +325,6 @@ NTSTATUS AVCommInit(PFLT_FILTER Filter)
 		{
 			leave;
 		}
-
-		status = AVCommPrepareServerPort(sd, AvConnectForAbort);
-		if (!NT_SUCCESS(status))
-		{
-			leave;
-		}
 	}
 	finally
 	{
@@ -367,49 +342,11 @@ NTSTATUS AVCommInit(PFLT_FILTER Filter)
 	return status;
 }
 
-NTSTATUS AVCommSendUnloadingToUser(
-	VOID
-)
-/*++
-Routine Description:
-	This routine sends unloading message to the user program.
-Arguments:
-	None.
-Return Value:
-	The return value is the status of the operation.
---*/
-{
-	NTSTATUS status = STATUS_SUCCESS;
-	AV_MESSAGE event;
-
-	PAGED_CODE();
-
-	event.MessageType = AvMsgFilterUnloading;
-
-	//  Tell the user-scanner that we are unloading the filter.
-	//  and waits for its reply.
-
-	status = FltSendMessage(Globals.Filter,
-		&Globals.AbortClientPort,
-		&event,
-		sizeof(AV_MESSAGE),
-		NULL,
-		NULL,
-		NULL);
-
-	return status;
-}
-
 void AVCommStop(VOID)
 {
-	AVCommSendUnloadingToUser();
 	if (NULL != Globals.EventsServerPort)
 	{
 		FltCloseCommunicationPort(Globals.EventsServerPort);
-	}
-	if (NULL != Globals.AbortServerPort)
-	{
-		FltCloseCommunicationPort(Globals.AbortServerPort);
 	}
 	if (NULL != Globals.Filter)
 	{
