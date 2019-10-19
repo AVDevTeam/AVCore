@@ -7,7 +7,7 @@ typedef struct _AV_COMM_GLOBAL_DATA
 	//  FltAllocateContext(...)
 	PFLT_FILTER Filter;
 
-	PFLT_PORT ScanClientPort;
+	PFLT_PORT EventsClientPort;
 	PFLT_PORT AbortClientPort;
 
 	//  Server-side communicate ports.

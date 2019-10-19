@@ -237,7 +237,8 @@
       <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)AVEventsDriver\$(TargetName).lib"</Command>
+      <Command>if not exist "$(SolutionDir)lib" mkdir "$(SolutionDir)lib"
+copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(TargetName).lib"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

@@ -182,6 +182,9 @@
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Inf />
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)utils\install.bat" "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <Link>

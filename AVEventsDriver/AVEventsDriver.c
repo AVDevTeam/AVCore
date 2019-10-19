@@ -37,33 +37,33 @@ NTSTATUS DriverEntry (
     _In_ PUNICODE_STRING RegistryPath
     );
 
-NTSTATUS AVEventsDriverInstanceSetup (
+NTSTATUS AVEventsInstanceSetup (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_SETUP_FLAGS Flags,
     _In_ DEVICE_TYPE VolumeDeviceType,
     _In_ FLT_FILESYSTEM_TYPE VolumeFilesystemType
     );
 
-VOID AVEventsDriverInstanceTeardownStart (
+VOID AVEventsInstanceTeardownStart (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     );
 
-VOID AVEventsDriverInstanceTeardownComplete (
+VOID AVEventsInstanceTeardownComplete (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     );
 
-NTSTATUS AVEventsDriverUnload (
+NTSTATUS DriverUnload (
     _In_ FLT_FILTER_UNLOAD_FLAGS Flags
     );
 
-NTSTATUS AVEventsDriverInstanceQueryTeardown (
+NTSTATUS AVEventsInstanceQueryTeardown (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags
     );
 
-FLT_PREOP_CALLBACK_STATUS AVEventsDriverPreMjCreate(
+FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
@@ -72,16 +72,17 @@ FLT_PREOP_CALLBACK_STATUS AVEventsDriverPreMjCreate(
 EXTERN_C_END
 #pragma endregion Prototypes
 
-
-
 //  Assign text sections for each routine.
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
-#pragma alloc_text(PAGE, AVEventsDriverUnload)
-#pragma alloc_text(PAGE, AVEventsDriverInstanceQueryTeardown)
-#pragma alloc_text(PAGE, AVEventsDriverInstanceSetup)
-#pragma alloc_text(PAGE, AVEventsDriverInstanceTeardownStart)
+#pragma alloc_text(PAGE, DriverUnload)
+#pragma alloc_text(PAGE, AVEventsInstanceQueryTeardown)
+#pragma alloc_text(PAGE, AVEventsInstanceSetup)
+#pragma alloc_text(PAGE, AVEventsInstanceTeardownStart)
 #endif
+
+// Globals
+PFLT_FILTER GlobalFilter;
 
 //  operation registration
 #pragma region operation registration
@@ -89,7 +90,7 @@ CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
 
     { IRP_MJ_CREATE,
       0,
-      AVEventsDriverPreMjCreate,
+      AVEventsPreMjCreate,
       NULL },
 
     { IRP_MJ_OPERATION_END }
@@ -106,12 +107,12 @@ CONST FLT_REGISTRATION FilterRegistration = {
     NULL,                               //  Context
     Callbacks,                          //  Operation callbacks
 
-    AVEventsDriverUnload,                           //  MiniFilterUnload
+    DriverUnload,                           //  MiniFilterUnload
 
-    AVEventsDriverInstanceSetup,                    //  InstanceSetup
-    AVEventsDriverInstanceQueryTeardown,            //  InstanceQueryTeardown
-    AVEventsDriverInstanceTeardownStart,            //  InstanceTeardownStart
-    AVEventsDriverInstanceTeardownComplete,         //  InstanceTeardownComplete
+    AVEventsInstanceSetup,                    //  InstanceSetup
+    AVEventsInstanceQueryTeardown,            //  InstanceQueryTeardown
+    AVEventsInstanceTeardownStart,            //  InstanceTeardownStart
+    AVEventsInstanceTeardownComplete,         //  InstanceTeardownComplete
 
     NULL,                               //  GenerateFileName
     NULL,                               //  GenerateDestinationFileName
@@ -119,7 +120,7 @@ CONST FLT_REGISTRATION FilterRegistration = {
 
 };
 
-NTSTATUS AVEventsDriverInstanceSetup (
+NTSTATUS AVEventsInstanceSetup (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_SETUP_FLAGS Flags,
     _In_ DEVICE_TYPE VolumeDeviceType,
@@ -145,17 +146,13 @@ Return Value:
     UNREFERENCED_PARAMETER( Flags );
     UNREFERENCED_PARAMETER( VolumeDeviceType );
     UNREFERENCED_PARAMETER( VolumeFilesystemType );
-
     PAGED_CODE();
-
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
                   ("AVEventsDriver!AVEventsDriverInstanceSetup: Entered\n") );
-
     return STATUS_SUCCESS;
 }
 
-
-NTSTATUS AVEventsDriverInstanceQueryTeardown (
+NTSTATUS AVEventsInstanceQueryTeardown (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags
     )
@@ -178,17 +175,13 @@ Return Value:
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
-
     PAGED_CODE();
-
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
                   ("AVEventsDriver!AVEventsDriverInstanceQueryTeardown: Entered\n") );
-
     return STATUS_SUCCESS;
 }
 
-
-VOID AVEventsDriverInstanceTeardownStart (
+VOID AVEventsInstanceTeardownStart (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     )
@@ -205,15 +198,12 @@ Return Value:
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
-
     PAGED_CODE();
-
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
                   ("AVEventsDriver!AVEventsDriverInstanceTeardownStart: Entered\n") );
 }
 
-
-VOID AVEventsDriverInstanceTeardownComplete (
+VOID AVEventsInstanceTeardownComplete (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     )
@@ -230,9 +220,7 @@ Return Value:
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
-
     PAGED_CODE();
-
     PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
                   ("AVEventsDriver!AVEventsDriverInstanceTeardownComplete: Entered\n") );
 }
@@ -259,77 +247,32 @@ Return Value:
 	Returns the final status of this operation.
 --*/
 {
-	NTSTATUS status = STATUS_SUCCESS;
-	PSECURITY_DESCRIPTOR sd = NULL;
-
 	UNREFERENCED_PARAMETER(RegistryPath);
 
-	PFLT_FILTER Filter;
+	//  Register with FltMgr to tell it our callback routines
+	NTSTATUS status = FltRegisterFilter(DriverObject,
+		&FilterRegistration,
+		&GlobalFilter);
 
-	try 
+	if (!NT_SUCCESS(status))
 	{
-		//  Register with FltMgr to tell it our callback routines
-		status = FltRegisterFilter(DriverObject,
-			&FilterRegistration,
-			&Filter);
-
-		setFilter(Filter);
-
-		if (!NT_SUCCESS(status)) 
-		{
-			leave;
-		}
-
-		//  Builds a default security descriptor for use with FltCreateCommunicationPort.
-		status = FltBuildDefaultSecurityDescriptor(&sd,
-			FLT_PORT_ALL_ACCESS);
-
-
-		if (!NT_SUCCESS(status)) 
-		{
-			leave;
-		}
-
-
-		//  Prepare ports between kernel and user.
-		status = AVCommPrepareServerPort(sd, AvConnectForScan);
-		if (!NT_SUCCESS(status))
-		{
-			leave;
-		}
-
-		status = AVCommPrepareServerPort(sd, AvConnectForAbort);
-		if (!NT_SUCCESS(status)) 
-		{
-			leave;
-		}
-
-		//  Start filtering i/o
-		status = FltStartFiltering(Filter);
-
-		if (!NT_SUCCESS(status)) 
-		{
-			leave;
-		}
-
+		return status;
 	}
-	finally
-	{
-		if (sd != NULL) 
-		{
-			FltFreeSecurityDescriptor(sd);
-		}
 
-		if (!NT_SUCCESS(status)) 
-		{
-			closeCommunicationPorts();
-		}
+	status = AVCommInit(GlobalFilter);
+
+	//  Start filtering i/o
+	status = FltStartFiltering(GlobalFilter);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		return status;
 	}
 
 	return status;
 }
 
-NTSTATUS AVEventsDriverUnload (
+NTSTATUS DriverUnload (
     _In_ FLT_FILTER_UNLOAD_FLAGS Flags
     )
 	/*++
@@ -345,16 +288,13 @@ NTSTATUS AVEventsDriverUnload (
 	--*/
 {
 	PAGED_CODE();
-
 	UNREFERENCED_PARAMETER(Flags);
-
-	
 
 	//  This function will wait for the user to abort the outstanding scan and 
 	//  close the section 
-	AVCommSendUnloadingToUser();
-
-	closeCommunicationPorts();
+	AVCommStop();
+	FltUnregisterFilter(GlobalFilter);
+	
 
 	return STATUS_SUCCESS;
 }
@@ -363,7 +303,7 @@ NTSTATUS AVEventsDriverUnload (
     MiniFilter callback routines.
 *************************************************************************/
 
-FLT_PREOP_CALLBACK_STATUS AVEventsDriverPreMjCreate(
+FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
     _Inout_ PFLT_CALLBACK_DATA Data,
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
@@ -374,18 +314,13 @@ Routine Description:
     This is non-pageable because it could be called on the paging path
 Arguments:
     Data - Pointer to the filter callbackData that is passed to us.
-
     FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
         opaque handles to this filter, instance, its associated volume and
         file object.
-
     CompletionContext - The context for the completion routine for this
         operation.
-
 Return Value:
-
     The return value is the status of the operation.
-
 --*/
 {
 	UNREFERENCED_PARAMETER(CompletionContext);
@@ -406,7 +341,7 @@ Return Value:
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
-	HANDLE AVCorePID = getAVCorePID();
+	HANDLE AVCorePID = AVCommGetUmPID();
 
 	if (!AVCorePID)
 	{
@@ -442,8 +377,8 @@ Return Value:
 
 	// Put file name information to UM memory and save address in Event stucture.
 	eventFileCreate.FileNameSize = FileObject->FileName.Length;
-	SIZE_T umBuffFileNameSize = eventFileCreate.FileNameSize;
-	status = memmoveUM(FileObject->FileName.Buffer, &umBuffFileNameSize, &eventFileCreate.FileName);
+	SIZE_T umBuffFileNameSize;
+	status = AVCommCreateBuffer(FileObject->FileName.Buffer, FileObject->FileName.Length, &eventFileCreate.FileName, &umBuffFileNameSize);
 	if (status != STATUS_SUCCESS)
 	{
 		// couldn't allocate memory in UM
@@ -452,8 +387,8 @@ Return Value:
 
 	// Put volume name information to UM memory and save address in Event stucture.
 	eventFileCreate.VolumeNameSize = volumeInformation->FilterVolumeNameLength;
-	SIZE_T umBuffVolumeNameSize = eventFileCreate.VolumeNameSize;
-	status = memmoveUM(volumeInformation->FilterVolumeName, &umBuffVolumeNameSize, &eventFileCreate.VolumeName);
+	SIZE_T umBuffVolumeNameSize;
+	status = AVCommCreateBuffer(volumeInformation->FilterVolumeName, eventFileCreate.VolumeNameSize, &eventFileCreate.VolumeName, &umBuffVolumeNameSize);
 	if (status != STATUS_SUCCESS)
 	{
 		// couldn't allocate memory in UM
@@ -463,20 +398,21 @@ Return Value:
 	AV_EVENT_RESPONSE UMResponse;
 	ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
 
+	DbgPrint("PID %ul opens %wZ\n", curProcess, FileObject->FileName);
+
 	// Send event to the AVCore UM service and wait for the response
-	status = sendEvent(&eventFileCreate,
+	status = AVCommSendEvent(&eventFileCreate,
 		sizeof(AV_EVENT_FILE_CREATE),
 		&UMResponse,
 		&replyLength);
 
 	// Got reply. Free memory. We need to free all UM-allocated buffers.
 #pragma region free UM memory
-	HANDLE AVCoreHandle = getAVCoreHandle();
-
-	NTSTATUS freeStatus = ZwFreeVirtualMemory(AVCoreHandle, &eventFileCreate.FileName, &umBuffFileNameSize, MEM_DECOMMIT);
+	
+	NTSTATUS freeStatus = AVCommFreeBuffer(&eventFileCreate.FileName, &umBuffFileNameSize);
 	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
 
-	freeStatus = ZwFreeVirtualMemory(AVCoreHandle, &eventFileCreate.VolumeName, &umBuffVolumeNameSize, MEM_DECOMMIT);
+	freeStatus = AVCommFreeBuffer(&eventFileCreate.VolumeName, &umBuffVolumeNameSize);
 	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
 #pragma endregion free UM memory
 

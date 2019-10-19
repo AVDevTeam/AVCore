@@ -19,11 +19,11 @@ namespace AVGUI
         {
             Loaded -= Main;
 
-            //PipeClient pipe = new PipeClient("AVCorePipe");
-            //pipe.Connect();
+            PipeClient pipe = new PipeClient("AVCorePipe");
+            pipe.Connect();
 
-            //string message = pipe.ReciveMessage();
-            //pipe.SendMessage("HELLO");
+            string message = pipe.ReciveMessage();
+            pipe.SendMessage("HELLO");
         }
 
         private void ScanModeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

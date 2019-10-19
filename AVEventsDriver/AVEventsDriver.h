@@ -1,21 +1,12 @@
 /*++
-
-Copyright (c) 1989-2011  Microsoft Corporation
-
 Module Name:
-
-	avscan.h
-
+	AVEventsDriver.h
 Abstract:
-
 	Header file which contains the structures, type definitions,
 	constants, global variables and function prototypes that are
 	only visible within the kernel. Mainly used by avscan module.
-
 Environment:
-
 	Kernel mode
-
 --*/
 #ifndef __AVSCAN_H__
 #define __AVSCAN_H__
@@ -53,38 +44,14 @@ Environment:
 #endif
 
 #pragma region EventsAPI import
-DECLSPEC_IMPORT NTSTATUS AVCommConnectNotifyCallback(
-	_In_ PFLT_PORT ClientPort,
-	_In_ PVOID ServerPortCookie,
-	_In_reads_bytes_(SizeOfContext) PVOID ConnectionContext,
-	_In_ ULONG SizeOfContext,
-	_Outptr_result_maybenull_ PVOID* ConnectionCookie
-);
 
-DECLSPEC_IMPORT VOID AVCommDisconnectNotifyCallback(
-	_In_opt_ PVOID ConnectionCookie
-);
+DECLSPEC_IMPORT NTSTATUS AVCommInit(PFLT_FILTER Filter);
+DECLSPEC_IMPORT void AVCommStop(VOID);
+DECLSPEC_IMPORT NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize);
+DECLSPEC_IMPORT NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
+DECLSPEC_IMPORT NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
+DECLSPEC_IMPORT HANDLE AVCommGetUmPID(VOID);
 
-DECLSPEC_IMPORT NTSTATUS AVCommPrepareServerPort(
-	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
-	_In_  AV_CONNECTION_TYPE  ConnectionType
-);
-
-DECLSPEC_IMPORT NTSTATUS AVCommSendUnloadingToUser(
-	VOID
-);
-
-DECLSPEC_IMPORT NTSTATUS memmoveUM(void*, PSIZE_T, void**);
-
-DECLSPEC_IMPORT void setFilter(PFLT_FILTER);
-
-DECLSPEC_IMPORT void closeCommunicationPorts(VOID);
-
-DECLSPEC_IMPORT HANDLE getAVCorePID(VOID);
-
-DECLSPEC_IMPORT HANDLE getAVCoreHandle(VOID);
-
-DECLSPEC_IMPORT NTSTATUS sendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
 #pragma endregion EventsAPI import
 
 #endif

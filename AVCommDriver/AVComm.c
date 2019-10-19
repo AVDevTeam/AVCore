@@ -37,17 +37,19 @@ NTSTATUS AVCommSendUnloadingToUser(
 	VOID
 );
 
-NTSTATUS memmoveUM(void*, PSIZE_T, void**);
+NTSTATUS AVCommInit(PFLT_FILTER Filter);
 
-void setFilter(PFLT_FILTER);
+void AVCommStop(VOID);
 
-void closeCommunicationPorts(VOID);
+//NTSTATUS memmoveUM(void*, PSIZE_T, void**);
 
-HANDLE getAVCorePID(VOID);
+NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize);
 
-HANDLE getAVCoreHandle(VOID);
+NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
 
-NTSTATUS sendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
+NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
+
+HANDLE AVCommGetUmPID(VOID);
 
 #ifdef ALLOC_PRAGMA
     #pragma alloc_text(INIT, DriverEntry)
@@ -57,12 +59,13 @@ NTSTATUS sendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
 	#pragma alloc_text(PAGE, AVCommDisconnectNotifyCallback)
 	#pragma alloc_text(PAGE, AVCommPrepareServerPort)
 	#pragma alloc_text(PAGE, AVCommSendUnloadingToUser)
-	#pragma alloc_text(PAGE, memmoveUM)
-	#pragma alloc_text(PAGE, setFilter)
-	#pragma alloc_text(PAGE, closeCommunicationPorts)
-	#pragma alloc_text(PAGE, getAVCorePID)
-	#pragma alloc_text(PAGE, sendEvent)
-	#pragma alloc_text(PAGE, getAVCoreHandle)
+	#pragma alloc_text(PAGE, AVCommInit)
+	#pragma alloc_text(PAGE, AVCommStop)
+	#pragma alloc_text(PAGE, AVCommCreateBuffer)
+	#pragma alloc_text(PAGE, AVCommFreeBuffer)
+	#pragma alloc_text(PAGE, AVCommSendEvent)
+	#pragma alloc_text(PAGE, AVCommGetUmPID)
+
 #endif
 
 #pragma prefast(disable:28159, "There are certain cases when we have to bugcheck...")
@@ -79,6 +82,7 @@ NTSTATUS DllInitialize(
 )
 {
 	UNREFERENCED_PARAMETER(RegistryPath);
+
 	DbgPrint("AVCommDriver.sys is now loading\n");
 	return STATUS_SUCCESS;
 }
@@ -171,7 +175,7 @@ Return Value
 	switch (connectionCtx->Type)
 	{
 	case AvConnectForScan:
-		Globals.ScanClientPort = ClientPort;
+		Globals.EventsClientPort = ClientPort;
 
 		OBJECT_ATTRIBUTES objectAttributes;
 		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
@@ -235,8 +239,8 @@ Return Value
 	switch (*connectionType)
 	{
 	case AvConnectForScan:
-		FltCloseClientPort(Globals.Filter, &Globals.ScanClientPort);
-		Globals.ScanClientPort = NULL;
+		FltCloseClientPort(Globals.Filter, &Globals.EventsClientPort);
+		Globals.EventsClientPort = NULL;
 		break;
 	case AvConnectForAbort:
 		FltCloseClientPort(Globals.Filter, &Globals.AbortClientPort);
@@ -308,6 +312,61 @@ Return Value:
 	return status;
 }
 
+/*
+Routine Desription:
+	Initialises minifilter-driver that is used for KM-UM communications.
+*/
+NTSTATUS AVCommInit(PFLT_FILTER Filter)
+{
+	NTSTATUS status = STATUS_SUCCESS;
+	PSECURITY_DESCRIPTOR sd = NULL;
+
+	Globals.Filter = Filter;
+
+	try
+	{
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+
+		//  Builds a default security descriptor for use with FltCreateCommunicationPort.
+		status = FltBuildDefaultSecurityDescriptor(&sd, FLT_PORT_ALL_ACCESS);
+
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+
+		//  Prepare ports between kernel and user.
+		status = AVCommPrepareServerPort(sd, AvConnectForScan);
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+
+		status = AVCommPrepareServerPort(sd, AvConnectForAbort);
+		if (!NT_SUCCESS(status))
+		{
+			leave;
+		}
+	}
+	finally
+	{
+		if (sd != NULL)
+		{
+			FltFreeSecurityDescriptor(sd);
+		}
+
+		if (!NT_SUCCESS(status))
+		{
+			AVCommStop();
+		}
+	}
+
+	return status;
+}
+
 NTSTATUS AVCommSendUnloadingToUser(
 	VOID
 )
@@ -341,49 +400,9 @@ Return Value:
 	return status;
 }
 
-NTSTATUS memmoveUM(void* srcBuffer, PSIZE_T size, void** outUmBuffer)
-/*
-Routine Description:
-	Allocates a block of memory in UM AVCore service and transferes
-	given KM memory block there.
-Arguments:
-	_in_ srcBuffer - pointer to the source buffer located in KM address space.
-	_in_ size - number of bytes to move from srcBuffer to UM.
-	_out_ outUmBuffer - pointer to the pointer that will recieve the address
-	of the buffer allocated in the UM address space. Should be zero.
-*/
+void AVCommStop(VOID)
 {
-	SIZE_T originalSize = *size;
-	NTSTATUS status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, outUmBuffer, 0, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't allocate memory in UM
-		return status;
-	}
-
-	// Save operands to global kernel address space because
-	// they might be unavailable after stack switch.
-	Globals.Target = *outUmBuffer;
-	Globals.Source = srcBuffer;
-	Globals.Size = originalSize;
-
-	// Chnage stack to that of the target UM process (AVCore service)
-	KAPC_STATE pkapcState;
-	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
-	memcpy(Globals.Target, Globals.Source, Globals.Size);
-	// Restore stack
-	KeUnstackDetachProcess(&pkapcState);
-
-	return STATUS_SUCCESS;
-}
-
-void setFilter(PFLT_FILTER Filter)
-{
-	Globals.Filter = Filter;
-}
-
-void closeCommunicationPorts(VOID)
-{
+	AVCommSendUnloadingToUser();
 	if (NULL != Globals.EventsServerPort)
 	{
 		FltCloseCommunicationPort(Globals.EventsServerPort);
@@ -394,22 +413,78 @@ void closeCommunicationPorts(VOID)
 	}
 	if (NULL != Globals.Filter)
 	{
-		FltUnregisterFilter(Globals.Filter);
 		Globals.Filter = NULL;
 	}
 }
 
-HANDLE getAVCorePID(VOID)
+/*
+Routine Description:
+	Allocates a block of memory in UM AVCore service and transferes
+	given KM memory block there.
+Arguments:
+	_in_ srcBuffer - pointer to the source buffer located in KM address space.
+	_in_ srcSize - number of bytes to move from srcBuffer to UM.
+	_out_ outUmBuffer - pointer to the pointer that will recieve the address
+	_out_ outUmSize - pointer to the variable where the size of allocated UM buffer will be stored.
+	of the buffer allocated in the UM address space. Should be zero.
+*/
+NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize)
+{
+	PVOID UmBuffer = NULL;
+	*outUmSize = srcSize;
+	// allocat memory in UM address space of AVCore service.
+	NTSTATUS status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, &UmBuffer, 0, outUmSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	if (status != STATUS_SUCCESS)
+	{
+		// couldn't allocate memory in UM
+		return status;
+	}
+
+	// Chnage stack to that of the target UM process (AVCore service)
+	KAPC_STATE pkapcState;
+	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
+	// copy buffer from KM to allocated buffer in UM.
+	memcpy(UmBuffer, srcBuffer, srcSize);
+	// Restore stack
+	KeUnstackDetachProcess(&pkapcState);
+
+	*outUmBuffer = UmBuffer;
+	return status;
+}
+
+/*
+Routine Description:
+	Frees the block of memory in UM address space
+	that was allocated via AVCommCreateBuffer.
+Arguments:
+	UmBuffer - pointer to the UM buffer (outUmBuffer)
+	UmBufferSize - size of UM buffer received from AVCommCreateBuffer (outUmSize)
+*/
+NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize)
+{
+	return ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &UmBuffer, UmBufferSize, MEM_DECOMMIT);
+}
+
+/*
+Routine Description:
+	Getter function for AVCoreServicePID that was recieved
+	in AVCommConnectNotifyCallback.
+*/
+HANDLE AVCommGetUmPID(VOID)
 {
 	return Globals.AVCoreServicePID;
 }
 
-HANDLE getAVCoreHandle(VOID)
-{
-	return Globals.AVCoreServiceHandle;
-}
-
-NTSTATUS sendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
+/*
+Routine Description:
+	Sends given event to UM service via communication port.
+Arguments:
+	eventBuffer - pointer to the event structure formed in KM memory space.
+	eventBufferSize - size of eventBuffer.
+	UMResponse - pointer to buffer that will receive AV_EVENT_RESPONSE structure.
+	UMResponseLength - size of UMResponse buffer.
+*/
+NTSTATUS AVCommSendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
 {
 	// Prepare AV_MESSAGE structure that will be sent to UM via comm port.
 	AV_MESSAGE avMessage = { 0 };
@@ -419,7 +494,7 @@ NTSTATUS sendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UM
 
 	// Put Event structure to UM memory and save address in AV_MESSAGE structure.
 	SIZE_T umBuffEventSize = avMessage.EventBufferLength;
-	NTSTATUS status = memmoveUM(eventBuffer, &umBuffEventSize, &avMessage.EventBuffer);
+	NTSTATUS status = AVCommCreateBuffer(eventBuffer, umBuffEventSize, &avMessage.EventBuffer, &umBuffEventSize);
 	if (status != STATUS_SUCCESS)
 	{
 		// couldn't allocate memory in UM
@@ -428,14 +503,14 @@ NTSTATUS sendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UM
 
 	// Send event to the AVCore UM service and wait for the response
 	status = FltSendMessage(Globals.Filter,
-		&Globals.ScanClientPort,
+		&Globals.EventsClientPort,
 		&avMessage,
 		sizeof(AV_MESSAGE),
 		UMResponse,
 		UMResponseLength,
 		NULL);
 
-	NTSTATUS freeStatus = ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &avMessage.EventBuffer, &umBuffEventSize, MEM_DECOMMIT);
+	NTSTATUS freeStatus = AVCommFreeBuffer(avMessage.EventBuffer, &umBuffEventSize);
 	if (freeStatus != STATUS_SUCCESS) { return freeStatus; }
 
 	return status;
