@@ -21,6 +21,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utils", "utils", "{7F1B02CF
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestPlugin", "TestPlugin\TestPlugin.vcxproj", "{5F78444A-A7D4-4E7B-B0B8-A86787648172}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{0E66CD07-E249-4F09-9747-A0B1D5847192}"
+	ProjectSection(SolutionItems) = preProject
+		include\EventsKMStructures.h = include\EventsKMStructures.h
+		include\EventsUMInterfaces.h = include\EventsUMInterfaces.h
+		include\EventsUMStructures.h = include\EventsUMStructures.h
+		include\KMUMcomm.h = include\KMUMcomm.h
+		include\PluginInterface.h = include\PluginInterface.h
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

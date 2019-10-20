@@ -1,5 +1,4 @@
 #pragma once
-#include "EventsKM.h"
 #include <Windows.h>
 #include "EventsUMInterfaces.h"
 #include <string>

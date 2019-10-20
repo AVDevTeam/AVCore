@@ -6,7 +6,7 @@
 #endif
 #endif
 
-#include "EventsKM.h"
+#include "EventsKMStructures.h"
 #include <string>
 
 class IEventFSCreate

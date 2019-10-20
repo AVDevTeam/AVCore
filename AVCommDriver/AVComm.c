@@ -14,7 +14,7 @@ Environment:
 #include "AVComm.h"
 #include "Globals.h"
 #include "KMUMcomm.h"
-#include "EventsKM.h"
+#include "EventsKMStructures.h"
 
 NTSTATUS AVCommConnectNotifyCallback(
 	_In_ PFLT_PORT ClientPort,

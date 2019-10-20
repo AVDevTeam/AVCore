@@ -1,7 +1,5 @@
 #include "pch.h"
 #include "TestPlugin.h"
-#include "EventsKM.h"
-#include "KMUMcomm.h"
 #include "EventsUMInterfaces.h"
 #include <iostream>
 

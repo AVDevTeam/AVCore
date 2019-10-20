@@ -19,7 +19,7 @@ Environment:
 
 #include <fltKernel.h>
 #include "KMUMcomm.h"
-#include "EventsKM.h"
+#include "EventsKMStructures.h"
 
 #define AV_CONNECTION_CTX_TAG                'cCvA'
 
