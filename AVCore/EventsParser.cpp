@@ -1,7 +1,8 @@
 #include "EventsParser.h"
 
-AvFSEventCreate::AvFSEventCreate(PAV_EVENT_FILE_CREATE KMEvent)
+AvFSEventCreate::AvFSEventCreate(PVOID event)
 {
+	PAV_EVENT_FILE_CREATE KMEvent = (PAV_EVENT_FILE_CREATE)event;
 	this->RequestorMode = KMEvent->RequestorMode;
 	this->RequestorPID = KMEvent->RequestorPID;
 
@@ -100,4 +101,10 @@ wchar_t* AvEvent::wcscpyZeroTerminate(wchar_t* srcBuffer, int srcSize)
 	memset(dstBuffer, 0, dstSize); // zero out new buffer.
 	memcpy_s(dstBuffer, dstSize, srcBuffer, srcSize);
 	return dstBuffer;
+}
+
+AvEvent* AvFsEventParser::parse(PVOID event)
+{
+	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvFSEventCreate(event));
+	return eventInstanse;
 }

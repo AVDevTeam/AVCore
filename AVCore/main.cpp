@@ -5,6 +5,7 @@
 #include "PipeServer.h"
 #include "CommPortServer.h"
 #include "PluginManager.h"
+#include "EventsParser.h"
 
 /*
 int _cdecl
@@ -56,6 +57,7 @@ main(
 	*/
 
 	PluginManager manager;
+	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFsEventParser()));
 	manager.loadPlugin((char*)"TestPlugin.dll");
 	CommPortServer portServer;
 	portServer.start(&manager);

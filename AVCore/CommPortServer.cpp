@@ -203,11 +203,7 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			// !!!!!!!!!!!!!!!!!!!!  TODO! EVENT PROCESSING. !!!!!!!!!!!!!!!!!!!!
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-			if (message->Event.EventType == AvFileCreate)
-			{
-				AvFSEventCreate eventFSCreate((PAV_EVENT_FILE_CREATE)message->Event.EventBuffer);
-				this->pluginManager->processEvent(&eventFSCreate);
-			}
+			this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,

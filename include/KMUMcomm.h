@@ -10,6 +10,7 @@ Environment:
 
 #ifndef __KMUMCOMM_H__
 #define __KMUMCOMM_H__
+#pragma once
 
 #if defined(_MSC_VER)
 #if (_MSC_VER >= 1200)

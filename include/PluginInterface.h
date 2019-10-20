@@ -16,8 +16,8 @@ class IPlugin;
 class IManager
 {
 public:
-	virtual int registerCallback(IPlugin*, int) = 0;
-	virtual AV_EVENT_RETURN_STATUS processEvent(void*) = 0;
+	virtual int registerCallback(IPlugin*, int, int, int) = 0;
+	virtual AV_EVENT_RETURN_STATUS processEvent(int, void*) = 0;
 };
 
 // Base class for plugins
