@@ -3,9 +3,9 @@
 
 typedef IPlugin* (* GetPlugin)();
 
-IPlugin* PluginManager::loadPlugin(char* path)
+IPlugin* PluginManager::loadPlugin(std::string path)
 {
-	HMODULE pluginDll = LoadLibraryA(path);
+	HMODULE pluginDll = LoadLibraryA(path.c_str());
 	if (pluginDll == 0)
 	{
 		DWORD lastError = GetLastError();
@@ -19,14 +19,14 @@ IPlugin* PluginManager::loadPlugin(char* path)
 	return plugin;
 }
 
-int PluginManager::registerCallback(IPlugin * plugin, int callbackId, int eventType, int priority)
+int PluginManager::registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority)
 {
 	callback newCallback = callback(callbackId, plugin);
 	this->callbacksMap[eventType]->insert(std::pair<int, callback>(priority, newCallback));
 	return 0;
 }
 
-AV_EVENT_RETURN_STATUS PluginManager::processEvent(int eventType, void* event)
+AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event)
 {
 	try
 	{
@@ -52,8 +52,8 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(int eventType, void* event)
 	
 }
 
-void PluginManager::addEventParser(int eventType, EventParser* parser)
+void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)
 {
 	this->parsersMap.insert(std::pair<int, EventParser*>(eventType, parser));
-	this->callbacksMap.insert(std::pair<int, priorityMap*>(eventType, new priorityMap()));
+	this->callbacksMap.insert(std::pair<AV_EVENT_TYPE, priorityMap*>(eventType, new priorityMap()));
 }

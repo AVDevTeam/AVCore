@@ -9,15 +9,15 @@
 
 typedef std::pair<int, IPlugin*> callback;
 typedef std::map<int, callback> priorityMap;
-typedef std::map <int, priorityMap*> eventsMap;
+typedef std::map <AV_EVENT_TYPE, priorityMap*> eventsMap;
 
 class PluginManager : public IManager
 {
 public:
-	IPlugin * loadPlugin(char* path);
-	int registerCallback(IPlugin * plugin, int callbackId, int, int);
-	AV_EVENT_RETURN_STATUS processEvent(int, void*);
-	void addEventParser(int, EventParser*);
+	IPlugin * loadPlugin(std::string path);
+	int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority);
+	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
+	void addEventParser(AV_EVENT_TYPE, EventParser*);
 
 private:
 	/*

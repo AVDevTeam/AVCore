@@ -9,6 +9,8 @@
 #endif
 
 #include "EventsUMInterfaces.h"
+#include <Windows.h>
+#include "KMUMcomm.h"
 
 class IPlugin;
 
@@ -16,15 +18,15 @@ class IPlugin;
 class IManager
 {
 public:
-	virtual int registerCallback(IPlugin*, int, int, int) = 0;
-	virtual AV_EVENT_RETURN_STATUS processEvent(int, void*) = 0;
+	virtual int registerCallback(IPlugin*, int, AV_EVENT_TYPE, int) = 0;
+	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*) = 0;
 };
 
-// Base class for plugins
+// Interface for plugins
 class IPlugin
 {
 public:
-	virtual AV_EVENT_RETURN_STATUS callback(int, void*) = 0;
+	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event) = 0;
 	virtual void init(IManager *) = 0;
 	virtual std::string& getName() = 0;
 };
