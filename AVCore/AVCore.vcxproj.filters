@@ -22,6 +22,9 @@
     <Filter Include="PluginManager">
       <UniqueIdentifier>{a63de55a-240f-449f-8acc-379f67234af2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PluginManager\EventParsers">
+      <UniqueIdentifier>{8622c304-db17-423d-bc2d-57bfcee26474}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,6 +39,9 @@
     <ClCompile Include="PluginManager.cpp">
       <Filter>PluginManager</Filter>
     </ClCompile>
+    <ClCompile Include="EventsParser.cpp">
+      <Filter>PluginManager\EventParsers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PipeServer.h">
@@ -49,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="PluginManager.h">
       <Filter>PluginManager</Filter>
+    </ClInclude>
+    <ClInclude Include="EventsParser.h">
+      <Filter>PluginManager\EventParsers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

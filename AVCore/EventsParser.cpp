@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "EventsParser.h"
 
 AvFSEventCreate::AvFSEventCreate(PAV_EVENT_FILE_CREATE KMEvent)
@@ -22,8 +21,6 @@ AvFSEventCreate::AvFSEventCreate(PAV_EVENT_FILE_CREATE KMEvent)
 	std::wstring path_ws(path), volumeLetter_ws(volumeLetter);
 	std::string path_std(path_ws.begin(), path_ws.end());
 	std::string volumeLetter_std(volumeLetter_ws.begin(), volumeLetter_ws.end());
-
-
 
 	this->FilePath = volumeLetter_std + path_std;
 
@@ -64,6 +61,21 @@ wchar_t* AvFSEventCreate::getVoluemLetter(wchar_t* deviceName)
 		volumeName += wcslen(volumeName) + 1; // go to next volume name
 	}
 	return nullptr;
+}
+
+std::string& AvFSEventCreate::getFilePath()
+{
+	return this->FilePath;
+}
+
+int AvFSEventCreate::getRequestorPID()
+{
+	return this->RequestorPID;
+}
+
+char AvFSEventCreate::getRequestorMode()
+{
+	return this->RequestorMode;
 }
 
 /*++

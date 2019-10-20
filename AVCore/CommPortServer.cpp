@@ -1,4 +1,5 @@
 #include "CommPortServer.h"
+#include "EventsParser.h"
 
 /*
 Method description:
@@ -201,47 +202,12 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			// !!!!!!!!!!!!!!!!!!!!  TODO! EVENT PROCESSING. !!!!!!!!!!!!!!!!!!!!
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			this->pluginManager->processEvent(&message->Event);
 
-			/*
 			if (message->Event.EventType == AvFileCreate)
 			{
-				// Get pointer to Event structure buffer
-				PAV_EVENT_FILE_CREATE KMeventFileCreate = (PAV_EVENT_FILE_CREATE)message->Event.EventBuffer;
-
-				
-				//AvFSEventCreate* UMeventCreate = new AvFSEventCreate(KMeventFileCreate);
-
-				//printf("AvFileCreate: %ls%ls\n", eventFileCreate->VolumeName, eventFileCreate->FileName);
-				std::cout << "AvFileCreate: " << UMeventCreate->FilePath << "\n";
-				//if (UMeventCreate->FilePath.rfind("C:\\Users\\user\\testfile.txt", 0) == 0)
-				//{
-				long size = GetFileSizeMy(UMeventCreate->FilePath);
-				if (size < 4096)
-				{
-					std::ifstream input(UMeventCreate->FilePath, std::ios::binary);
-					if (!input.fail())
-					{
-						std::string eicar_string = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
-						std::vector<unsigned char> eicar_signature(eicar_string.begin(), eicar_string.end());
-						std::vector<unsigned char> file_binary(std::istreambuf_iterator<char>(input), {});
-						auto res = std::search(
-							file_binary.begin(),
-							file_binary.end(),
-							eicar_signature.begin(),
-							eicar_signature.end()
-						);
-						auto found = res != file_binary.end();
-						if (found)
-						{
-							replyMsg.EventResponse.Status = AvEventStatusBlock;
-						}
-					}
-				}
-				//}
-
+				AvFSEventCreate eventFSCreate((PAV_EVENT_FILE_CREATE)message->Event.EventBuffer);
+				this->pluginManager->processEvent(&eventFSCreate);
 			}
-			*/
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,

@@ -1,6 +1,7 @@
 #pragma once
 #include "EventsKM.h"
 #include <Windows.h>
+#include "EventsUMInterfaces.h"
 #include <string>
 
 // Base class for all UM events.
@@ -12,16 +13,20 @@ protected:
 };
 
 // Class for File System create event (IRP_MJ_CREATE).
-class AvFSEventCreate : public AvEvent
+class AvFSEventCreate : public IEventFSCreate, AvEvent
 {
 public:
 	AvFSEventCreate(PAV_EVENT_FILE_CREATE);
 	~AvFSEventCreate();
 
-	std::string FilePath;
-	int RequestorPID;
-	char RequestorMode;
+	// Inherited via IEventFSCreate
+	virtual int getRequestorPID() override;
+	virtual char getRequestorMode() override;
+	virtual std::string& getFilePath() override;
 
 private:
 	wchar_t* getVoluemLetter(wchar_t*);
+	std::string FilePath;
+	int RequestorPID;
+	char RequestorMode;
 };

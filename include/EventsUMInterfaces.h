@@ -9,15 +9,10 @@
 #include "EventsKM.h"
 #include <string>
 
-class IEventHasRequestor
+class IEventFSCreate
 {
 public:
 	virtual int getRequestorPID() = 0;
 	virtual char getRequestorMode() = 0;
-};
-
-class IEventFSCreate
-{
-public:
-	virtual std::string getFilePath() = 0;
+	virtual std::string& getFilePath() = 0;
 };
