@@ -26,6 +26,7 @@ class IPlugin
 public:
 	virtual AV_EVENT_RETURN_STATUS callback(int, void*) = 0;
 	virtual void init(IManager *) = 0;
+	virtual std::string& getName() = 0;
 };
 
 #endif

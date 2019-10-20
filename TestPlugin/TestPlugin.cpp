@@ -31,3 +31,8 @@ void TestPlugin::init(IManager * manager)
 	manager->registerCallback(this, 1, AvFileCreate, 1);
 	manager->registerCallback(this, 2, AvFileCreate, 2);
 }
+
+std::string& TestPlugin::getName()
+{
+	return this->name;
+}

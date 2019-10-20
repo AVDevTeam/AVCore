@@ -37,7 +37,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(int eventType, void* event)
 		{
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
-			std::cout << "Processing callback with priority " << priority << "\n";
+			std::cout << "Processing callback with priority " << priority << " in plugin " << curCallback.second->getName() << "\n";
 			AV_EVENT_RETURN_STATUS status = curCallback.second->callback(curCallback.first, parsedEvent);
 			if (status == AvEventStatusBlock)
 				return status;
