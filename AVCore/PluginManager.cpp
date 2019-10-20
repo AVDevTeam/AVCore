@@ -8,15 +8,42 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	HMODULE pluginDll = LoadLibraryA(path.c_str());
 	if (pluginDll == 0)
 	{
-		DWORD lastError = GetLastError();
-		throw "PLUGIN NOT FOUND";
+		return nullptr;
 	}
 	GetPlugin getPlugin = (GetPlugin)GetProcAddress(pluginDll, "GetPlugin");
 	if (getPlugin == 0)
-		throw "PLUGIN NOT FOUND";
+		return nullptr;
+	this->moduleLoadMutex.lock();
 	IPlugin * plugin = getPlugin();
 	plugin->init(this);
+	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
+	this->moduleLoadMutex.unlock();
 	return plugin;
+}
+
+void PluginManager::unloadPlugin(std::string name)
+{
+	this->moduleLoadMutex.lock();
+	std::list<std::pair<priorityMap*, int>> toDelete;
+	IPlugin* plugin = this->loadedPlugins[name];
+	for (eventsMap::iterator it = this->callbacksMap.begin(); it != this->callbacksMap.end(); it++)
+		for (priorityMap::iterator it2 = (*it).second->begin(); it2 != (*it).second->end(); it2++)
+		{
+			callback curCallback = (*it2).second;
+			if (curCallback.second == plugin)
+				toDelete.push_back(std::pair<priorityMap*, int>((*it).second, (*it2).first));
+		}
+	for (std::list<std::pair<priorityMap*, int>>::iterator it = toDelete.begin(); it != toDelete.end(); it++)
+		(*it).first->erase((*it).second);
+	this->loadedPlugins.erase(name);
+	this->moduleLoadMutex.unlock();
+}
+
+IPlugin* PluginManager::getPluginByName(std::string name)
+{
+	if (this->loadedPlugins.find(name) == this->loadedPlugins.end())
+		return nullptr;
+	return this->loadedPlugins[name];
 }
 
 int PluginManager::registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority)
@@ -30,6 +57,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 {
 	try
 	{
+		this->moduleLoadMutex.lock_shared();
 		EventParser* eventParser = this->parsersMap[eventType];
 		AvEvent* parsedEvent = eventParser->parse(event);
 		priorityMap* eventPriorityMap = this->callbacksMap[eventType];
@@ -42,6 +70,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			if (status == AvEventStatusBlock)
 				return status;
 		}
+		this->moduleLoadMutex.unlock_shared();
 		return AvEventStatusAllow;
 	}
 	catch (const std::string& ex)

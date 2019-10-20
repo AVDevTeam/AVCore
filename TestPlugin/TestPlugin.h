@@ -11,7 +11,7 @@ public:
 	virtual std::string& getName() override;
 
 private:
-	std::string name = std::string("TEST PLUGIN");
+	std::string name = std::string("TestPlugin.dll");
 
 
 };

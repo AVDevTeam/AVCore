@@ -39,45 +39,40 @@ main(
 	printf("press any key to start\n");
 	getchar();
 
-	UCHAR c;
-	HRESULT hr = S_OK;
-
 	UNREFERENCED_PARAMETER(argc);
 	UNREFERENCED_PARAMETER(argv);
 
-	/*
-
-	hr = KMCommInit(&userScanCtx);
-	if (FAILED(hr)) 
-	{
-		fprintf(stderr, "Failed to initialize user scan data\n");
-		return 255;
-	}
-
-	*/
-
 	PluginManager manager;
 	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFsEventParser()));
-	manager.loadPlugin((char*)"TestPlugin.dll");
+
 	CommPortServer portServer;
 	portServer.start(&manager);
 
-	for (;;) 
+	std::cout << "$ ";
+	for (std::string cmd; std::getline(std::cin, cmd);)
 	{
-		printf("press 'q' to quit: ");
-		c = (unsigned char)getchar();
-		if (c == 'q') 
+
+		if (cmd == std::string("load"))
+		{
+			manager.loadPlugin((char*)"TestPlugin.dll");
+		}
+		else if (cmd == std::string("unload"))
+		{
+			if (manager.getPluginByName("TestPlugin.dll") != nullptr)
+				manager.unloadPlugin("TestPlugin.dll");
+		}
+		else if (cmd == std::string("exit"))
 		{
 			break;
 		}
+		else
+		{
+			std::cout << "Invalid command.\n";
+		}
+		std::cout << "$ ";
 	}
-
-	// hr = KMCommFinalize(&userScanCtx);
+	
+	
 	portServer.stop();
-	if (FAILED(hr)) 
-	{
-		fprintf(stderr, "Failed to finalize the user scan data.\n");
-	}
-
 	return 0;
 }

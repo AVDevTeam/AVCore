@@ -203,7 +203,7 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			// !!!!!!!!!!!!!!!!!!!!  TODO! EVENT PROCESSING. !!!!!!!!!!!!!!!!!!!!
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-			this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
+			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,
