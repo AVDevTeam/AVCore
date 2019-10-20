@@ -3,6 +3,10 @@
 #include "PluginInterface.h"
 #include "TestPlugin.h"
 
+// This is the plugin entry point.
+// Each plugin should implement this function.
+// Plugin logic should be implemented in a class that implements
+// IPlugin interface.
 extern "C" __declspec (dllexport) IPlugin* GetPlugin()
 {
 	IPlugin* plugin = new TestPlugin();

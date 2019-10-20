@@ -43,7 +43,7 @@ main(
 	UNREFERENCED_PARAMETER(argv);
 
 	PluginManager manager;
-	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFsEventParser()));
+	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventParser()));
 
 	CommPortServer portServer;
 	portServer.start(&manager);

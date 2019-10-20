@@ -103,7 +103,7 @@ wchar_t* AvEvent::wcscpyZeroTerminate(wchar_t* srcBuffer, int srcSize)
 	return dstBuffer;
 }
 
-AvEvent* AvFsEventParser::parse(PVOID event)
+AvEvent* AvFSEventParser::parse(PVOID event)
 {
 	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvFSEventCreate(event));
 	return eventInstanse;

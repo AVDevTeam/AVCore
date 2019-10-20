@@ -4,6 +4,10 @@
 #include "KMUMcomm.h"
 #include <iostream>
 
+/*
+This file contains the actual plugin logic.
+*/
+
 AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 {
 	if (callbackId == 1)
@@ -25,6 +29,7 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 	}
 	return AvEventStatusAllow;
 }
+
 
 void TestPlugin::init(IManager * manager)
 {

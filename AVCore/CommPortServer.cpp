@@ -41,6 +41,7 @@ void CommPortServer::start(IManager* pluginManager)
 		throw "FAILED";
 	}
 
+	// Start listeners.
 	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
 	{
 		CommPortListener * listener = new CommPortListener(this->pluginManager);
@@ -199,10 +200,7 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			replyMsg.ReplyHeader.MessageId = message->MessageHeader.MessageId;
 			replyMsg.EventResponse.Status = AvEventStatusAllow;
 
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-			// !!!!!!!!!!!!!!!!!!!!  TODO! EVENT PROCESSING. !!!!!!!!!!!!!!!!!!!!
-			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+			// Process event using pluginManager.
 			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
 
 			hr = FilterReplyMessage(eventsPort,

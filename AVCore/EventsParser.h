@@ -15,6 +15,7 @@ protected:
 	wchar_t* wcscpyZeroTerminate(wchar_t*, int);
 };
 
+// Base class for event parsers.
 class EventParser
 {
 public:
@@ -40,7 +41,8 @@ private:
 	char RequestorMode;
 };
 
-class AvFsEventParser : EventParser
+// AvFSEvent parser
+class AvFSEventParser : EventParser
 {
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;

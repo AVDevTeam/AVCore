@@ -5,27 +5,41 @@ typedef IPlugin* (* GetPlugin)();
 
 IPlugin* PluginManager::loadPlugin(std::string path)
 {
+	// load plugin dll
 	HMODULE pluginDll = LoadLibraryA(path.c_str());
 	if (pluginDll == 0)
 	{
 		return nullptr;
 	}
+	// get plugin entry point.
 	GetPlugin getPlugin = (GetPlugin)GetProcAddress(pluginDll, "GetPlugin");
 	if (getPlugin == 0)
 		return nullptr;
+
+	// start of the critical section
+	// we use lock (not shared_lock) because we need to halt
+	// all listener threads.
 	this->moduleLoadMutex.lock();
+	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
 	plugin->init(this);
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
+	// leaving critical section
 	this->moduleLoadMutex.unlock();
+
 	return plugin;
 }
 
 void PluginManager::unloadPlugin(std::string name)
 {
+	// start of critical section
 	this->moduleLoadMutex.lock();
+	// this list will hold all callbacks that were registered
+	// by the unloading plugin.
 	std::list<std::pair<priorityMap*, int>> toDelete;
+
 	IPlugin* plugin = this->loadedPlugins[name];
+	// iterate over callbackMap and gather all callbacks of the unloadin plugin
 	for (eventsMap::iterator it = this->callbacksMap.begin(); it != this->callbacksMap.end(); it++)
 		for (priorityMap::iterator it2 = (*it).second->begin(); it2 != (*it).second->end(); it2++)
 		{
@@ -33,9 +47,11 @@ void PluginManager::unloadPlugin(std::string name)
 			if (curCallback.second == plugin)
 				toDelete.push_back(std::pair<priorityMap*, int>((*it).second, (*it2).first));
 		}
+	// do the actual erasing of the callbacks from the map.
 	for (std::list<std::pair<priorityMap*, int>>::iterator it = toDelete.begin(); it != toDelete.end(); it++)
 		(*it).first->erase((*it).second);
 	this->loadedPlugins.erase(name);
+	// leaving critical section
 	this->moduleLoadMutex.unlock();
 }
 
@@ -53,6 +69,22 @@ int PluginManager::registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_T
 	return 0;
 }
 
+/*
+Method description:
+	This method is used in event-streams listeners to handle events.
+	First the eventParsers are used to represent event as an
+	instance of AvEvent class.
+	Method iterates over callback map for the given event type
+	from the callback with highest priority (the smallest int).
+
+	If callback returns BlockStatus than the event processing stops.
+	If not, the next callback for this event is called.
+Arguments:
+	eventType - known AV_EVENT_TYPE retreived from event source (KM, UM)
+	event - poitner to raw event buffer.
+Return value:
+	event processing status that will be sent to interceptor module (KM, UM).
+*/
 AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event)
 {
 	try

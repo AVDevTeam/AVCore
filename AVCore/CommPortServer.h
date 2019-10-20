@@ -24,6 +24,7 @@ public:
 	CommPortListener(IManager*);
 	void listen(HANDLE eventsPort, HANDLE completionPort);
 	void signalStop() { this->stop = true;  }
+	// worker thread.
 	std::thread * thread;
 
 private:
@@ -38,6 +39,13 @@ communication port.
 class CommPortServer
 {
 public:
+	/*
+	Method description:
+		Starts listening to events.
+	Arguments:
+		Pointer to the pluginManager that will be passed
+		to listeners.
+	*/
 	void start(IManager *);
 	void stop();
 	
@@ -48,6 +56,9 @@ private:
 	std::list<CommPortListener *> listeners;
 
 	IManager* pluginManager;
+
+	// Client side communication port.
 	HANDLE eventsPort;
+	// IO Completion port for multi-thread event processing.
 	HANDLE completionPort;
 };

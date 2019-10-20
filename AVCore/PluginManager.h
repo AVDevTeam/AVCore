@@ -22,8 +22,9 @@ public:
 	IPlugin* getPluginByName(std::string name);
 
 	int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority);
-	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
 	void addEventParser(AV_EVENT_TYPE, EventParser*);
+
+	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
 
 private:
 	/*
@@ -38,10 +39,10 @@ private:
 	*/
 	eventsMap callbacksMap;
 
+	// map of loaded modules. string - module ID.
 	std::map<std::string, IPlugin*> loadedPlugins;
-	
+	// map of event parsers.
 	std::map<int, EventParser*> parsersMap;
-
-	volatile std::atomic<boolean> moduleLoadLock = false;
+	// mutex to syncronize modules load/unload.
 	std::shared_mutex moduleLoadMutex;
 };
