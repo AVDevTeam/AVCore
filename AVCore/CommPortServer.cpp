@@ -6,12 +6,13 @@ Method description:
 	Creates IO completion port.
 	Creates listeners and pumps initial events to completion port.
 */
-void CommPortServer::start()
+void CommPortServer::start(IManager* pluginManager)
 {
 	HRESULT hr = S_OK;
 	this->eventsPort = NULL;
 	this->completionPort = NULL;
 	AV_CONNECTION_CONTEXT connectionCtx;
+	this->pluginManager = pluginManager;
 
 	//  Prepare the scan communication port.
 	connectionCtx.Type = AvConnectForScan;
@@ -41,7 +42,7 @@ void CommPortServer::start()
 
 	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
 	{
-		CommPortListener * listener = new CommPortListener();
+		CommPortListener * listener = new CommPortListener(this->pluginManager);
 		std::thread * thread = new std::thread(&CommPortListener::listen, listener, eventsPort, completionPort);
 		listener->thread = thread;
 		this->listeners.push_back(listener);
@@ -128,6 +129,11 @@ long GetFileSizeMy(std::string filename)
 	return rc == 0 ? stat_buf.st_size : -1;
 }
 
+CommPortListener::CommPortListener(IManager* manager)
+{
+	this->pluginManager = manager;
+}
+
 void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 {
 	HRESULT hr = S_OK;
@@ -140,7 +146,6 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 	ULONG_PTR key;
 	BOOL  success = FALSE;
 
-	PLISTENER_THREAD_CONTEXT threadCtx = NULL;
 
 	ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 
@@ -196,11 +201,16 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			// !!!!!!!!!!!!!!!!!!!!  TODO! EVENT PROCESSING. !!!!!!!!!!!!!!!!!!!!
 			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			this->pluginManager->processEvent(&message->Event);
+
+			/*
 			if (message->Event.EventType == AvFileCreate)
 			{
 				// Get pointer to Event structure buffer
 				PAV_EVENT_FILE_CREATE KMeventFileCreate = (PAV_EVENT_FILE_CREATE)message->Event.EventBuffer;
-				AvFSEventCreate* UMeventCreate = new AvFSEventCreate(KMeventFileCreate);
+
+				
+				//AvFSEventCreate* UMeventCreate = new AvFSEventCreate(KMeventFileCreate);
 
 				//printf("AvFileCreate: %ls%ls\n", eventFileCreate->VolumeName, eventFileCreate->FileName);
 				std::cout << "AvFileCreate: " << UMeventCreate->FilePath << "\n";
@@ -229,7 +239,9 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 					}
 				}
 				//}
+
 			}
+			*/
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 #include "CommPortStuctures.h"
+#include "PluginInterface.h"
 
 #ifndef MAKE_HRESULT
 #define MAKE_HRESULT(sev,fac,code) \
@@ -20,11 +21,13 @@ from kernel via communication port.
 class CommPortListener
 {
 public:
+	CommPortListener(IManager*);
 	void listen(HANDLE eventsPort, HANDLE completionPort);
 	void signalStop() { this->stop = true;  }
 	std::thread * thread;
 
 private:
+	IManager* pluginManager;
 	boolean stop;
 };
 
@@ -35,7 +38,7 @@ communication port.
 class CommPortServer
 {
 public:
-	void start();
+	void start(IManager *);
 	void stop();
 	
 private:
@@ -44,6 +47,7 @@ private:
 
 	std::list<CommPortListener *> listeners;
 
+	IManager* pluginManager;
 	HANDLE eventsPort;
 	HANDLE completionPort;
 };

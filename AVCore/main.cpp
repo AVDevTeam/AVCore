@@ -4,6 +4,7 @@
 #include "KMUMcomm.h"
 #include "PipeServer.h"
 #include "CommPortServer.h"
+#include "PluginManager.h"
 
 /*
 int _cdecl
@@ -39,7 +40,6 @@ main(
 
 	UCHAR c;
 	HRESULT hr = S_OK;
-	AV_CORE_CONTEXT userScanCtx = { 0 };
 
 	UNREFERENCED_PARAMETER(argc);
 	UNREFERENCED_PARAMETER(argv);
@@ -55,8 +55,10 @@ main(
 
 	*/
 
+	PluginManager manager;
+	manager.loadPlugin((char*)"TestPlugin.dll");
 	CommPortServer portServer;
-	portServer.start();
+	portServer.start(&manager);
 
 	for (;;) 
 	{

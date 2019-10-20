@@ -19,6 +19,9 @@
     <Filter Include="CommPortServer">
       <UniqueIdentifier>{2aa6c985-1dde-4262-9f24-6c0c1328558f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PluginManager">
+      <UniqueIdentifier>{a63de55a-240f-449f-8acc-379f67234af2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -30,8 +33,8 @@
     <ClCompile Include="CommPortServer.cpp">
       <Filter>CommPortServer</Filter>
     </ClCompile>
-    <ClCompile Include="EventsUM.cpp">
-      <Filter>CommPortServer</Filter>
+    <ClCompile Include="PluginManager.cpp">
+      <Filter>PluginManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,8 +47,8 @@
     <ClInclude Include="CommPortStuctures.h">
       <Filter>CommPortServer</Filter>
     </ClInclude>
-    <ClInclude Include="EventsUM.h">
-      <Filter>CommPortServer</Filter>
+    <ClInclude Include="PluginManager.h">
+      <Filter>PluginManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,10 +1,9 @@
-#include <windows.h>
-#include <fltUser.h>
-#include "EventsUM.h"
-#include "KMUMcomm.h"
-
-#define  KM_EVENTS_LISTENER_THREAD_COUNT   6 // DEBUG !!!      // the number of scanning worker threads.
-
+#if defined(_MSC_VER)
+#if (_MSC_VER >= 1200)
+#pragma warning(push)
+#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
+#endif
+#endif
 
 typedef struct _KM_MESSAGE
 {
@@ -35,4 +34,3 @@ typedef struct _UM_REPLY_MESSAGE
 } UM_REPLY_MESSAGE, * PUM_REPLY_MESSAGE;
 
 #define UM_REPLY_MESSAGE_SIZE   (sizeof(FILTER_REPLY_HEADER) + sizeof(ULONG))
-

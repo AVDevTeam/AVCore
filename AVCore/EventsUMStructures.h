@@ -1,10 +1,8 @@
-#include <windows.h>
+#pragma once
 #include <fltUser.h>
-#include "EventsUM.h"
+#include <windows.h>
+#include "EventsKM.h"
 #include "KMUMcomm.h"
-
-#define  KM_EVENTS_LISTENER_THREAD_COUNT   6 // DEBUG !!!      // the number of scanning worker threads.
-
 
 typedef struct _KM_MESSAGE
 {
@@ -35,4 +33,3 @@ typedef struct _UM_REPLY_MESSAGE
 } UM_REPLY_MESSAGE, * PUM_REPLY_MESSAGE;
 
 #define UM_REPLY_MESSAGE_SIZE   (sizeof(FILTER_REPLY_HEADER) + sizeof(ULONG))
-

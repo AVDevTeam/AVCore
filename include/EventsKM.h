@@ -1,6 +1,4 @@
-#ifndef __EVENTS_H__
-#define __EVENTS_H__
-
+#pragma once
 #if defined(_MSC_VER)
 #if (_MSC_VER >= 1200)
 #pragma warning(push)
@@ -42,5 +40,3 @@ typedef struct _AV_EVENT_FILE_CREATE
 } AV_EVENT_FILE_CREATE, *PAV_EVENT_FILE_CREATE;
 
 #pragma endregion Events structures
-
-#endif
