@@ -10,9 +10,6 @@ class AvEvent
 public:
 	AvEvent() {};
 	AvEvent(PVOID) {};
-
-protected:
-	wchar_t* wcscpyZeroTerminate(wchar_t*, int);
 };
 
 // Base class for event parsers.
@@ -20,13 +17,16 @@ class EventParser
 {
 public:
 	virtual AvEvent* parse(PVOID) = 0;
+
+protected:
+	wchar_t* wcscpyZeroTerminate(wchar_t*, int);
 };
 
 // Class for File System create event (IRP_MJ_CREATE).
 class AvFSEventCreate : public IEventFSCreate, AvEvent
 {
 public:
-	AvFSEventCreate(PVOID);
+	AvFSEventCreate(char, int, std::string);
 	~AvFSEventCreate();
 
 	// Inherited via IEventFSCreate
@@ -35,15 +35,18 @@ public:
 	virtual std::string& getFilePath() override;
 
 private:
-	wchar_t* getVoluemLetter(wchar_t*);
 	std::string FilePath;
 	int RequestorPID;
 	char RequestorMode;
 };
 
 // AvFSEvent parser
-class AvFSEventParser : EventParser
+class AvFSEventCreateParser : EventParser
 {
+public:
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;
+
+private:
+	wchar_t* getVoluemLetter(wchar_t*);
 };

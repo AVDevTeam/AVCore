@@ -1,42 +1,17 @@
 #include "EventsParser.h"
 
-AvFSEventCreate::AvFSEventCreate(PVOID event)
+AvFSEventCreate::AvFSEventCreate(char requestorMode, int requestorPID, std::string FilePath)
 {
-	PAV_EVENT_FILE_CREATE KMEvent = (PAV_EVENT_FILE_CREATE)event;
-	this->RequestorMode = KMEvent->RequestorMode;
-	this->RequestorPID = KMEvent->RequestorPID;
-
-	// copy wide char strings from KM supplied buffers (VolumeName might not be NULL-terminated).
-	wchar_t* path = this->wcscpyZeroTerminate(KMEvent->FileName, KMEvent->FileNameSize);
-	wchar_t* volume = this->wcscpyZeroTerminate(KMEvent->VolumeName, KMEvent->VolumeNameSize);
-	wchar_t* volumeLetter = this->getVoluemLetter(volume);
-	bool volumeLetterPresent = true;
-
-	if (volumeLetter == nullptr)
-	{
-		volumeLetterPresent = false;
-		volumeLetter = volume;
-	}
-
-	// translate wchar_t* to std::string [https://stackoverflow.com/questions/27720553/conversion-of-wchar-t-to-string/27721137]
-	std::wstring path_ws(path), volumeLetter_ws(volumeLetter);
-	std::string path_std(path_ws.begin(), path_ws.end());
-	std::string volumeLetter_std(volumeLetter_ws.begin(), volumeLetter_ws.end());
-
-	this->FilePath = volumeLetter_std + path_std;
-
-	// free temporary buffers.
-	free(path);
-	free(volume);
-	if (volumeLetterPresent)
-		free(volumeLetter);
+	this->RequestorMode = requestorMode;
+	this->RequestorPID = requestorPID;
+	this->FilePath = FilePath;
 }
 
 AvFSEventCreate::~AvFSEventCreate()
 {
 }
 
-wchar_t* AvFSEventCreate::getVoluemLetter(wchar_t* deviceName)
+wchar_t* AvFSEventCreateParser::getVoluemLetter(wchar_t* deviceName)
 {
 	wchar_t volumeNames[512] = { 0 }; // todo dynamic allocation
 	wchar_t curDeviceName[512] = { 0 };
@@ -89,7 +64,7 @@ Arguments:
 Return Value:
 	pointer to newly allocated NULL-terminated buffer with the copied wide char string.
 --*/
-wchar_t* AvEvent::wcscpyZeroTerminate(wchar_t* srcBuffer, int srcSize)
+wchar_t* EventParser::wcscpyZeroTerminate(wchar_t* srcBuffer, int srcSize)
 {
 	int dstSize = srcSize;
 	dstSize += 2; // two additional bytes for wide char NULL-terminator.
@@ -103,8 +78,37 @@ wchar_t* AvEvent::wcscpyZeroTerminate(wchar_t* srcBuffer, int srcSize)
 	return dstBuffer;
 }
 
-AvEvent* AvFSEventParser::parse(PVOID event)
+AvEvent* AvFSEventCreateParser::parse(PVOID event)
 {
-	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvFSEventCreate(event));
+	PAV_EVENT_FILE_CREATE KMEvent = (PAV_EVENT_FILE_CREATE)event;
+	char RequestorMode = KMEvent->RequestorMode;
+	int RequestorPID = KMEvent->RequestorPID;
+
+	// copy wide char strings from KM supplied buffers (VolumeName might not be NULL-terminated).
+	wchar_t* path = this->wcscpyZeroTerminate(KMEvent->FileName, KMEvent->FileNameSize);
+	wchar_t* volume = this->wcscpyZeroTerminate(KMEvent->VolumeName, KMEvent->VolumeNameSize);
+	wchar_t* volumeLetter = this->getVoluemLetter(volume);
+	bool volumeLetterPresent = true;
+
+	if (volumeLetter == nullptr)
+	{
+		volumeLetterPresent = false;
+		volumeLetter = volume;
+	}
+
+	// translate wchar_t* to std::string [https://stackoverflow.com/questions/27720553/conversion-of-wchar-t-to-string/27721137]
+	std::wstring path_ws(path), volumeLetter_ws(volumeLetter);
+	std::string path_std(path_ws.begin(), path_ws.end());
+	std::string volumeLetter_std(volumeLetter_ws.begin(), volumeLetter_ws.end());
+
+	std::string FilePath = volumeLetter_std + path_std;
+
+	// free temporary buffers.
+	free(path);
+	free(volume);
+	if (volumeLetterPresent)
+		free(volumeLetter);
+
+	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvFSEventCreate(RequestorMode, RequestorPID, FilePath));
 	return eventInstanse;
 }
