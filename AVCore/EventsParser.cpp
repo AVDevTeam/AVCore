@@ -29,7 +29,7 @@ wchar_t* AvFSEventCreateParser::getVoluemLetter(wchar_t* deviceName)
 			wchar_t* resultVolumeName = (wchar_t*)malloc(sizeof(wchar_t) * (curVolumeNameSize + 1));
 			if (resultVolumeName == NULL)
 			{
-				throw "OutOfMemory"; // TODO! Error handling (Exceptions or RetVals ?!)
+				throw std::bad_alloc();
 			}
 			wcscpy_s(resultVolumeName, curVolumeNameSize + 1, volumeName);
 			return resultVolumeName;

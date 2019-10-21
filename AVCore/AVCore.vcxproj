@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CommPortServer.cpp" />
+    <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="EventsParser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipeServer.cpp" />
@@ -153,6 +154,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommPortServer.h" />
+    <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="EventsParser.h" />
     <ClInclude Include="PipeServer.h" />
     <ClInclude Include="PluginManager.h" />

@@ -11,6 +11,8 @@
 #include "EventsUMInterfaces.h"
 #include <Windows.h>
 #include "KMUMcomm.h"
+#include <map>
+#include <list>
 
 class IPlugin;
 
@@ -51,6 +53,34 @@ public:
 	virtual std::string& getDescription() = 0;
 
 	virtual HMODULE getModule() = 0;
+};
+
+class IParameter
+{
+public:
+	virtual char getType();
+};
+
+typedef enum _ConfigParamType {
+	DwordParam = 0,
+	StringParam,
+	ListParam
+} ConfigParamType;
+
+// Interface for configuration managers
+class IConfig
+{
+public:
+	virtual void init(std::string) = 0;
+	virtual std::map<std::string, ConfigParamType>* getParamList() = 0;
+	// parameter getters
+	virtual DWORD getDwordParam(std::string paramName) = 0;
+	virtual std::string getStringParam(std::string paramName) = 0;
+	virtual std::list<std::string>* getListParam(std::string paramName) = 0;
+	// parameter setters
+	virtual void setDwordParam(std::string paramName, DWORD value) = 0;
+	virtual void setStringParam(std::string paramName, std::string value) = 0;
+	virtual void setListParam(std::string paramName, std::list<std::string>& value) = 0;
 };
 
 #endif
