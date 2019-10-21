@@ -6,13 +6,19 @@
 #include <iterator>
 #include <algorithm>
 #include <vector>
-#include "CommPortStuctures.h"
+
+
+#include <windows.h>
+#include <fltUser.h>
 #include "PluginInterface.h"
+#include "EventsUMStructures.h"
 
 #ifndef MAKE_HRESULT
 #define MAKE_HRESULT(sev,fac,code) \
     ((HRESULT) (((unsigned long)(sev)<<31) | ((unsigned long)(fac)<<16) | ((unsigned long)(code))) )
 #endif
+
+#define  KM_EVENTS_LISTENER_THREAD_COUNT   4 // DEBUG !!!      // the number of scanning worker threads.
 
 /*
 Implements logic of the worker thread that receives events

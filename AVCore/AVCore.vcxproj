@@ -153,7 +153,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommPortServer.h" />
-    <ClInclude Include="CommPortStuctures.h" />
     <ClInclude Include="EventsParser.h" />
     <ClInclude Include="PipeServer.h" />
     <ClInclude Include="PluginManager.h" />

@@ -31,8 +31,9 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 }
 
 
-void TestPlugin::init(IManager * manager)
+void TestPlugin::init(IManager * manager, HMODULE module)
 {
+	this->module = module;
 	manager->registerCallback(this, 1, AvFileCreate, 1);
 	manager->registerCallback(this, 2, AvFileCreate, 2);
 }
@@ -40,4 +41,14 @@ void TestPlugin::init(IManager * manager)
 std::string& TestPlugin::getName()
 {
 	return this->name;
+}
+
+HMODULE TestPlugin::getModule()
+{
+	return this->module;
+}
+
+std::string& TestPlugin::getDescription()
+{
+	return this->description;
 }

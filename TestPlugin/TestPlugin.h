@@ -7,11 +7,15 @@ class TestPlugin : public IPlugin
 public:
 	// Inherited via IPlugin
 	AV_EVENT_RETURN_STATUS callback(int, void*) override;
-	void init(IManager* manager) override;
+	void init(IManager* manager, HMODULE module) override;
 	virtual std::string& getName() override;
+	virtual HMODULE getModule() override;
+	virtual std::string& getDescription() override;
 
 private:
 	std::string name = std::string("TestPlugin.dll");
-
+	std::string description = std::string("Just a test plugin.");
+	HMODULE module;
+	
 
 };

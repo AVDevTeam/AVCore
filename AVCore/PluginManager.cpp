@@ -6,13 +6,13 @@ typedef IPlugin* (* GetPlugin)();
 IPlugin* PluginManager::loadPlugin(std::string path)
 {
 	// load plugin dll
-	HMODULE pluginDll = LoadLibraryA(path.c_str());
-	if (pluginDll == 0)
+	HMODULE pluginModule = LoadLibraryA(path.c_str());
+	if (pluginModule == 0)
 	{
 		return nullptr;
 	}
 	// get plugin entry point.
-	GetPlugin getPlugin = (GetPlugin)GetProcAddress(pluginDll, "GetPlugin");
+	GetPlugin getPlugin = (GetPlugin)GetProcAddress(pluginModule, "GetPlugin");
 	if (getPlugin == 0)
 		return nullptr;
 
@@ -22,7 +22,7 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	this->moduleLoadMutex.lock();
 	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
-	plugin->init(this);
+	plugin->init(this, pluginModule);
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section
 	this->moduleLoadMutex.unlock();
@@ -51,6 +51,8 @@ void PluginManager::unloadPlugin(std::string name)
 	for (std::list<std::pair<priorityMap*, int>>::iterator it = toDelete.begin(); it != toDelete.end(); it++)
 		(*it).first->erase((*it).second);
 	this->loadedPlugins.erase(name);
+	// free plugin DLL
+	FreeLibrary(plugin->getModule());
 	// leaving critical section
 	this->moduleLoadMutex.unlock();
 }

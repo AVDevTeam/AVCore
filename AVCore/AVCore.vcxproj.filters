@@ -50,9 +50,6 @@
     <ClInclude Include="CommPortServer.h">
       <Filter>CommPortServer</Filter>
     </ClInclude>
-    <ClInclude Include="CommPortStuctures.h">
-      <Filter>CommPortServer</Filter>
-    </ClInclude>
     <ClInclude Include="PluginManager.h">
       <Filter>PluginManager</Filter>
     </ClInclude>

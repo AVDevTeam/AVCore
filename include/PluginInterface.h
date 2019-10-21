@@ -26,9 +26,31 @@ public:
 class IPlugin
 {
 public:
+	/*
+	Method description:
+		Method for plugin initialization.
+	Arguments:
+		IManager * - pointer to the pluginManager instance that will
+		be used to set callbacks via registerCallback method.
+
+		HMODULE - module handle received via LoadLibrary in loadPlugin
+		method of IManager. Plugins shoud provide access to it via
+		getModule method.
+	*/
+	virtual void init(IManager*, HMODULE) = 0;
+
+	/*
+	Method description:
+		Entry point for plugin's event processing logic. This method
+		will be called from IManager in processEvent.
+	*/
 	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event) = 0;
-	virtual void init(IManager *) = 0;
+	
+	// methods that provide access to the information about the plugin.
 	virtual std::string& getName() = 0;
+	virtual std::string& getDescription() = 0;
+
+	virtual HMODULE getModule() = 0;
 };
 
 #endif
