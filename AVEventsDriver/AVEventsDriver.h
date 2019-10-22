@@ -8,9 +8,6 @@ Abstract:
 Environment:
 	Kernel mode
 --*/
-#ifndef __AVSCAN_H__
-#define __AVSCAN_H__
-
 #ifndef RTL_USE_AVL_TABLES
 #define RTL_USE_AVL_TABLES
 #endif // RTL_USE_AVL_TABLES
@@ -42,6 +39,18 @@ Environment:
 
 #endif
 
+EXTERN_C_START
+
+FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
+	_Inout_ PFLT_CALLBACK_DATA Data,
+	_In_ PCFLT_RELATED_OBJECTS FltObjects,
+	_Flt_CompletionContext_Outptr_ PVOID* CompletionContext
+);
+
+EX_CALLBACK_FUNCTION AVEventsRegistryCallback;
+
+EXTERN_C_END
+
 // Exports from AVCommDriver
 #pragma region EventsAPI import
 
@@ -53,6 +62,4 @@ DECLSPEC_IMPORT NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG)
 DECLSPEC_IMPORT HANDLE AVCommGetUmPID(VOID);
 
 #pragma endregion EventsAPI import
-
-#endif
 

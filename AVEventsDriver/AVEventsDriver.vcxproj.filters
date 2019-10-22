@@ -27,6 +27,12 @@
     <ClCompile Include="AVEventsDriver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RegistryCallback.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FSCallbacks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AVEventsDriver.rc">

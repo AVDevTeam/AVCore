@@ -35,6 +35,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FSCallbacks.c" />
+    <ClCompile Include="RegistryCallback.c" />
     <ResourceCompile Include="AVEventsDriver.rc" />
     <ClCompile Include="AVEventsDriver.c" />
     <Inf Include="AVEventsDriver.inf" />
