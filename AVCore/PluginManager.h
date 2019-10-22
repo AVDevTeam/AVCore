@@ -8,22 +8,29 @@
 #include <atomic>
 #include <shared_mutex>
 
-
+// <int - callbackId, IPlugin* - plugin that registered the callback>
 typedef std::pair<int, IPlugin*> callback;
+// <int - callback priority, specified by the plugin, callback>
 typedef std::map<int, callback> priorityMap;
 typedef std::map <AV_EVENT_TYPE, priorityMap*> eventsMap;
 
 class PluginManager : public IManager
 {
 public:
+
 	IPlugin * loadPlugin(std::string path);
 	void unloadPlugin(std::string name);
 
+	// returns IPlugin from loadedPlugins map.
 	IPlugin* getPluginByName(std::string name);
-
+	// this function is used from plugins (in IPlugin init())
+	// to register events callbacks.
 	int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority);
+	// this function is used on PluginManager initialization in order
+	// to register parsers for implemented events.
 	void addEventParser(AV_EVENT_TYPE, EventParser*);
-
+	// this function is called from event listeners in order to
+	// process an event by iterating through registered callbacks.
 	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
 
 private:
@@ -36,13 +43,20 @@ private:
 			...
 		}
 	}
+	Each event type has it's priority callback map.
+	Each callback in priority map is identified by callbackId and priority.
+	Priorities should be unique within priorityMaps.
+	Here we use the fact that map::iterator iterates keys
+	from the smallest to the biggest in order to implement
+	callback prioritization.
 	*/
 	eventsMap callbacksMap;
-
 	// map of loaded modules. string - module ID.
 	std::map<std::string, IPlugin*> loadedPlugins;
 	// map of event parsers.
 	std::map<int, EventParser*> parsersMap;
-	// mutex to syncronize modules load/unload.
-	std::shared_mutex moduleLoadMutex;
+	// mutex to syncronize operations that modify
+	// cruatial structures processed in event listeners
+	// (it is used to pause all event listening threads).
+	std::shared_mutex eventProcessingMutex;
 };

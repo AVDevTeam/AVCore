@@ -42,6 +42,9 @@ public:
 		getModule method.
 	*/
 	virtual void init(IManager*, HMODULE, IConfig*) = 0;
+	// Plugins should implement resources dealocation in this method.
+	// deinit() should be called on pluginUnload in IManager.
+	virtual void deinit() = 0;
 
 	/*
 	Method description:
@@ -57,12 +60,7 @@ public:
 	virtual IConfig* getConfig() = 0;
 };
 
-class IParameter
-{
-public:
-	virtual char getType();
-};
-
+// Type of supported parameters.
 typedef enum _ConfigParamType {
 	DwordParam = 0,
 	StringParam,
@@ -70,13 +68,24 @@ typedef enum _ConfigParamType {
 } ConfigParamType;
 
 typedef std::map<std::string, ConfigParamType> paramMap;
+typedef std::pair<std::string, ConfigParamType> paramPair;
 
 // Interface for configuration managers
 class IConfig
 {
 public:
-	virtual void init(std::string) = 0; 
+	/*
+	Method description:
+		Initializes IConfig store (opens registry key).
+	Arguments:
+		moduleId - string that identifies a module that will
+		use this IConfig. It shoud be unique because it will
+		make up the reg key path.
+	*/
+	virtual void init(std::string moduleId) = 0;
+	// this function is used by plugins to set their parameters' lists.
 	virtual void setParamMap(paramMap*) = 0;
+	// this function should be used to query parameter list for the IConfig.
 	virtual paramMap* getParamMap() = 0;
 	// parameter getters
 	virtual DWORD getDwordParam(std::string paramName) = 0;

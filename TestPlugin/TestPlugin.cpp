@@ -37,9 +37,9 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 
 	this->configManager = config;
 	paramMap* paramMap = new std::map<std::string, ConfigParamType>();
-	paramMap->insert(std::pair<std::string, ConfigParamType>("BlockList", ListParam));
-	paramMap->insert(std::pair<std::string, ConfigParamType>("SomeInt", DwordParam));
-	paramMap->insert(std::pair<std::string, ConfigParamType>("SomeStr", StringParam));
+	paramMap->insert(paramPair("BlockList", ListParam));
+	paramMap->insert(paramPair("SomeInt", DwordParam));
+	paramMap->insert(paramPair("SomeStr", StringParam));
 
 	this->configManager->setParamMap(paramMap);
 
@@ -59,6 +59,12 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 
 	manager->registerCallback(this, 1, AvFileCreate, 1);
 	manager->registerCallback(this, 2, AvFileCreate, 2);
+}
+
+void TestPlugin::deinit()
+{
+	delete this->configManager->getParamMap();
+	delete this;
 }
 
 std::string& TestPlugin::getName()

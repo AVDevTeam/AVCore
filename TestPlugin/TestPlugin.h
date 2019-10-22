@@ -8,6 +8,8 @@ public:
 	// Inherited via IPlugin
 	AV_EVENT_RETURN_STATUS callback(int, void*) override;
 	void init(IManager* manager, HMODULE module, IConfig * configManager) override;
+	void deinit() override;
+
 	virtual std::string& getName() override;
 	virtual HMODULE getModule() override;
 	virtual std::string& getDescription() override;

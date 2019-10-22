@@ -20,7 +20,7 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	// start of the critical section
 	// we use lock (not shared_lock) because we need to halt
 	// all listener threads.
-	this->moduleLoadMutex.lock();
+	this->eventProcessingMutex.lock();
 	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
 	UMModuleConfig* configManager = new UMModuleConfig();
@@ -28,7 +28,7 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	plugin->init(this, pluginModule, configManager);
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section
-	this->moduleLoadMutex.unlock();
+	this->eventProcessingMutex.unlock();
 
 	return plugin;
 }
@@ -36,7 +36,7 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 void PluginManager::unloadPlugin(std::string name)
 {
 	// start of critical section
-	this->moduleLoadMutex.lock();
+	this->eventProcessingMutex.lock();
 	// this list will hold all callbacks that were registered
 	// by the unloading plugin.
 	std::list<std::pair<priorityMap*, int>> toDelete;
@@ -55,9 +55,13 @@ void PluginManager::unloadPlugin(std::string name)
 		(*it).first->erase((*it).second);
 	this->loadedPlugins.erase(name);
 	// free plugin DLL
-	FreeLibrary(plugin->getModule());
+	HMODULE pluginModule = plugin->getModule();
+	// here the plugin should free the memory (including 
+	// IPlugin instance that was returned from DLL entry point).
+	plugin->deinit();
+	FreeLibrary(pluginModule);
 	// leaving critical section
-	this->moduleLoadMutex.unlock();
+	this->eventProcessingMutex.unlock();
 }
 
 IPlugin* PluginManager::getPluginByName(std::string name)
@@ -94,7 +98,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 {
 	try
 	{
-		this->moduleLoadMutex.lock_shared();
+		this->eventProcessingMutex.lock_shared();
 		EventParser* eventParser = this->parsersMap[eventType];
 		AvEvent* parsedEvent = eventParser->parse(event);
 		priorityMap* eventPriorityMap = this->callbacksMap[eventType];
@@ -107,7 +111,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			if (status == AvEventStatusBlock)
 				return status;
 		}
-		this->moduleLoadMutex.unlock_shared();
+		this->eventProcessingMutex.unlock_shared();
 		return AvEventStatusAllow;
 	}
 	catch (const std::string& ex)

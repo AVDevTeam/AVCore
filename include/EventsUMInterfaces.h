@@ -9,6 +9,8 @@
 #include "EventsKMStructures.h"
 #include <string>
 
+// Interface for AvFSEventCreate that will be used
+// in plugins to access event parameters.
 class IEventFSCreate
 {
 public:

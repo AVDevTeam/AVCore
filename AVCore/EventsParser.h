@@ -5,6 +5,13 @@
 
 // Base class for all UM events.
 // contains helper functions.
+// Classes inherited from AvEvent are passed
+// to the plugins that registered callback
+// on a particula event.
+// Each implementation of AvEvent class
+// should provide interface that will be available
+// for plugins (those interfaces are declared 
+// in EventsUMInterfaces.h).
 class AvEvent
 {
 public:
@@ -13,6 +20,8 @@ public:
 };
 
 // Base class for event parsers.
+// Event parsers should process KM event structures and
+// build AvEventClasses (inherited from AvEvent).
 class EventParser
 {
 public:
@@ -26,6 +35,7 @@ protected:
 class AvFSEventCreate : public IEventFSCreate, AvEvent
 {
 public:
+	// constructor that is used by AvFSEventCreateParser.
 	AvFSEventCreate(char, int, std::string);
 	~AvFSEventCreate();
 

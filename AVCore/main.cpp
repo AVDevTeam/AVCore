@@ -58,10 +58,10 @@ main(
 		switch ((*it).second)
 		{
 		case DwordParam:
-			std::cout << "DWORD param " << (*it).first << " = " << config->getDwordParam((*it).first);
+			std::cout << "DWORD param " << (*it).first << " = " << config->getDwordParam((*it).first) << "\n";
 			break;
 		case StringParam:
-			std::cout << "STRING param " << (*it).first << " = " << config->getStringParam((*it).first);
+			std::cout << "STRING param " << (*it).first << " = " << config->getStringParam((*it).first) << "\n";
 			break;
 		case ListParam:
 			std::list<std::string>* tmp = config->getListParam((*it).first);
@@ -72,6 +72,8 @@ main(
 
 		}
 	}
+
+	manager.unloadPlugin("TestPlugin.dll");
 
 	CommPortServer portServer;
 	portServer.start(&manager);
