@@ -309,6 +309,40 @@ Return Value:
 		return status;
 	}
 
+	status = PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, FALSE);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		return status;
+	}
+
+	status = PsSetCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+		return status;
+	}
+
+	// TODO. IFDEF x86/x64 (x64 support for x86 modules, PsSetLoadImageNotifyRoutineEx).
+	status = PsSetLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+		PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+		return status;
+	}
+
 	return status;
 }
 
@@ -336,6 +370,9 @@ NTSTATUS DriverUnload (
 	FltUnregisterFilter(GlobalFilter);
 	CmUnRegisterCallback(RegFilterCookie);
 	ObUnRegisterCallbacks(ObRegistrationHandle);
+	PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+	PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+	PsRemoveLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
 
 	return STATUS_SUCCESS;
 }

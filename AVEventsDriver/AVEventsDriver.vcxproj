@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FSCallbacks.c" />
+    <ClCompile Include="NotifyRoutines.c" />
     <ClCompile Include="ObjectFilterCallbacks.c" />
     <ClCompile Include="RegistryCallback.c" />
     <ResourceCompile Include="AVEventsDriver.rc" />

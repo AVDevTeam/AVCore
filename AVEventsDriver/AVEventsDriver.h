@@ -53,6 +53,24 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(PVOID RegistrationContext, POB_P
 
 OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
 
+void AVCreateProcessCallback(
+	PEPROCESS Process,
+	HANDLE ProcessId,
+	PPS_CREATE_NOTIFY_INFO CreateInfo
+);
+
+void AVCreateThreadCallback(
+	HANDLE ProcessId,
+	HANDLE ThreadId,
+	BOOLEAN Create
+);
+
+void AVLoadImageCallback(
+	PUNICODE_STRING FullImageName,
+	HANDLE ProcessId,
+	PIMAGE_INFO ImageInfo
+);
+
 EXTERN_C_END
 
 // Exports from AVCommDriver

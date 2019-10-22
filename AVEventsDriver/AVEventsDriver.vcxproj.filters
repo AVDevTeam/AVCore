@@ -36,6 +36,9 @@
     <ClCompile Include="ObjectFilterCallbacks.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NotifyRoutines.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="AVEventsDriver.rc">
