@@ -83,6 +83,8 @@ public:
 		make up the reg key path.
 	*/
 	virtual void init(std::string moduleId) = 0;
+	// releases IConfig store.
+	virtual void deinit() = 0;
 	// this function is used by plugins to set their parameters' lists.
 	virtual void setParamMap(paramMap*) = 0;
 	// this function should be used to query parameter list for the IConfig.

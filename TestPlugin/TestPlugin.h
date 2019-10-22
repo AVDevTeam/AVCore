@@ -15,7 +15,7 @@ public:
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
 private:
-	std::string name = std::string("TestPlugin.dll");
+	std::string name = std::string("TestPlugin");
 	std::string description = std::string("Just a test plugin.");
 	HMODULE module;
 	IConfig* configManager;

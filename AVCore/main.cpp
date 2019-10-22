@@ -46,35 +46,6 @@ main(
 	PluginManager manager;
 	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
 
-	manager.loadPlugin((char*)"TestPlugin.dll");
-
-	IConfig* config = manager.getPluginByName("TestPlugin.dll")->getConfig();
-	// get plugin parameters list (we don't know them in AVCore.exe). The list of params
-	// is provided by plugin.
-	paramMap* pMap = config->getParamMap();
-	// iterate plugin parameter
-	for (paramMap::iterator it = pMap->begin(); it != pMap->end(); it++)
-	{
-		switch ((*it).second)
-		{
-		case DwordParam:
-			std::cout << "DWORD param " << (*it).first << " = " << config->getDwordParam((*it).first) << "\n";
-			break;
-		case StringParam:
-			std::cout << "STRING param " << (*it).first << " = " << config->getStringParam((*it).first) << "\n";
-			break;
-		case ListParam:
-			std::list<std::string>* tmp = config->getListParam((*it).first);
-			std::cout << "STRING param " << (*it).first << " = \n";
-			for (std::list<std::string>::iterator it2 = tmp->begin(); it2 != tmp->end(); it2++)
-				std::cout << "\t" << (*it2) << "\n";
-			break;
-
-		}
-	}
-
-	manager.unloadPlugin("TestPlugin.dll");
-
 	CommPortServer portServer;
 	portServer.start(&manager);
 
@@ -89,8 +60,8 @@ main(
 		}
 		else if (cmd == std::string("unload"))
 		{
-			if (manager.getPluginByName("TestPlugin.dll") != nullptr)
-				manager.unloadPlugin("TestPlugin.dll");
+			if (manager.getPluginByName("TestPlugin") != nullptr)
+				manager.unloadPlugin("TestPlugin");
 		}
 		else if (cmd == std::string("exit"))
 		{

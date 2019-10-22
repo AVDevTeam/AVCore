@@ -14,7 +14,7 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 	{
 		IEventFSCreate* eventFSCreate = reinterpret_cast<IEventFSCreate*>(event);
 		std::string fName = eventFSCreate->getFilePath();
-
+		
 		if (fName.find(std::string("testfile.txt")) != std::string::npos)
 		{
 			std::cout << "BLOCKED: " << fName << "\n";
@@ -56,6 +56,9 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	param = "SomeStr";
 	std::string value("A STRING");
 	this->configManager->setStringParam(param, value);
+
+	std::list<std::string>* blockListTest = this->getConfig()->getListParam("BlockList");
+	delete blockListTest;
 
 	manager->registerCallback(this, 1, AvFileCreate, 1);
 	manager->registerCallback(this, 2, AvFileCreate, 2);

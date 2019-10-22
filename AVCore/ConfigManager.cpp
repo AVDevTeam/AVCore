@@ -3,7 +3,14 @@
 void UMModuleConfig::init(std::string moduleId)
 {
 	this->regStorePath = std::string("SOFTWARE\\AVCore\\") + moduleId;
-	LSTATUS status = RegOpenKeyExA(HKEY_LOCAL_MACHINE, this->regStorePath.c_str(), NULL, KEY_QUERY_VALUE | KEY_SET_VALUE, &this->configKey);
+	LSTATUS status = RegCreateKeyExA(HKEY_LOCAL_MACHINE, this->regStorePath.c_str(), NULL, NULL, NULL, KEY_QUERY_VALUE | KEY_SET_VALUE, NULL, &this->configKey, NULL);
+	if (status != ERROR_SUCCESS)
+		throw "Open key error";
+}
+
+void UMModuleConfig::deinit()
+{
+	LSTATUS status = RegCloseKey(this->configKey);
 	if (status != ERROR_SUCCESS)
 		throw "Open key error";
 }

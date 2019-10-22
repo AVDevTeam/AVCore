@@ -23,8 +23,9 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	this->eventProcessingMutex.lock();
 	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
+	// Create config store for the plugin.
 	UMModuleConfig* configManager = new UMModuleConfig();
-	configManager->init(std::string("TestPlugin"));
+	configManager->init(plugin->getName());
 	plugin->init(this, pluginModule, configManager);
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section

@@ -51,19 +51,22 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <TargetVersion>Windows10</TargetVersion>
+    <TargetVersion>Windows7</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
     <SpectreMitigation>false</SpectreMitigation>
+    <DriverTargetPlatform>Desktop</DriverTargetPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <TargetVersion>Windows10</TargetVersion>
+    <TargetVersion>Windows7</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
+    <SpectreMitigation>false</SpectreMitigation>
+    <DriverTargetPlatform>Desktop</DriverTargetPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -119,9 +122,13 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -134,6 +141,7 @@
     <IncludePath>$(IncludePath)</IncludePath>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
+    <LibraryPath>$(SolutionDir)lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -149,19 +157,27 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Link>
-      <AdditionalDependencies>fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fltmgr.lib;AVCommDriver.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)utils\install.bat" "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Link>
-      <AdditionalDependencies>fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>fltmgr.lib;AVCommDriver.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)include;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
     </ClCompile>
+    <PostBuildEvent>
+      <Command>copy /Y "$(SolutionDir)utils\install.bat" "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\"</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>

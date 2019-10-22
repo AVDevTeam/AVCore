@@ -7,6 +7,8 @@ class UMModuleConfig : public IConfig
 public:
 	// Inherited via IConfig
 	virtual void init(std::string moduleId) override;
+	virtual void deinit() override;
+
 	virtual void setParamMap(paramMap*) override;
 	virtual paramMap* getParamMap() override;
 
