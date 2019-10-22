@@ -14,7 +14,9 @@
 #include <map>
 #include <list>
 
+class IManager;
 class IPlugin;
+class IConfig;
 
 // Plugin manager interface
 class IManager
@@ -39,7 +41,7 @@ public:
 		method of IManager. Plugins shoud provide access to it via
 		getModule method.
 	*/
-	virtual void init(IManager*, HMODULE) = 0;
+	virtual void init(IManager*, HMODULE, IConfig*) = 0;
 
 	/*
 	Method description:
@@ -51,8 +53,8 @@ public:
 	// methods that provide access to the information about the plugin.
 	virtual std::string& getName() = 0;
 	virtual std::string& getDescription() = 0;
-
 	virtual HMODULE getModule() = 0;
+	virtual IConfig* getConfig() = 0;
 };
 
 class IParameter
@@ -67,20 +69,23 @@ typedef enum _ConfigParamType {
 	ListParam
 } ConfigParamType;
 
+typedef std::map<std::string, ConfigParamType> paramMap;
+
 // Interface for configuration managers
 class IConfig
 {
 public:
-	virtual void init(std::string) = 0;
-	virtual std::map<std::string, ConfigParamType>* getParamList() = 0;
+	virtual void init(std::string) = 0; 
+	virtual void setParamMap(paramMap*) = 0;
+	virtual paramMap* getParamMap() = 0;
 	// parameter getters
 	virtual DWORD getDwordParam(std::string paramName) = 0;
 	virtual std::string getStringParam(std::string paramName) = 0;
 	virtual std::list<std::string>* getListParam(std::string paramName) = 0;
 	// parameter setters
-	virtual void setDwordParam(std::string paramName, DWORD value) = 0;
-	virtual void setStringParam(std::string paramName, std::string value) = 0;
-	virtual void setListParam(std::string paramName, std::list<std::string>& value) = 0;
+	virtual void setDwordParam(std::string& paramName, DWORD value) = 0;
+	virtual void setStringParam(std::string& paramName, std::string& value) = 0;
+	virtual void setListParam(std::string& paramName, std::list<std::string>& value) = 0;
 };
 
 #endif

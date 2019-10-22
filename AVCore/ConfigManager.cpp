@@ -8,6 +8,11 @@ void UMModuleConfig::init(std::string moduleId)
 		throw "Open key error";
 }
 
+void UMModuleConfig::setParamMap(paramMap* configParamMap)
+{
+	this->configParamMap = configParamMap;
+}
+
 DWORD UMModuleConfig::getDwordParam(std::string paramName)
 {
 	DWORD type = NULL;
@@ -64,14 +69,14 @@ std::list<std::string>* UMModuleConfig::getListParam(std::string paramName)
 	return result;
 }
 
-void UMModuleConfig::setDwordParam(std::string paramName, DWORD value)
+void UMModuleConfig::setDwordParam(std::string& paramName, DWORD value)
 {
 	LSTATUS status = RegSetValueExA(this->configKey, paramName.c_str(), NULL, REG_DWORD, (LPBYTE)&value, sizeof(DWORD));
 	if (status != ERROR_SUCCESS)
 		throw "Error reading dword from registry";
 }
 
-void UMModuleConfig::setStringParam(std::string paramName, std::string value)
+void UMModuleConfig::setStringParam(std::string& paramName, std::string& value)
 {
 	std::string local(value);
 	LSTATUS status = RegSetValueExA(this->configKey, paramName.c_str(), NULL, REG_SZ, (LPBYTE)local.c_str(), value.size() + 1);
@@ -79,7 +84,7 @@ void UMModuleConfig::setStringParam(std::string paramName, std::string value)
 		throw "Error reading dword from registry";
 }
 
-void UMModuleConfig::setListParam(std::string paramName, std::list<std::string>& value)
+void UMModuleConfig::setListParam(std::string& paramName, std::list<std::string>& value)
 {
 	std::string rawListString("");
 	for (std::list<std::string>::iterator it = value.begin(); it != value.end(); it++)
@@ -89,7 +94,7 @@ void UMModuleConfig::setListParam(std::string paramName, std::list<std::string>&
 	this->setStringParam(paramName, rawListString);
 }
 
-std::map<std::string, ConfigParamType>* UMModuleConfig::getParamList()
+std::map<std::string, ConfigParamType>* UMModuleConfig::getParamMap()
 {
-	return nullptr;
+	return this->configParamMap;
 }

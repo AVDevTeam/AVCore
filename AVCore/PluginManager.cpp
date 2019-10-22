@@ -1,4 +1,5 @@
 #include "PluginManager.h"
+#include "ConfigManager.h"
 #include <Windows.h>
 
 typedef IPlugin* (* GetPlugin)();
@@ -22,7 +23,9 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	this->moduleLoadMutex.lock();
 	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
-	plugin->init(this, pluginModule);
+	UMModuleConfig* configManager = new UMModuleConfig();
+	configManager->init(std::string("TestPlugin"));
+	plugin->init(this, pluginModule, configManager);
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section
 	this->moduleLoadMutex.unlock();

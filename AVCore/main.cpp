@@ -37,23 +37,6 @@ main(
 )
 {
 
-	UMModuleConfig configMgr;
-	configMgr.init("PluginManager");
-	DWORD test = configMgr.getDwordParam("TEST");
-	configMgr.setDwordParam("TEST", 123);
-	test = configMgr.getDwordParam("TEST");
-	std::string testStr = configMgr.getStringParam("STR");
-	configMgr.setStringParam("STR", "newstr");
-	testStr = configMgr.getStringParam("STR");
-
-	std::list<std::string> testList;
-	testList.push_back("VAL1");
-	testList.push_back("VAL2");
-	testList.push_back("VAL3");
-	configMgr.setListParam("LIST", testList);
-
-	std::list<std::string>* resList = configMgr.getListParam("LIST");
-
 	printf("press any key to start\n");
 	getchar();
 
@@ -63,9 +46,37 @@ main(
 	PluginManager manager;
 	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
 
+	manager.loadPlugin((char*)"TestPlugin.dll");
+
+	IConfig* config = manager.getPluginByName("TestPlugin.dll")->getConfig();
+	// get plugin parameters list (we don't know them in AVCore.exe). The list of params
+	// is provided by plugin.
+	paramMap* pMap = config->getParamMap();
+	// iterate plugin parameter
+	for (paramMap::iterator it = pMap->begin(); it != pMap->end(); it++)
+	{
+		switch ((*it).second)
+		{
+		case DwordParam:
+			std::cout << "DWORD param " << (*it).first << " = " << config->getDwordParam((*it).first);
+			break;
+		case StringParam:
+			std::cout << "STRING param " << (*it).first << " = " << config->getStringParam((*it).first);
+			break;
+		case ListParam:
+			std::list<std::string>* tmp = config->getListParam((*it).first);
+			std::cout << "STRING param " << (*it).first << " = \n";
+			for (std::list<std::string>::iterator it2 = tmp->begin(); it2 != tmp->end(); it2++)
+				std::cout << "\t" << (*it2) << "\n";
+			break;
+
+		}
+	}
+
 	CommPortServer portServer;
 	portServer.start(&manager);
 
+	
 	std::cout << "$ ";
 	for (std::string cmd; std::getline(std::cin, cmd);)
 	{
