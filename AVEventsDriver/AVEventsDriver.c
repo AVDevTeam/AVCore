@@ -84,6 +84,7 @@ EXTERN_C_END
 // Globals
 PFLT_FILTER GlobalFilter;
 LARGE_INTEGER RegFilterCookie;
+HANDLE ObRegistrationHandle;
 
 //  operation registration
 #pragma region operation registration
@@ -271,6 +272,42 @@ Return Value:
 	}
 
 	status = CmRegisterCallback(AVEventsRegistryCallback, NULL, &RegFilterCookie);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		return status;
+	}
+
+	OB_CALLBACK_REGISTRATION obCallbackReg = { 0 };
+	OB_OPERATION_REGISTRATION obOperationReg[2] = { 0 };
+	RtlZeroMemory(&obCallbackReg, sizeof(OB_CALLBACK_REGISTRATION));
+	RtlZeroMemory(&obOperationReg, sizeof(OB_OPERATION_REGISTRATION)*2);
+
+	// setup callback registratio structure
+	obCallbackReg.Version = ObGetFilterVersion();
+	obCallbackReg.OperationRegistrationCount = 2;
+	obCallbackReg.RegistrationContext = NULL;
+	RtlInitUnicodeString(&obCallbackReg.Altitude, L"321000");
+	obCallbackReg.OperationRegistration = obOperationReg;
+
+	// setup operation registration structures
+	obOperationReg[0].ObjectType = PsProcessType;
+	obOperationReg[0].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+	obOperationReg[0].PreOperation = (POB_PRE_OPERATION_CALLBACK)AVObPreProcessCallback;
+
+	obOperationReg[1].ObjectType = PsThreadType;
+	obOperationReg[1].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+	obOperationReg[1].PreOperation = (POB_PRE_OPERATION_CALLBACK)AVObPreThreadCallback;
+
+	status = ObRegisterCallbacks(&obCallbackReg, &ObRegistrationHandle);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		return status;
+	}
 
 	return status;
 }
@@ -298,6 +335,7 @@ NTSTATUS DriverUnload (
 	AVCommStop();
 	FltUnregisterFilter(GlobalFilter);
 	CmUnRegisterCallback(RegFilterCookie);
+	ObUnRegisterCallbacks(ObRegistrationHandle);
 
 	return STATUS_SUCCESS;
 }

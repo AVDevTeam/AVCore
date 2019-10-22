@@ -19,31 +19,17 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="AVEventsDriver.inf">
+    <Inf Include="AVRegistryDriver.inf">
       <Filter>Driver Files</Filter>
     </Inf>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AVEventsDriver.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RegistryCallback.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FSCallbacks.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectFilterCallbacks.c">
+    <ClCompile Include="AVRegistryDriver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="AVEventsDriver.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="AVEventsDriver.h">
+    <ClInclude Include="AVRegistryDriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

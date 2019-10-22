@@ -49,6 +49,10 @@ FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
 
 EX_CALLBACK_FUNCTION AVEventsRegistryCallback;
 
+OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
+
+OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
+
 EXTERN_C_END
 
 // Exports from AVCommDriver
