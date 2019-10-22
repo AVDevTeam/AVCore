@@ -22,6 +22,14 @@ namespace AVGUI
         public SettingsWindow()
         {
             InitializeComponent();
+            Loaded += Main;
+        }
+
+        public void Main(Object sender, EventArgs e)
+        {
+            Loaded -= Main;
+
+         
         }
     }
 }

@@ -21,11 +21,12 @@ namespace AVGUI
 
             PipeClient pipe = new PipeClient("AVCorePipe");
             pipe.Connect();
-
+            pipe.SendMessage("EnumeratePlugins");
             string message = pipe.ReciveMessage();
-            pipe.SendMessage("HELLO");
+            MessageBox.Show(message);
         }
 
+        // Слайдер для изменения режима сканирования
         private void ScanModeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             ((Slider)sender).SelectionEnd = e.NewValue;

@@ -8,7 +8,7 @@
 #include "EventsParser.h"
 #include "ConfigManager.h"
 
-/*
+
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -17,18 +17,14 @@ main(
 {
 	const std::string pipeName = "\\\\.\\pipe\\AVCorePipe";
 	PipeServer pipe(pipeName);
-
 	pipe.createNamedPipe();
-	pipe.waitForClient();
 
-	pipe.sendMessage("HELLO");
-	
-	std::string message;
-	pipe.receiveMessage(message);
 
-	getchar();
+	pipe.start();
+	pipe.stop();
 }
-*/
+
+/*
 
 int _cdecl
 main(
@@ -49,7 +45,10 @@ main(
 	CommPortServer portServer;
 	portServer.start(&manager);
 
-	
+
+
+
+
 	std::cout << "$ ";
 	for (std::string cmd; std::getline(std::cin, cmd);)
 	{
@@ -78,3 +77,4 @@ main(
 	portServer.stop();
 	return 0;
 }
+*/
