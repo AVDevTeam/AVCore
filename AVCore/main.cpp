@@ -45,11 +45,12 @@ main(
 
 	PluginManager manager;
 	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
+	manager.addEventParser(AvProcessHandleCreate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleCreateParser()));
+	manager.addEventParser(AvProcessHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleDublicateParser()));
 
 	CommPortServer portServer;
 	portServer.start(&manager);
 
-	
 	std::cout << "$ ";
 	for (std::string cmd; std::getline(std::cin, cmd);)
 	{

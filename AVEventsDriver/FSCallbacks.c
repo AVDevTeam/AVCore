@@ -98,7 +98,8 @@ Return Value:
 	DbgPrint("PID %ul opens %wZ\n", curProcess, FileObject->FileName);
 
 	// Send event to the AVCore UM service and wait for the response
-	status = AVCommSendEvent(&eventFileCreate,
+	status = AVCommSendEvent(AvFileCreate,
+		&eventFileCreate,
 		sizeof(AV_EVENT_FILE_CREATE),
 		&UMResponse,
 		&replyLength);

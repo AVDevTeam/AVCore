@@ -309,6 +309,7 @@ Return Value:
 		return status;
 	}
 
+	// TODO ifdef x64 use PsSetCreateProcessNotifyRoutineEx2
 	status = PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, FALSE);
 	if (!NT_SUCCESS(status))
 	{

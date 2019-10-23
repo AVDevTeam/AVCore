@@ -41,7 +41,7 @@ NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer,
 
 NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
 
-NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
+NTSTATUS AVCommSendEvent(AV_EVENT_TYPE, void*, int, PAV_EVENT_RESPONSE, PULONG);
 
 HANDLE AVCommGetUmPID(VOID);
 
@@ -421,11 +421,12 @@ Arguments:
 	UMResponse - pointer to buffer that will receive AV_EVENT_RESPONSE structure.
 	UMResponseLength - size of UMResponse buffer.
 */
-NTSTATUS AVCommSendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
+NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
 {
 	// Prepare AV_MESSAGE structure that will be sent to UM via comm port.
 	AV_MESSAGE avMessage = { 0 };
 	avMessage.MessageType = AvMsgEvent;
+	avMessage.EventType = eventType;
 	avMessage.EventBuffer = NULL;
 	avMessage.EventBufferLength = eventBufferSize;
 

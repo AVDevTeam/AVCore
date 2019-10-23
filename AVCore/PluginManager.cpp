@@ -97,9 +97,23 @@ Return value:
 */
 AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event)
 {
+	switch (eventType)
+	{
+		case AvFileCreate:
+			std::cout << "Processing AvFileCreate event\n";
+			break;
+		case AvProcessHandleCreate:
+			std::cout << "Processing AvProcessHandleCreate event\n";
+			break;
+		case AvProcessHandleDublicate:
+			std::cout << "Processing AvProcessHandleDublicate event\n";
+			break;
+	}
 	try
 	{
+		// enter event processing section
 		this->eventProcessingMutex.lock_shared();
+
 		EventParser* eventParser = this->parsersMap[eventType];
 		AvEvent* parsedEvent = eventParser->parse(event);
 		priorityMap* eventPriorityMap = this->callbacksMap[eventType];
@@ -112,6 +126,8 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			if (status == AvEventStatusBlock)
 				return status;
 		}
+
+		// leave event processing section
 		this->eventProcessingMutex.unlock_shared();
 		return AvEventStatusAllow;
 	}

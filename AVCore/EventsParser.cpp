@@ -112,3 +112,77 @@ AvEvent* AvFSEventCreateParser::parse(PVOID event)
 	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvFSEventCreate(RequestorMode, RequestorPID, FilePath));
 	return eventInstanse;
 }
+
+int AvObEventProcessHandleCreate::getRequestorPID()
+{
+	return this->requestorPID;
+}
+
+boolean AvObEventProcessHandleCreate::getIsKernelHandle()
+{
+	return this->isKernelHandle;
+}
+
+int AvObEventProcessHandleCreate::getTargetPID()
+{
+	return this->targetPID;
+}
+
+ACCESS_MASK AvObEventProcessHandleCreate::getDesiredAccess()
+{
+	return this->desiredAccess;
+}
+
+AvEvent* AvObEventProcessHandleCreateParser::parse(PVOID event)
+{
+	PAV_EVENT_PROCESS_HANDLE_CREATE eventPrHandleCreate = (PAV_EVENT_PROCESS_HANDLE_CREATE)event;
+	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvObEventProcessHandleCreate(
+		eventPrHandleCreate->RequestorPID,
+		eventPrHandleCreate->KernelHandle == TRUE,
+		eventPrHandleCreate->TargetPID,
+		eventPrHandleCreate->DesiredAccess));
+	return eventInstanse;
+}
+
+int AvObEventProcessHandleDublicate::getDublicateSourcePID()
+{
+	return this->dublicateSourcePID;
+}
+
+int AvObEventProcessHandleDublicate::getDublicateTargetPID()
+{
+	return this->dublicateTargetPID;
+}
+
+int AvObEventProcessHandleDublicate::getRequestorPID()
+{
+	return this->requestorPID;
+}
+
+unsigned char AvObEventProcessHandleDublicate::getIsKernelHandle()
+{
+	return this->isKernelHandle;
+}
+
+int AvObEventProcessHandleDublicate::getTargetPID()
+{
+	return this->targetPID;
+}
+
+unsigned long AvObEventProcessHandleDublicate::getDesiredAccess()
+{
+	return this->desiredAccess;
+}
+
+AvEvent* AvObEventProcessHandleDublicateParser::parse(PVOID event)
+{
+	PAV_EVENT_PROCESS_HANDLE_DUBLICATE eventPrHandleDublicate = (PAV_EVENT_PROCESS_HANDLE_DUBLICATE)event;
+	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvObEventProcessHandleDublicate(
+		eventPrHandleDublicate->RequestorPID,
+		eventPrHandleDublicate->KernelHandle == TRUE,
+		eventPrHandleDublicate->TargetPID,
+		eventPrHandleDublicate->DesiredAccess,
+		eventPrHandleDublicate->DublicateSourcePID,
+		eventPrHandleDublicate->DublicateTargetPID));
+	return nullptr;
+}
