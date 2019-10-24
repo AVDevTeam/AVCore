@@ -1,5 +1,6 @@
 #include <aclapi.h>
 #include <tchar.h>
+#include <Windows.h>
 
 #include "PipeServer.h"
 
@@ -108,6 +109,7 @@ int PipeServer::waitForClient()
 
 		if (fConnected)
 		{
+			std::cout << "CLIENT CONNECTED" << std::endl;
 			return 1;
 		}
 
@@ -160,6 +162,38 @@ int PipeServer::sendMessage(const std::string & _message)
 		std::cout << "WriteFile failed: " << GetLastError() << std::endl;
 		return -1;
 	}
+}
+
+void PipeServer::listen()
+{
+	std::string message;
+	while (1)
+	{
+		waitForClient();
+		receiveMessage(message);
+
+		if (message == "EnumeratePlugins")
+		{
+			sendMessage("TestPlugin");
+		}
+
+		if (stopSignal)
+		{
+			break;
+		}
+
+		Sleep(100);
+	}
+}
+
+void PipeServer::start()
+{
+	thread = new std::thread(&PipeServer::listen, this);
+}
+
+void PipeServer::stop()
+{
+	stopSignal = 1;
 }
 
 PipeServer::PipeServer(const std::string & pipename_)

@@ -17,16 +17,11 @@ main(
 {
 	const std::string pipeName = "\\\\.\\pipe\\AVCorePipe";
 	PipeServer pipe(pipeName);
-
 	pipe.createNamedPipe();
-	pipe.waitForClient();
 
-	pipe.sendMessage("HELLO");
-	
-	std::string message;
-	pipe.receiveMessage(message);
 
-	getchar();
+	pipe.start();
+	pipe.stop();
 }
 */
 

@@ -16,7 +16,8 @@ namespace AVGUI
 
         public PipeClient(string _pipeName)
         {
-            Pipe = new NamedPipeClientStream("AVCorePipe");
+            // def name = AVCorePipe
+            Pipe = new NamedPipeClientStream(_pipeName);
             reader = new StreamReader(Pipe);
             writer = new StreamWriter(Pipe);
         }
