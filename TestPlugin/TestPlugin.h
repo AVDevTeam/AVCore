@@ -2,6 +2,12 @@
 #include "PluginInterface.h"
 #include "EventsUMInterfaces.h"
 
+typedef enum {
+	CallbackFileCreate,
+	CallbackPrHandleCreate,
+	CallbackPrHandleDublicate,
+} CALLBACK_ID;
+
 class TestPlugin : public IPlugin
 {
 public:

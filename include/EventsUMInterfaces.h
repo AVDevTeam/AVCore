@@ -32,9 +32,13 @@ public:
 
 // Interface for AvObEventProcessHandleDublicate that will be used
 // in plugins to access event parameters.
-class IEventObProcessHandleDublicate : IEventObProcessHandleCreate
+class IEventObProcessHandleDublicate
 {
 public:
+	virtual int getRequestorPID() = 0;
+	virtual unsigned char getIsKernelHandle() = 0;
+	virtual int getTargetPID() = 0;
+	virtual unsigned long getDesiredAccess() = 0;
 	virtual int getDublicateSourcePID() = 0;
 	virtual int getDublicateTargetPID() = 0;
 };

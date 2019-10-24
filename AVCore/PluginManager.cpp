@@ -126,6 +126,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			if (status == AvEventStatusBlock)
 				return status;
 		}
+		delete parsedEvent;
 
 		// leave event processing section
 		this->eventProcessingMutex.unlock_shared();

@@ -26,8 +26,8 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 		AV_EVENT_PROCESS_HANDLE_CREATE eventPrHandleCreate = { 0 };
 		eventPrHandleCreate.DesiredAccess = desiredAccess;
 		eventPrHandleCreate.KernelHandle = kernelHandle;
-		eventPrHandleCreate.RequestorPID = (int)currentPid;
-		eventPrHandleCreate.TargetPID = (int)targetPid;
+		eventPrHandleCreate.RequestorPID = (int)(__int64)currentPid;
+		eventPrHandleCreate.TargetPID = (int)(__int64)targetPid;
 		
 		// UM response structure
 		AV_EVENT_RESPONSE UMResponse;
@@ -61,10 +61,10 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 		AV_EVENT_PROCESS_HANDLE_DUBLICATE eventPrHandleDublicate = { 0 };
 		eventPrHandleDublicate.DesiredAccess = desiredAccess;
 		eventPrHandleDublicate.KernelHandle = kernelHandle;
-		eventPrHandleDublicate.RequestorPID = (int)currentPid;
-		eventPrHandleDublicate.TargetPID = (int)targetPid;
-		eventPrHandleDublicate.DublicateSourcePID = (int)dublicateSourcePid;
-		eventPrHandleDublicate.DublicateTargetPID = (int)dublicateTargetPid;
+		eventPrHandleDublicate.RequestorPID = (int)(__int64)currentPid;
+		eventPrHandleDublicate.TargetPID = (int)(__int64)targetPid;
+		eventPrHandleDublicate.DublicateSourcePID = (int)(__int64)dublicateSourcePid;
+		eventPrHandleDublicate.DublicateTargetPID = (int)(__int64)dublicateTargetPid;
 
 		// UM response structure
 		AV_EVENT_RESPONSE UMResponse;

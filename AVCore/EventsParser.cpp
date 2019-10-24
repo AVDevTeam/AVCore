@@ -184,5 +184,5 @@ AvEvent* AvObEventProcessHandleDublicateParser::parse(PVOID event)
 		eventPrHandleDublicate->DesiredAccess,
 		eventPrHandleDublicate->DublicateSourcePID,
 		eventPrHandleDublicate->DublicateTargetPID));
-	return nullptr;
+	return eventInstanse;
 }
