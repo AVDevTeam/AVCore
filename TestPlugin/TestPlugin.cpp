@@ -21,18 +21,37 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 		IEventObProcessHandleCreate* eventPrHandleCreate = reinterpret_cast<IEventObProcessHandleCreate*>(event);
 		std::cout << "\tRequestor PID: " << eventPrHandleCreate->getRequestorPID() << "\n";
 		std::cout << "\tTarget PID: " << eventPrHandleCreate->getTargetPID() << "\n";
-		std::cout << "\tDesired access: " << std::hex << eventPrHandleCreate->getDesiredAccess();
-		std::cout << "\n";
+		std::cout << "\tDesired access: " << std::hex << eventPrHandleCreate->getDesiredAccess() << std::dec << "\n";
 	}
 	else if (callbackId == CallbackPrHandleDublicate)
 	{
 		IEventObProcessHandleDublicate* eventPrHandleDublicate = reinterpret_cast<IEventObProcessHandleDublicate*>(event);
 		std::cout << "\tRequestor PID: " << eventPrHandleDublicate->getRequestorPID() << "\n";
 		std::cout << "\tTarget PID: " << eventPrHandleDublicate->getTargetPID() << "\n";
-		std::cout << "\tDesired access: " << std::hex << eventPrHandleDublicate->getDesiredAccess();
-		std::cout << "\n";
+		std::cout << "\tDesired access: " << std::hex << eventPrHandleDublicate->getDesiredAccess() << std::dec << "\n";
 		std::cout << "\tSource dublicate PID: " << eventPrHandleDublicate->getDublicateSourcePID() << "\n";
 		std::cout << "\tTarget dublicate PID: " << eventPrHandleDublicate->getDublicateTargetPID() << "\n";
+	}
+	else if (callbackId == CallbackThHandleCreate)
+	{
+		IEventObThreadHandleCreate* eventThHandleCreate = reinterpret_cast<IEventObThreadHandleCreate*>(event);
+		std::cout << "\tRequestor PID: " << eventThHandleCreate->getRequestorPID() << "\n";
+		std::cout << "\tRequestor TID: " << eventThHandleCreate->getRequestorTID() << "\n";
+		std::cout << "\tTarget PID: " << eventThHandleCreate->getTargetPID() << "\n";
+		std::cout << "\tTarget TID: " << eventThHandleCreate->getTargetTID() << "\n";
+		std::cout << "\tDesired access: " << std::hex << eventThHandleCreate->getDesiredAccess() << std::dec;
+		std::cout << "\n";
+	}
+	else if (callbackId == CallbackThHandleDublicate)
+	{
+		IEventObThreadHandleDublicate* eventThHandleDublicate = reinterpret_cast<IEventObThreadHandleDublicate*>(event);
+		std::cout << "\tRequestor PID: " << eventThHandleDublicate->getRequestorPID() << "\n";
+		std::cout << "\tRequestor TID: " << eventThHandleDublicate->getRequestorTID() << "\n";
+		std::cout << "\tTarget PID: " << eventThHandleDublicate->getTargetPID() << "\n";
+		std::cout << "\tTarget TID: " << eventThHandleDublicate->getTargetTID() << "\n";
+		std::cout << "\tDesired access: " << std::hex << eventThHandleDublicate->getDesiredAccess() << std::dec << "\n";
+		std::cout << "\tSource dublicate PID: " << eventThHandleDublicate->getDublicateSourcePID() << "\n";
+		std::cout << "\tTarget dublicate PID: " << eventThHandleDublicate->getDublicateTargetPID() << "\n";
 	}
 	return AvEventStatusAllow;
 }
@@ -70,6 +89,8 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 1);
 	manager->registerCallback(this, CallbackPrHandleCreate, AvProcessHandleCreate, 1);
 	manager->registerCallback(this, CallbackPrHandleDublicate, AvProcessHandleDublicate , 1);
+	manager->registerCallback(this, CallbackThHandleCreate, AvThreadHandleCreate , 1);
+	manager->registerCallback(this, CallbackThHandleDublicate, AvThreadHandleDublicate , 1);
 }
 
 void TestPlugin::deinit()

@@ -186,3 +186,101 @@ AvEvent* AvObEventProcessHandleDublicateParser::parse(PVOID event)
 		eventPrHandleDublicate->DublicateTargetPID));
 	return eventInstanse;
 }
+
+int AvObEventThreadHandleCreate::getRequestorTID()
+{
+	return this->requestorTID;
+}
+
+int AvObEventThreadHandleCreate::getTargetTID()
+{
+	return this->targetTID;
+}
+
+int AvObEventThreadHandleCreate::getRequestorPID()
+{
+	return this->requestorPID;
+}
+
+unsigned char AvObEventThreadHandleCreate::getIsKernelHandle()
+{
+	return this->isKernelHandle;
+}
+
+int AvObEventThreadHandleCreate::getTargetPID()
+{
+	return this->targetPID;
+}
+
+unsigned long AvObEventThreadHandleCreate::getDesiredAccess()
+{
+	return this->desiredAccess;
+}
+
+AvEvent* AvObEventThreadHandleCreateParser::parse(PVOID event)
+{
+	PAV_EVENT_THREAD_HANDLE_CREATE eventThHandleCreate = (PAV_EVENT_THREAD_HANDLE_CREATE)event;
+	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvObEventThreadHandleCreate(
+		eventThHandleCreate->RequestorPID,
+		eventThHandleCreate->RequestorTID,
+		eventThHandleCreate->KernelHandle == TRUE,
+		eventThHandleCreate->TargetPID,
+		eventThHandleCreate->TargetTID,
+		eventThHandleCreate->DesiredAccess));
+	return eventInstanse;
+}
+
+int AvObEventThreadHandleDublicate::getRequestorTID()
+{
+	return this->requestorTID;
+}
+
+int AvObEventThreadHandleDublicate::getTargetTID()
+{
+	return this->targetTID;
+}
+
+int AvObEventThreadHandleDublicate::getDublicateSourcePID()
+{
+	return this->dublicateSourcePID;
+}
+
+int AvObEventThreadHandleDublicate::getDublicateTargetPID()
+{
+	return this->dublicateTargetPID;
+}
+
+int AvObEventThreadHandleDublicate::getRequestorPID()
+{
+	return this->requestorPID;
+}
+
+unsigned char AvObEventThreadHandleDublicate::getIsKernelHandle()
+{
+	return this->isKernelHandle;
+}
+
+int AvObEventThreadHandleDublicate::getTargetPID()
+{
+	return this->targetPID;
+}
+
+unsigned long AvObEventThreadHandleDublicate::getDesiredAccess()
+{
+	return this->desiredAccess;
+}
+
+AvEvent* AvObEventThreadHandleDublicateParser::parse(PVOID event)
+{
+	PAV_EVENT_THREAD_HANDLE_DUBLICATE eventThHandleDublicate = (PAV_EVENT_THREAD_HANDLE_DUBLICATE)event;
+	AvEvent* eventInstanse = reinterpret_cast<AvEvent*>(new AvObEventThreadHandleDublicate(
+		eventThHandleDublicate->RequestorPID,
+		eventThHandleDublicate->RequestorTID,
+		eventThHandleDublicate->KernelHandle == TRUE,
+		eventThHandleDublicate->TargetPID,
+		eventThHandleDublicate->TargetTID,
+		eventThHandleDublicate->DesiredAccess,
+		eventThHandleDublicate->DublicateSourcePID,
+		eventThHandleDublicate->DublicateTargetPID));
+	return eventInstanse;
+}

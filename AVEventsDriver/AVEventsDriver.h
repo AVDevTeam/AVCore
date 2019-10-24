@@ -74,3 +74,7 @@ void AVLoadImageCallback(
 
 EXTERN_C_END
 
+// KMEventsAPI init deinit imports.
+DECLSPEC_IMPORT NTSTATUS AVCommInit(PFLT_FILTER Filter);
+DECLSPEC_IMPORT void AVCommStop(VOID);
+

@@ -64,4 +64,35 @@ typedef struct _AV_EVENT_PROCESS_HANDLE_DUBLICATE
 
 } AV_EVENT_PROCESS_HANDLE_DUBLICATE, * PAV_EVENT_PROCESS_HANDLE_DUBLICATE;
 
+
+// Defines parameters of AvProcessThreadCreate (KMUMcomm.h) event
+typedef struct _AV_EVENT_THREAD_HANDLE_CREATE
+{
+	int RequestorPID;
+	int RequestorTID;
+	char KernelHandle;
+
+	int TargetPID;
+	int TargetTID;
+	unsigned long DesiredAccess;
+
+} AV_EVENT_THREAD_HANDLE_CREATE, * PAV_EVENT_THREAD_HANDLE_CREATE;
+
+// Defines parameters of AvProcessThreadDublicate (KMUMcomm.h) event
+typedef struct _AV_EVENT_THREAD_HANDLE_DUBLICATE
+{
+	int RequestorPID;
+	int RequestorTID;
+	char KernelHandle;
+
+	int TargetPID;
+	int TargetTID;
+	unsigned long DesiredAccess;
+
+	int DublicateSourcePID;
+	int DublicateTargetPID;
+
+} AV_EVENT_THREAD_HANDLE_DUBLICATE, * PAV_EVENT_THREAD_HANDLE_DUBLICATE;
+
+
 #pragma endregion Events structures

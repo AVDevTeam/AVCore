@@ -38,16 +38,14 @@ Return Value:
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
-	HANDLE AVCorePID = AVCommGetUmPID();
-
-	if (!AVCorePID)
+	if (!AVCommIsInitialized())
 	{
 		// AVCore service is not listening skip event.
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;
 	}
 
 	HANDLE curProcess = PsGetCurrentProcessId();
-	if (curProcess == AVCorePID)
+	if (AVCommIsExcludedPID(curProcess))
 	{
 		// ignore events triggered by AVCore.exe
 		return FLT_PREOP_SUCCESS_NO_CALLBACK;

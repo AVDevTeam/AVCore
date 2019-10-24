@@ -6,6 +6,8 @@ typedef enum {
 	CallbackFileCreate,
 	CallbackPrHandleCreate,
 	CallbackPrHandleDublicate,
+	CallbackThHandleCreate,
+	CallbackThHandleDublicate,
 } CALLBACK_ID;
 
 class TestPlugin : public IPlugin

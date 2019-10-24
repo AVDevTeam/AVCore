@@ -9,14 +9,13 @@ This file provides declarations for AVCommDriver exports.
 #endif
 #endif
 
-// Exports from AVCommDriver
+// Exports from AVCommDriver (KMEventsAPI)
 #pragma region EventsAPI import
 
-DECLSPEC_IMPORT NTSTATUS AVCommInit(PFLT_FILTER Filter);
-DECLSPEC_IMPORT void AVCommStop(VOID);
 DECLSPEC_IMPORT NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID* outUmBuffer, PSIZE_T outUmSize);
 DECLSPEC_IMPORT NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
 DECLSPEC_IMPORT NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength);
-DECLSPEC_IMPORT HANDLE AVCommGetUmPID(VOID);
+DECLSPEC_IMPORT UCHAR AVCommIsExcludedPID(HANDLE PID);
+DECLSPEC_IMPORT UCHAR AVCommIsInitialized(VOID);
 
 #pragma endregion EventsAPI import
