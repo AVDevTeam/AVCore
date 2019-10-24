@@ -16,7 +16,6 @@ class AvEvent
 {
 public:
 	AvEvent() {};
-	AvEvent(PVOID) {};
 };
 
 // Base class for event parsers.
@@ -59,4 +58,139 @@ public:
 
 private:
 	wchar_t* getVoluemLetter(wchar_t*);
+};
+
+// Class for Object Filter (handles operations)
+// process handle create event.
+class AvObEventProcessHandleCreate : public IEventObProcessHandleCreate, AvEvent
+{
+public:
+	AvObEventProcessHandleCreate(int requestorPID, boolean isKernelHandle, int targetPID, ACCESS_MASK desiredAccess)
+	{
+		this->requestorPID = requestorPID;
+		this->isKernelHandle = isKernelHandle;
+		this->targetPID = targetPID;
+		this->desiredAccess = desiredAccess;
+	}
+	// Inherited via IEventObProcessHandleCreate
+	virtual int getRequestorPID() override;
+	virtual unsigned char  getIsKernelHandle() override;
+	virtual int getTargetPID() override;
+	virtual unsigned long  getDesiredAccess() override;
+protected:
+	int requestorPID;
+	unsigned char isKernelHandle;
+	int targetPID;
+	unsigned long desiredAccess;
+};
+
+// AvProcessHandleCreate parser
+class AvObEventProcessHandleCreateParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for Object Filter (handles operations)
+// process handle dublicate event.
+class AvObEventProcessHandleDublicate : public IEventObProcessHandleDublicate, AvObEventProcessHandleCreate
+{
+public:
+	AvObEventProcessHandleDublicate(int requestorPID, boolean isKernelHandle, int targetPID, ACCESS_MASK desiredAccess, int dublicateSourcePID, int dublicateTargetPID)
+		: AvObEventProcessHandleCreate(requestorPID, isKernelHandle, targetPID, desiredAccess)
+	{
+		this->dublicateSourcePID = dublicateSourcePID;
+		this->dublicateTargetPID = dublicateTargetPID;
+	}
+
+	// Inherited via IEventObProcessHandleDublicate
+	virtual int getDublicateSourcePID() override;
+	virtual int getDublicateTargetPID() override;
+	virtual int getRequestorPID() override;
+	virtual unsigned char getIsKernelHandle() override;
+	virtual int getTargetPID() override;
+	virtual unsigned long getDesiredAccess() override;
+
+private:
+	int dublicateSourcePID;
+	int dublicateTargetPID;
+};
+
+// AvProcessHandleDublicate parser
+class AvObEventProcessHandleDublicateParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for Object Filter (handles operations)
+// thread handle create event.
+class AvObEventThreadHandleCreate : public IEventObThreadHandleCreate, AvObEventProcessHandleCreate
+{
+public:
+	AvObEventThreadHandleCreate(int requestorPID, int requestorTID, boolean isKernelHandle, int targetPID, int targetTID, ACCESS_MASK desiredAccess)
+		: AvObEventProcessHandleCreate(requestorPID, isKernelHandle,targetPID, desiredAccess)
+	{
+		this->requestorTID = requestorTID;
+		this->targetTID = targetTID;
+	}
+	// Inherited via IEventObThreadHandleCreate
+	virtual int getRequestorTID() override;
+	virtual int getTargetTID() override;
+	virtual int getRequestorPID() override;
+	virtual unsigned char  getIsKernelHandle() override;
+	virtual int getTargetPID() override;
+	virtual unsigned long  getDesiredAccess() override;
+protected:
+	int requestorTID;
+	int targetTID;
+	using AvObEventProcessHandleCreate::requestorPID;
+	using AvObEventProcessHandleCreate::isKernelHandle;
+	using AvObEventProcessHandleCreate::targetPID;
+	using AvObEventProcessHandleCreate::desiredAccess;
+};
+
+// AvThreadHandleCreate parser
+class AvObEventThreadHandleCreateParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for Object Filter (handles operations)
+// thread handle dublicate event.
+class AvObEventThreadHandleDublicate : public IEventObThreadHandleDublicate, private AvObEventThreadHandleCreate
+{
+public:
+	AvObEventThreadHandleDublicate(int requestorPID, int requestorTID, boolean isKernelHandle, int targetPID, int targetTID, ACCESS_MASK desiredAccess, int dublicateSourcePID, int dublicateTargetPID)
+		: AvObEventThreadHandleCreate(requestorPID, requestorTID, isKernelHandle, targetPID, targetTID, desiredAccess)
+	{
+		this->dublicateSourcePID = dublicateSourcePID;
+		this->dublicateTargetPID = dublicateTargetPID;
+	}
+
+	// Inherited via IEventObThreadHandleDublicate
+	virtual int getRequestorTID() override;
+	virtual int getTargetTID() override;
+	virtual int getDublicateSourcePID() override;
+	virtual int getDublicateTargetPID() override;
+	virtual int getRequestorPID() override;
+	virtual unsigned char getIsKernelHandle() override;
+	virtual int getTargetPID() override;
+	virtual unsigned long getDesiredAccess() override;
+
+private:
+	int dublicateSourcePID;
+	int dublicateTargetPID;
+};
+
+// AvThreadHandleDublicate parser
+class AvObEventThreadHandleDublicateParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
 };

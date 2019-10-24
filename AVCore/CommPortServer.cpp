@@ -35,6 +35,7 @@ void CommPortServer::start(IManager* pluginManager)
 		NULL,
 		0,
 		KM_EVENTS_LISTENER_THREAD_COUNT);
+	std::cout << "Created completion port\n";
 
 	if (NULL == this->completionPort)
 	{

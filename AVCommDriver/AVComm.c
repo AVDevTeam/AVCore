@@ -41,9 +41,13 @@ NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer,
 
 NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
 
-NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
+NTSTATUS AVCommSendEvent(AV_EVENT_TYPE, void*, int, PAV_EVENT_RESPONSE, PULONG);
 
 HANDLE AVCommGetUmPID(VOID);
+
+UCHAR AVCommIsExcludedPID(HANDLE PID);
+
+UCHAR AVCommIsInitialized(VOID);
 
 #ifdef ALLOC_PRAGMA
     #pragma alloc_text(INIT, DriverEntry)
@@ -57,7 +61,8 @@ HANDLE AVCommGetUmPID(VOID);
 	#pragma alloc_text(PAGE, AVCommCreateBuffer)
 	#pragma alloc_text(PAGE, AVCommFreeBuffer)
 	#pragma alloc_text(PAGE, AVCommSendEvent)
-	#pragma alloc_text(PAGE, AVCommGetUmPID)
+	#pragma alloc_text(PAGE, AVCommIsExcludedPID)
+	#pragma alloc_text(PAGE, AVCommIsInitialized)
 
 #endif
 
@@ -108,6 +113,8 @@ DriverEntry(
 {
 	UNREFERENCED_PARAMETER(DriverObject);
     UNREFERENCED_PARAMETER(RegistryPath);
+
+	RtlZeroMemory(&Globals, sizeof(Globals));
 
     return STATUS_SUCCESS;
 }
@@ -404,16 +411,6 @@ NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize)
 
 /*
 Routine Description:
-	Getter function for AVCoreServicePID that was recieved
-	in AVCommConnectNotifyCallback.
-*/
-HANDLE AVCommGetUmPID(VOID)
-{
-	return Globals.AVCoreServicePID;
-}
-
-/*
-Routine Description:
 	Sends given event to UM service via communication port.
 Arguments:
 	eventBuffer - pointer to the event structure formed in KM memory space.
@@ -421,11 +418,12 @@ Arguments:
 	UMResponse - pointer to buffer that will receive AV_EVENT_RESPONSE structure.
 	UMResponseLength - size of UMResponse buffer.
 */
-NTSTATUS AVCommSendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
+NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
 {
 	// Prepare AV_MESSAGE structure that will be sent to UM via comm port.
 	AV_MESSAGE avMessage = { 0 };
 	avMessage.MessageType = AvMsgEvent;
+	avMessage.EventType = eventType;
 	avMessage.EventBuffer = NULL;
 	avMessage.EventBufferLength = eventBufferSize;
 
@@ -451,4 +449,22 @@ NTSTATUS AVCommSendEvent(void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPO
 	if (freeStatus != STATUS_SUCCESS) { return freeStatus; }
 
 	return status;
+}
+
+/*
+Implements KM event scanning exclusion
+based on PID.
+*/
+UCHAR AVCommIsExcludedPID(HANDLE PID)
+{
+	return Globals.AVCoreServicePID == PID;
+}
+
+/*
+Checks weather client comm port was set up (KM-UM communication
+was established).
+*/
+UCHAR AVCommIsInitialized()
+{
+	return Globals.EventsClientPort != NULL;
 }

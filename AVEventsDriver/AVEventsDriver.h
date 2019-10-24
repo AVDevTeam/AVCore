@@ -8,9 +8,6 @@ Abstract:
 Environment:
 	Kernel mode
 --*/
-#ifndef __AVSCAN_H__
-#define __AVSCAN_H__
-
 #ifndef RTL_USE_AVL_TABLES
 #define RTL_USE_AVL_TABLES
 #endif // RTL_USE_AVL_TABLES
@@ -20,6 +17,7 @@ Environment:
 #include <fltKernel.h>
 #include "KMUMcomm.h"
 #include "EventsKMStructures.h"
+#include "KMEventsAPI.h"
 
 #define AV_CONNECTION_CTX_TAG                'cCvA'
 
@@ -42,17 +40,41 @@ Environment:
 
 #endif
 
-// Exports from AVCommDriver
-#pragma region EventsAPI import
+EXTERN_C_START
 
+FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
+	_Inout_ PFLT_CALLBACK_DATA Data,
+	_In_ PCFLT_RELATED_OBJECTS FltObjects,
+	_Flt_CompletionContext_Outptr_ PVOID* CompletionContext
+);
+
+EX_CALLBACK_FUNCTION AVEventsRegistryCallback;
+
+OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
+
+OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
+
+void AVCreateProcessCallback(
+	PEPROCESS Process,
+	HANDLE ProcessId,
+	PPS_CREATE_NOTIFY_INFO CreateInfo
+);
+
+void AVCreateThreadCallback(
+	HANDLE ProcessId,
+	HANDLE ThreadId,
+	BOOLEAN Create
+);
+
+void AVLoadImageCallback(
+	PUNICODE_STRING FullImageName,
+	HANDLE ProcessId,
+	PIMAGE_INFO ImageInfo
+);
+
+EXTERN_C_END
+
+// KMEventsAPI init deinit imports.
 DECLSPEC_IMPORT NTSTATUS AVCommInit(PFLT_FILTER Filter);
 DECLSPEC_IMPORT void AVCommStop(VOID);
-DECLSPEC_IMPORT NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID* outUmBuffer, PSIZE_T outUmSize);
-DECLSPEC_IMPORT NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
-DECLSPEC_IMPORT NTSTATUS AVCommSendEvent(void*, int, PAV_EVENT_RESPONSE, PULONG);
-DECLSPEC_IMPORT HANDLE AVCommGetUmPID(VOID);
-
-#pragma endregion EventsAPI import
-
-#endif
 

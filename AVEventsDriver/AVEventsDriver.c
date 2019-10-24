@@ -83,6 +83,8 @@ EXTERN_C_END
 
 // Globals
 PFLT_FILTER GlobalFilter;
+LARGE_INTEGER RegFilterCookie;
+HANDLE ObRegistrationHandle;
 
 //  operation registration
 #pragma region operation registration
@@ -269,6 +271,79 @@ Return Value:
 		return status;
 	}
 
+	status = CmRegisterCallback(AVEventsRegistryCallback, NULL, &RegFilterCookie);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		return status;
+	}
+
+	OB_CALLBACK_REGISTRATION obCallbackReg = { 0 };
+	OB_OPERATION_REGISTRATION obOperationReg[2] = { 0 };
+	RtlZeroMemory(&obCallbackReg, sizeof(OB_CALLBACK_REGISTRATION));
+	RtlZeroMemory(&obOperationReg, sizeof(OB_OPERATION_REGISTRATION)*2);
+
+	// setup callback registratio structure
+	obCallbackReg.Version = ObGetFilterVersion();
+	obCallbackReg.OperationRegistrationCount = 2;
+	obCallbackReg.RegistrationContext = NULL;
+	RtlInitUnicodeString(&obCallbackReg.Altitude, L"321000");
+	obCallbackReg.OperationRegistration = obOperationReg;
+
+	// setup operation registration structures
+	obOperationReg[0].ObjectType = PsProcessType;
+	obOperationReg[0].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+	obOperationReg[0].PreOperation = (POB_PRE_OPERATION_CALLBACK)AVObPreProcessCallback;
+
+	obOperationReg[1].ObjectType = PsThreadType;
+	obOperationReg[1].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+	obOperationReg[1].PreOperation = (POB_PRE_OPERATION_CALLBACK)AVObPreThreadCallback;
+
+	status = ObRegisterCallbacks(&obCallbackReg, &ObRegistrationHandle);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		return status;
+	}
+
+	// TODO ifdef x64 use PsSetCreateProcessNotifyRoutineEx2
+	status = PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, FALSE);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		return status;
+	}
+
+	status = PsSetCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+		return status;
+	}
+
+	// TODO. IFDEF x86/x64 (x64 support for x86 modules, PsSetLoadImageNotifyRoutineEx).
+	status = PsSetLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+		PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+		return status;
+	}
+
 	return status;
 }
 
@@ -294,136 +369,11 @@ NTSTATUS DriverUnload (
 	//  close the section 
 	AVCommStop();
 	FltUnregisterFilter(GlobalFilter);
-	
+	CmUnRegisterCallback(RegFilterCookie);
+	ObUnRegisterCallbacks(ObRegistrationHandle);
+	PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+	PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+	PsRemoveLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
 
 	return STATUS_SUCCESS;
-}
-
-/*************************************************************************
-    MiniFilter callback routines.
-*************************************************************************/
-
-FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
-    _Inout_ PFLT_CALLBACK_DATA Data,
-    _In_ PCFLT_RELATED_OBJECTS FltObjects,
-    _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
-    )
-/*++
-Routine Description:
-    This routine is a pre-operation dispatch routine for this miniFilter.
-    This is non-pageable because it could be called on the paging path
-Arguments:
-    Data - Pointer to the filter callbackData that is passed to us.
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance, its associated volume and
-        file object.
-    CompletionContext - The context for the completion routine for this
-        operation.
-Return Value:
-    The return value is the status of the operation.
---*/
-{
-	UNREFERENCED_PARAMETER(CompletionContext);
-	UNREFERENCED_PARAMETER(FltObjects);
-
-	ULONG_PTR stackLow;
-	ULONG_PTR stackHigh;
-	PFILE_OBJECT FileObject = Data->Iopb->TargetFileObject;
-
-	PAGED_CODE();
-
-	//  Stack file objects are never scanned.
-	IoGetStackLimits(&stackLow, &stackHigh);
-
-	if (((ULONG_PTR)FileObject > stackLow) &&
-		((ULONG_PTR)FileObject < stackHigh)) 
-	{
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	HANDLE AVCorePID = AVCommGetUmPID();
-
-	if (!AVCorePID)
-	{
-		// AVCore service is not listening skip event.
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	HANDLE curProcess = PsGetCurrentProcessId();
-	if (curProcess == AVCorePID)
-	{
-		// ignore events triggered by AVCore.exe
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	UCHAR volumeInformationBuffer[256];
-	SIZE_T volumeInformationSize = sizeof(volumeInformationBuffer);
-
-	NTSTATUS status = STATUS_SUCCESS;
-	status = FltGetVolumeInformation(FltObjects->Volume, FilterVolumeBasicInformation, &volumeInformationBuffer, (ULONG)volumeInformationSize, (PULONG)&volumeInformationSize);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't get volume information
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	PFILTER_VOLUME_BASIC_INFORMATION volumeInformation = (PFILTER_VOLUME_BASIC_INFORMATION)volumeInformationBuffer;
-
-	// Start forming Event structure on KM stack
-	AV_EVENT_FILE_CREATE eventFileCreate = { 0 };
-
-	eventFileCreate.RequestorMode = Data->RequestorMode;
-	eventFileCreate.RequestorPID = (int)(__int64)curProcess;
-
-	// Put file name information to UM memory and save address in Event stucture.
-	eventFileCreate.FileNameSize = FileObject->FileName.Length;
-	SIZE_T umBuffFileNameSize;
-	status = AVCommCreateBuffer(FileObject->FileName.Buffer, FileObject->FileName.Length, &eventFileCreate.FileName, &umBuffFileNameSize);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't allocate memory in UM
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	// Put volume name information to UM memory and save address in Event stucture.
-	eventFileCreate.VolumeNameSize = volumeInformation->FilterVolumeNameLength;
-	SIZE_T umBuffVolumeNameSize;
-	status = AVCommCreateBuffer(volumeInformation->FilterVolumeName, eventFileCreate.VolumeNameSize, &eventFileCreate.VolumeName, &umBuffVolumeNameSize);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't allocate memory in UM
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	AV_EVENT_RESPONSE UMResponse;
-	ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
-
-	DbgPrint("PID %ul opens %wZ\n", curProcess, FileObject->FileName);
-
-	// Send event to the AVCore UM service and wait for the response
-	status = AVCommSendEvent(&eventFileCreate,
-		sizeof(AV_EVENT_FILE_CREATE),
-		&UMResponse,
-		&replyLength);
-
-	// Got reply. Free memory. We need to free all UM-allocated buffers.
-#pragma region free UM memory
-	
-	NTSTATUS freeStatus = AVCommFreeBuffer(&eventFileCreate.FileName, &umBuffFileNameSize);
-	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
-
-	freeStatus = AVCommFreeBuffer(&eventFileCreate.VolumeName, &umBuffVolumeNameSize);
-	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
-#pragma endregion free UM memory
-
-	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
-	{
-		if (UMResponse.Status == AvEventStatusBlock)
-		{
-			Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-			return FLT_PREOP_COMPLETE;
-		}
-	}
-	// allow access if we were not able to communicate with UM.
-	return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }
