@@ -34,6 +34,11 @@ void SettingsManager::stop()
 	stopSignal = 1;
 }
 
+void SettingsManager::join()
+{
+	thread->join();
+}
+
 SettingsManager::SettingsManager()
 {
 	pipe = new PipeServer(serverName);

@@ -17,6 +17,8 @@ public:
 	const std::string serverName = "\\\\.\\pipe\\AVCoreSettings";
 	PipeServer *pipe;
 	
+	void join();
+
 	SettingsManager();
 	~SettingsManager();
 };
