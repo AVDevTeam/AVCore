@@ -146,6 +146,26 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	
 }
 
+void PluginManager::enterCriticalEventProcessingSection()
+{
+	this->eventProcessingMutex.lock_shared();
+}
+
+void PluginManager::leaveCriticalEventProcessingSection()
+{
+	this->eventProcessingMutex.unlock_shared();
+}
+
+void PluginManager::lockEventsProcessing()
+{
+	this->eventProcessingMutex.lock();
+}
+
+void PluginManager::unlockEventsProcessing()
+{
+	this->eventProcessingMutex.unlock();
+}
+
 void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)
 {
 	this->parsersMap.insert(std::pair<int, EventParser*>(eventType, parser));

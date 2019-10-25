@@ -12,6 +12,7 @@
 #include <fltUser.h>
 #include "PluginInterface.h"
 #include "EventsUMStructures.h"
+#include <mutex>
 
 #ifndef MAKE_HRESULT
 #define MAKE_HRESULT(sev,fac,code) \
@@ -28,14 +29,18 @@ class CommPortListener
 {
 public:
 	CommPortListener(IManager*);
-	void listen(HANDLE eventsPort, HANDLE completionPort);
+	void listen();
 	void signalStop() { this->stop = true;  }
 	// worker thread.
 	std::thread * thread;
+	void setEventsPort(HANDLE eventsPort) { this->eventsPort = eventsPort; }
+	void setCompletionPort(HANDLE completionPort) { this->completionPort = completionPort; }
 
 private:
 	IManager* pluginManager;
 	boolean stop;
+	HANDLE eventsPort;
+	HANDLE completionPort;
 };
 
 /*
