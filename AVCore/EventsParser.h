@@ -232,3 +232,23 @@ public:
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;
 };
+
+// Class for process exit event (PsSetCreateProcessNotifyRoutineEx[2])
+class AvEventProcessEixt : public IEventProcessExit
+{
+public:
+	AvEventProcessEixt(int PID) { this->PID = PID; }
+
+	// Inherited via IEventProcessExit
+	virtual int getPID() override;
+private:
+	int PID;
+};
+
+// AvEventProcessEixt parser
+class AvEventProcessEixtParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};

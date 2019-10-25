@@ -338,3 +338,17 @@ AvEvent* AvEventProcessCreateParser::parse(PVOID event)
 	));
 	return instance;
 }
+
+int AvEventProcessEixt::getPID()
+{
+	return this->PID;
+}
+
+AvEvent* AvEventProcessEixtParser::parse(PVOID event)
+{
+	PAV_EVENT_PROCESS_EXIT eventProcessExit = (PAV_EVENT_PROCESS_EXIT)event;
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventProcessEixt(
+		eventProcessExit->PID
+	));
+	return instance;
+}

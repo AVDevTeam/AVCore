@@ -108,4 +108,11 @@ typedef struct _AV_EVENT_PROCESS_CREATE
 
 } AV_EVENT_PROCESS_CREATE, * PAV_EVENT_PROCESS_CREATE;
 
+// Defines parameters of AvProcessCreate event
+typedef struct _AV_EVENT_PROCESS_EXIT
+{
+	int PID;
+
+} AV_EVENT_PROCESS_EXIT, * PAV_EVENT_PROCESS_EXIT;
+
 #pragma endregion Events structures

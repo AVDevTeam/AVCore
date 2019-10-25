@@ -16,6 +16,11 @@ void AVCreateProcessCallback(
 
 	if (CreateInfo)
 	{ // Process create notification
+		if (AVCommIsExcludedPID(CreateInfo->CreatingThreadId.UniqueProcess))
+		{
+			return;
+		}
+
 		AV_EVENT_PROCESS_CREATE eventProcessCreate = { 0 };
 		eventProcessCreate.PID = (int)(__int64)ProcessId;
 		eventProcessCreate.parentPID = (int)(__int64)CreateInfo->ParentProcessId;
@@ -74,7 +79,22 @@ void AVCreateProcessCallback(
 	}
 	else
 	{
-		// TODO. Process exits.
+		AV_EVENT_PROCESS_EXIT eventProcessExit = { 0 };
+		eventProcessExit.PID = (int)(__int64)ProcessId;
+
+		AV_EVENT_RESPONSE UMResponse;
+		ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
+		NTSTATUS status = AVCommSendEvent(AvProcessExit,
+			&eventProcessExit,
+			sizeof(AV_EVENT_PROCESS_EXIT),
+			&UMResponse,
+			&replyLength);
+
+		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+		{
+			// TODO. Maybe some exlude list logic.
+		}
 	}
 }
 

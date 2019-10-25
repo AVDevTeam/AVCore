@@ -119,6 +119,9 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 		case AvProcessCreate:
 			std::cout << "Processing AvProcessCreate event\n";
 			break;
+		case AvProcessExit:
+			std::cout << "Processing AvProcessExit event\n";
+			break;
 	}
 	try
 	{

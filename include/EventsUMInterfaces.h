@@ -84,3 +84,10 @@ public:
 	virtual std::string& getCommandLine() = 0;
 };
 
+// Interface for AvEventProcessExit that will be used
+// in plugins to access event parameters.
+class IEventProcessExit
+{
+public:
+	virtual int getPID() = 0;
+};

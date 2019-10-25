@@ -63,6 +63,12 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 		std::cout << "\tImage file name: " << eventProcessCreate->getImageFileName() << "\n";
 		std::cout << "\tCommand line: " << eventProcessCreate->getCommandLine() << "\n";
 	}
+	else if (callbackId == CallbackProcessExit)
+	{
+		IEventProcessExit* eventProcessExit = reinterpret_cast<IEventProcessExit*>(event);
+		std::cout << "\tProcess exits. PID: " << eventProcessExit->getPID() << "\n";
+
+	}
 	return AvEventStatusAllow;
 }
 
@@ -103,6 +109,7 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	manager->registerCallback(this, CallbackThHandleDublicate, AvThreadHandleDublicate , 1);
 	*/
 	manager->registerCallback(this, CallbackProcessCreate, AvProcessCreate, 1);
+	manager->registerCallback(this, CallbackProcessExit, AvProcessExit, 1);
 }
 
 void TestPlugin::deinit()

@@ -8,7 +8,7 @@
 #include "EventsParser.h"
 #include "ConfigManager.h"
 
-
+/*
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -23,8 +23,8 @@ main(
 	//settingManager->join(); 
 	delete settingManager;
 }
+*/
 
-/*
 void testEventsParsers(PluginManager* manager)
 {
 	AV_EVENT_THREAD_HANDLE_CREATE testThreadCreate = { 0 };
@@ -50,10 +50,13 @@ void testEventsParsers(PluginManager* manager)
 	testProcessCreate.imageFileNameSize = sizeof(L"TEST_IMAGE_PATH");
 	testProcessCreate.commandLine = (wchar_t*)L"TEST_COMMAND_LINE";
 	testProcessCreate.commandLineSize = sizeof(L"TEST_COMMAND_LINE");
+	AV_EVENT_PROCESS_EXIT testProcessExit = { 0 };
+	testProcessExit.PID = 111;
 
 	manager->processEvent(AvThreadHandleCreate, &testThreadCreate);
 	manager->processEvent(AvThreadHandleDublicate, &testThreadDublicate);
 	manager->processEvent(AvProcessCreate, &testProcessCreate);
+	manager->processEvent(AvProcessExit, &testProcessExit);
 }
 
 int _cdecl
@@ -76,6 +79,7 @@ main(
 	manager.addEventParser(AvThreadHandleCreate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleCreateParser()));
 	manager.addEventParser(AvThreadHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleDublicateParser()));
 	manager.addEventParser(AvProcessCreate, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
+	manager.addEventParser(AvProcessExit, reinterpret_cast<EventParser*>(new AvEventProcessEixtParser()));
 
 	//manager.loadPlugin((char*)"TestPlugin.dll");
 	//testEventsParsers(&manager);
@@ -118,4 +122,4 @@ main(
 	
 	portServer.stop();
 	return 0;
-}*/
+}

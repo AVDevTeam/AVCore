@@ -36,7 +36,7 @@ typedef enum _AV_EVENT_TYPE
 	AvThreadHandleCreate, // (ObFilter thread handle create)
 	AvThreadHandleDublicate, // (ObFilter thread handle dublicate)
 	AvProcessCreate, // (PsSetCreateProcessNotifyRoutineEx[2]) 
-
+	AvProcessExit, // (PsSetCreateProcessNotifyRoutineEx[2]) 
 } AV_EVENT_TYPE;
 
 //  Event stucture: Kernel -> User Message
