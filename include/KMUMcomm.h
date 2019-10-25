@@ -30,7 +30,12 @@ typedef enum _AV_MESSAGE_TYPE
 
 typedef enum _AV_EVENT_TYPE
 {
-	AvFileCreate,
+	AvFileCreate, // (IRP_MJ_CREATE)
+	AvProcessHandleCreate, // (ObFilter process handle create)
+	AvProcessHandleDublicate, // (ObFilter process handle dublicate)
+	AvThreadHandleCreate, // (ObFilter thread handle create)
+	AvThreadHandleDublicate, // (ObFilter thread handle dublicate)
+
 } AV_EVENT_TYPE;
 
 //  Event stucture: Kernel -> User Message

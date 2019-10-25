@@ -18,3 +18,56 @@ public:
 	virtual char getRequestorMode() = 0;
 	virtual std::string& getFilePath() = 0;
 };
+
+// Interface for AvObEventProcessHandleCreate that will be used
+// in plugins to access event parameters.
+class IEventObProcessHandleCreate
+{
+public:
+	virtual int getRequestorPID() = 0;
+	virtual unsigned char getIsKernelHandle() = 0;
+	virtual int getTargetPID() = 0;
+	virtual unsigned long getDesiredAccess() = 0;
+};
+
+// Interface for AvObEventProcessHandleDublicate that will be used
+// in plugins to access event parameters.
+class IEventObProcessHandleDublicate
+{
+public:
+	virtual int getRequestorPID() = 0;
+	virtual unsigned char getIsKernelHandle() = 0;
+	virtual int getTargetPID() = 0;
+	virtual unsigned long getDesiredAccess() = 0;
+	virtual int getDublicateSourcePID() = 0;
+	virtual int getDublicateTargetPID() = 0;
+};
+
+// Interface for AvObEventThreadHandleCreate that will be used
+// in plugins to access event parameters.
+class IEventObThreadHandleCreate
+{
+public:
+	virtual int getRequestorPID() = 0;
+	virtual int getRequestorTID() = 0;
+	virtual unsigned char getIsKernelHandle() = 0;
+	virtual int getTargetPID() = 0;
+	virtual int getTargetTID() = 0;
+	virtual unsigned long getDesiredAccess() = 0;
+};
+
+// Interface for AvObEventThreadHandleDublicate that will be used
+// in plugins to access event parameters.
+class IEventObThreadHandleDublicate
+{
+public:
+	virtual int getRequestorPID() = 0;
+	virtual int getRequestorTID() = 0;
+	virtual unsigned char getIsKernelHandle() = 0;
+	virtual int getTargetPID() = 0;
+	virtual int getTargetTID() = 0;
+	virtual unsigned long getDesiredAccess() = 0;
+	virtual int getDublicateSourcePID() = 0;
+	virtual int getDublicateTargetPID() = 0;
+};
+

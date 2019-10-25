@@ -26,6 +26,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{0E66
 		include\EventsKMStructures.h = include\EventsKMStructures.h
 		include\EventsUMInterfaces.h = include\EventsUMInterfaces.h
 		include\EventsUMStructures.h = include\EventsUMStructures.h
+		include\KMEventsAPI.h = include\KMEventsAPI.h
 		include\KMUMcomm.h = include\KMUMcomm.h
 		include\PluginInterface.h = include\PluginInterface.h
 	EndProjectSection

@@ -8,7 +8,7 @@
 #include "EventsParser.h"
 #include "ConfigManager.h"
 
-
+/*
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -22,8 +22,28 @@ main(
 	getchar();
 	delete settingManager;
 }
+*/
 
-/*
+void testEventsParsers(PluginManager* manager)
+{
+	AV_EVENT_THREAD_HANDLE_CREATE testThreadCreate = { 0 };
+	testThreadCreate.RequestorPID = 111;
+	testThreadCreate.DesiredAccess = 222;
+	testThreadCreate.RequestorTID = 333;
+	testThreadCreate.TargetPID = 444;
+	testThreadCreate.TargetTID = 555;
+	AV_EVENT_THREAD_HANDLE_DUBLICATE testThreadDublicate = { 0 };
+	testThreadDublicate.RequestorPID = 666;
+	testThreadDublicate.DesiredAccess = 777;
+	testThreadDublicate.RequestorTID = 888;
+	testThreadDublicate.TargetPID = 999;
+	testThreadDublicate.TargetTID = 1111;
+	testThreadDublicate.DublicateSourcePID = 2222;
+	testThreadDublicate.DublicateTargetPID = 3333;
+
+	manager->processEvent(AvThreadHandleCreate, &testThreadCreate);
+	manager->processEvent(AvThreadHandleDublicate, &testThreadDublicate);
+}
 
 int _cdecl
 main(
@@ -40,13 +60,24 @@ main(
 
 	PluginManager manager;
 	manager.addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
+	manager.addEventParser(AvProcessHandleCreate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleCreateParser()));
+	manager.addEventParser(AvProcessHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleDublicateParser()));
+	manager.addEventParser(AvThreadHandleCreate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleCreateParser()));
+	manager.addEventParser(AvThreadHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleDublicateParser()));
+
+	//manager.loadPlugin((char*)"TestPlugin.dll");
+	//testEventsParsers(&manager);
 
 	CommPortServer portServer;
-	portServer.start(&manager);
-
-
-
-
+	try
+	{
+		portServer.start(&manager);
+	}
+	catch (char* ex)
+	{
+		std::cout << "Exception: " << std::string(ex) << "\n";
+		return 1;
+	}
 
 	std::cout << "$ ";
 	for (std::string cmd; std::getline(std::cin, cmd);)
@@ -76,4 +107,3 @@ main(
 	portServer.stop();
 	return 0;
 }
-*/

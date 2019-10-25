@@ -7,13 +7,24 @@ Method description:
 	Creates IO completion port.
 	Creates listeners and pumps initial events to completion port.
 */
-void CommPortServer::start(IManager* pluginManager)
+void CommPortServer::start(IManager* manager)
 {
+	this->pluginManager = manager;
 	HRESULT hr = S_OK;
 	this->eventsPort = NULL;
 	this->completionPort = NULL;
 	AV_CONNECTION_CONTEXT connectionCtx;
-	this->pluginManager = pluginManager;
+
+	this->pluginManager->lockEventsProcessing();
+
+	// Start listeners.
+	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
+	{
+		CommPortListener* listener = new CommPortListener(this->pluginManager);
+		std::thread* thread = new std::thread(&CommPortListener::listen, listener);
+		listener->thread = thread;
+		this->listeners.push_back(listener);
+	}
 
 	//  Prepare the scan communication port.
 	connectionCtx.Type = AvConnectForScan;
@@ -35,20 +46,22 @@ void CommPortServer::start(IManager* pluginManager)
 		NULL,
 		0,
 		KM_EVENTS_LISTENER_THREAD_COUNT);
+	std::cout << "Created completion port\n";
 
 	if (NULL == this->completionPort)
 	{
 		throw "FAILED";
 	}
 
-	// Start listeners.
-	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
+	for (std::list<CommPortListener*>::iterator it = this->listeners.begin(); it != this->listeners.end(); it++)
 	{
-		CommPortListener * listener = new CommPortListener(this->pluginManager);
-		std::thread * thread = new std::thread(&CommPortListener::listen, listener, eventsPort, completionPort);
-		listener->thread = thread;
-		this->listeners.push_back(listener);
+		(*it)->setEventsPort(this->eventsPort);
+		(*it)->setCompletionPort(this->completionPort);
 	}
+
+	// comm port and IO completion port were set up
+	// we can resume listeners' threads.
+	this->pluginManager->unlockEventsProcessing();
 
 	//  Pump messages into queue of completion port.
 	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
@@ -136,8 +149,11 @@ CommPortListener::CommPortListener(IManager* manager)
 	this->pluginManager = manager;
 }
 
-void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
+void CommPortListener::listen()
 {
+	this->pluginManager->enterCriticalEventProcessingSection();
+	this->pluginManager->leaveCriticalEventProcessingSection();
+
 	HRESULT hr = S_OK;
 
 	PKM_MESSAGE  message = NULL;

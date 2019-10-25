@@ -33,6 +33,12 @@ public:
 	// process an event by iterating through registered callbacks.
 	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
 
+	// Syncronization methods (use shared_mutex)
+	virtual void enterCriticalEventProcessingSection() override;
+	virtual void leaveCriticalEventProcessingSection() override;
+	virtual void lockEventsProcessing() override;
+	virtual void unlockEventsProcessing() override;
+
 private:
 	/*
 	Callbacks map (two levels):

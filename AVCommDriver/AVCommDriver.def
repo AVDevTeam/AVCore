@@ -8,4 +8,5 @@ EXPORTS
 	AVCommCreateBuffer
 	AVCommFreeBuffer
 	AVCommSendEvent
-	AVCommGetUmPID
+	AVCommIsExcludedPID
+	AVCommIsInitialized

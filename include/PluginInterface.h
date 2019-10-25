@@ -24,6 +24,13 @@ class IManager
 public:
 	virtual int registerCallback(IPlugin*, int, AV_EVENT_TYPE, int) = 0;
 	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*) = 0;
+
+	// Syncronizationi methods
+	virtual void enterCriticalEventProcessingSection() = 0;
+	virtual void leaveCriticalEventProcessingSection() = 0;
+
+	virtual void lockEventsProcessing() = 0;
+	virtual void unlockEventsProcessing() = 0;
 };
 
 // Interface for plugins

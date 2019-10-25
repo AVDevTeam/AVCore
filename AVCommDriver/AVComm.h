@@ -39,6 +39,4 @@ DriverEntry(
 	IN PUNICODE_STRING RegistryPath
 );
 
-
-
 #pragma endregion Prototypes
