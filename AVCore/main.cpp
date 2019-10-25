@@ -8,7 +8,7 @@
 #include "EventsParser.h"
 #include "ConfigManager.h"
 
-/*
+
 int _cdecl
 main(
 	_Unreferenced_parameter_ int argc,
@@ -20,10 +20,11 @@ main(
 
 
 	getchar();
+	//settingManager->join(); 
 	delete settingManager;
 }
-*/
 
+/*
 void testEventsParsers(PluginManager* manager)
 {
 	AV_EVENT_THREAD_HANDLE_CREATE testThreadCreate = { 0 };
@@ -106,4 +107,4 @@ main(
 	
 	portServer.stop();
 	return 0;
-}
+}*/
