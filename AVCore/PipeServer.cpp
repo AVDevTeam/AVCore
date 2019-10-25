@@ -14,7 +14,7 @@ int PipeServer::createSecurityAttributes(SECURITY_ATTRIBUTES * sa)
 	SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
 
 	// Create a well-known SID for the Everyone group
-	if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pEveryoneSID)) 
+	if (!AllocateAndInitializeSid(&SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, &pEveryoneSID))
 	{
 		std::cout << "AllocateAndInitializeSid failed : " << GetLastError() << std::endl;
 		return -1;
@@ -32,7 +32,7 @@ int PipeServer::createSecurityAttributes(SECURITY_ATTRIBUTES * sa)
 
 	// Create a new ACL that contains the new ACEs.
 	dwRes = SetEntriesInAcl(1, &ea, NULL, &pACL);
-	if (ERROR_SUCCESS != dwRes) 
+	if (ERROR_SUCCESS != dwRes)
 	{
 		std::cout << "SetEntriesInAcl failed : " << GetLastError() << std::endl;
 		return -1;
@@ -69,7 +69,7 @@ int PipeServer::createNamedPipe()
 	const int bufsize = 512;
 
 	SECURITY_ATTRIBUTES sa;
-	if (this->createSecurityAttributes(&sa) < 0) 
+	if (this->createSecurityAttributes(&sa) < 0)
 	{
 		std::cout << "GetSecurityDescriptor failed: " << GetLastError() << std::endl;
 		return -1;
@@ -80,28 +80,29 @@ int PipeServer::createNamedPipe()
 		PIPE_ACCESS_DUPLEX,       // read/write access 
 		PIPE_TYPE_MESSAGE |       // message type pipe 
 		PIPE_READMODE_MESSAGE |   // message-read mode 
-		PIPE_WAIT |               // blocking mode 
+		PIPE_NOWAIT |             // NOT blocking mode 
 		PIPE_ACCEPT_REMOTE_CLIENTS,
 		PIPE_UNLIMITED_INSTANCES, // max. instances  
 		bufsize,                  // output buffer size 
 		bufsize,                  // input buffer size 
-		0,                        // client time-out 
+		100,                      // client time-out 
 		&sa);					  // security attribute 
 
-	if (this->hPipe == INVALID_HANDLE_VALUE) 
+	if (this->hPipe == INVALID_HANDLE_VALUE)
 	{
 		std::cout << "CreateNamedPipe failed: " << GetLastError() << std::endl;
 		return -1;
 	}
 }
 
-int PipeServer::waitForClient()
+int PipeServer::waitForClient(int &_stopSignal)
 {
 	BOOL fConnected = FALSE;
 
-	while (true) 
+	int hj = 0;
+	while (!_stopSignal)
 	{
-
+		//std::cout << hj++ << std::endl;
 		// Wait for the client to connect; if it succeeds, 
 		// the function returns a nonzero value. If the function
 		// returns zero, GetLastError returns ERROR_PIPE_CONNECTED
@@ -109,7 +110,6 @@ int PipeServer::waitForClient()
 
 		if (fConnected)
 		{
-			std::cout << "CLIENT CONNECTED" << std::endl;
 			return 1;
 		}
 
@@ -131,14 +131,26 @@ int PipeServer::receiveMessage(std::string & _message)
 		&cbRead,		// number of bytes read 
 		nullptr);		// not overlapped 
 
-	if (!fSuccess) 
+	if (!fSuccess)
 	{
-		std::cout << "ReadFile failed: " << GetLastError() << std::endl;
-		return -1;
+		//std::cout << "ReadFile failed: " << GetLastError() << std::endl;
+		if (GetLastError() == ERROR_BROKEN_PIPE)
+		{
+			// Если клиент отключился 
+			// Очистить pipe от него
+			DisconnectNamedPipe(hPipe);
+			return -1;
+		}
+		else
+		{
+			// Если клиент ничего не прислал 
+			return 0;
+		}
 	}
 
-	if (cbRead != 0) 
+	if (cbRead != 0)
 	{
+		_message = "";
 		_message.append(buffer, cbRead);
 	}
 
@@ -157,44 +169,13 @@ int PipeServer::sendMessage(const std::string & _message)
 		&cbWritten,					// number of bytes written 
 		nullptr);					// not overlapped I/O 
 
-	if (!fSuccess || _message.length() + 1 != cbWritten) 
+	if (!fSuccess || _message.length() + 1 != cbWritten)
 	{
 		std::cout << "WriteFile failed: " << GetLastError() << std::endl;
 		return -1;
 	}
 }
 
-void PipeServer::listen()
-{
-	std::string message;
-	while (1)
-	{
-		waitForClient();
-		receiveMessage(message);
-
-		if (message == "EnumeratePlugins")
-		{
-			sendMessage("TestPlugin");
-		}
-
-		if (stopSignal)
-		{
-			break;
-		}
-
-		Sleep(100);
-	}
-}
-
-void PipeServer::start()
-{
-	thread = new std::thread(&PipeServer::listen, this);
-}
-
-void PipeServer::stop()
-{
-	stopSignal = 1;
-}
 
 PipeServer::PipeServer(const std::string & pipename_)
 {

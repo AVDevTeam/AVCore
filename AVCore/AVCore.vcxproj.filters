@@ -28,6 +28,9 @@
     <Filter Include="ConfigurationManagers">
       <UniqueIdentifier>{d04efef8-8157-4260-b82f-4ba930ade44c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="SettingsManager">
+      <UniqueIdentifier>{af0dcac3-2108-4739-b32a-437d877c9e5c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,6 +51,9 @@
     <ClCompile Include="ConfigManager.cpp">
       <Filter>ConfigurationManagers</Filter>
     </ClCompile>
+    <ClCompile Include="SettingsManager.cpp">
+      <Filter>SettingsManager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PipeServer.h">
@@ -64,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="ConfigManager.h">
       <Filter>ConfigurationManagers</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsManager.h">
+      <Filter>SettingsManager</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

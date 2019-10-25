@@ -27,6 +27,12 @@ namespace AVGUI
             Pipe.Connect();
         }
 
+        public void Close()
+        {
+            Pipe.Close();
+            Pipe.Dispose();
+        }
+
         public void SendMessage(string _message)
         {
             writer.WriteLine(_message);

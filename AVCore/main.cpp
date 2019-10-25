@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <fltUser.h>
 #include "KMUMcomm.h"
-#include "PipeServer.h"
+#include "SettingsManager.h"
 #include "CommPortServer.h"
 #include "PluginManager.h"
 #include "EventsParser.h"
@@ -15,13 +15,12 @@ main(
 	_Unreferenced_parameter_ char* argv[]
 )
 {
-	const std::string pipeName = "\\\\.\\pipe\\AVCorePipe";
-	PipeServer pipe(pipeName);
-	pipe.createNamedPipe();
+	SettingsManager *settingManager = new SettingsManager();
 
 
-	pipe.start();
-	pipe.stop();
+
+	getchar();
+	delete settingManager;
 }
 */
 

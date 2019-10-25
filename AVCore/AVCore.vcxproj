@@ -157,6 +157,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipeServer.cpp" />
     <ClCompile Include="PluginManager.cpp" />
+    <ClCompile Include="SettingsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommPortServer.h" />
@@ -164,6 +165,7 @@
     <ClInclude Include="EventsParser.h" />
     <ClInclude Include="PipeServer.h" />
     <ClInclude Include="PluginManager.h" />
+    <ClInclude Include="SettingsManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
