@@ -10,8 +10,6 @@ class PipeServer
 private:
 	HANDLE hPipe;
 	std::string pipeName;
-	std::thread * thread;
-	int stopSignal = 0;
 
 public:
 	PipeServer(const std::string &_pipeName);
@@ -19,13 +17,11 @@ public:
 
 public:
 	int createNamedPipe();
-	int waitForClient();
+	int waitForClient(int &_stopSignal);
 	int sendMessage(const std::string &_message);
 	int receiveMessage(std::string &_message);
-	void start();
-	void stop();
 
 private:
 	int createSecurityAttributes(SECURITY_ATTRIBUTES *);
-	void listen();
+	
 };
