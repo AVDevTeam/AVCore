@@ -1,5 +1,6 @@
 #include "AVEventsDriver.h"
 
+// TODO. IFDEF x86/x64 (-/-Ex2 support)
 void AVCreateProcessCallback(
 	PEPROCESS Process,
 	HANDLE ProcessId,
@@ -7,8 +8,74 @@ void AVCreateProcessCallback(
 )
 {
 	UNREFERENCED_PARAMETER(Process);
-	UNREFERENCED_PARAMETER(ProcessId);
-	UNREFERENCED_PARAMETER(CreateInfo);
+
+	if (!AVCommIsInitialized())
+	{
+		return;
+	}
+
+	if (CreateInfo)
+	{ // Process create notification
+		AV_EVENT_PROCESS_CREATE eventProcessCreate = { 0 };
+		eventProcessCreate.PID = (int)(__int64)ProcessId;
+		eventProcessCreate.parentPID = (int)(__int64)CreateInfo->ParentProcessId;
+		eventProcessCreate.creatingPID = (int)(__int64)CreateInfo->CreatingThreadId.UniqueProcess;
+		eventProcessCreate.creatingTID = (int)(__int64)CreateInfo->CreatingThreadId.UniqueThread;
+
+		SIZE_T umBuffCommandLineSize, umBuffFileNameSize;
+		NTSTATUS status = STATUS_SUCCESS;
+		if (CreateInfo->FileOpenNameAvailable && CreateInfo->ImageFileName)
+		{
+			// Put file name info to UM buffer
+			eventProcessCreate.imageFileNameSize = CreateInfo->ImageFileName->Length;
+			status = AVCommCreateBuffer(CreateInfo->ImageFileName->Buffer, eventProcessCreate.imageFileNameSize, &eventProcessCreate.imageFileName, &umBuffFileNameSize);
+			if (status != STATUS_SUCCESS)
+			{
+				// couldn't allocate memory in UM
+				return;
+			}
+
+			// Put command line info to UM buffer
+			eventProcessCreate.commandLineSize = CreateInfo->CommandLine->Length;
+			status = AVCommCreateBuffer(CreateInfo->CommandLine->Buffer, eventProcessCreate.commandLineSize, &eventProcessCreate.commandLine, &umBuffCommandLineSize);
+			if (status != STATUS_SUCCESS)
+			{
+				// couldn't allocate memory in UM
+				return;
+			}
+		}
+
+		AV_EVENT_RESPONSE UMResponse;
+		ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
+		// Send event to the AVCore UM service and wait for the response
+		status = AVCommSendEvent(AvProcessCreate,
+			&eventProcessCreate,
+			sizeof(AV_EVENT_PROCESS_CREATE),
+			&UMResponse,
+			&replyLength);
+
+		if (CreateInfo->FileOpenNameAvailable && CreateInfo->ImageFileName)
+		{
+			// free memory in UM
+			NTSTATUS freeStatus = AVCommFreeBuffer(&eventProcessCreate.imageFileName, &umBuffFileNameSize);
+			if (freeStatus != STATUS_SUCCESS) { return; }
+			freeStatus = AVCommFreeBuffer(&eventProcessCreate.commandLine, &umBuffCommandLineSize);
+			if (freeStatus != STATUS_SUCCESS) { return; }
+		}
+
+		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+		{
+			if (UMResponse.Status == AvEventStatusBlock)
+			{
+				CreateInfo->CreationStatus = STATUS_ACCESS_DENIED;
+			}
+		}
+	}
+	else
+	{
+		// TODO. Process exits.
+	}
 }
 
 void AVCreateThreadCallback(

@@ -194,3 +194,41 @@ public:
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;
 };
+
+// Class for process create event (PsSetCreateProcessNotifyRoutineEx[2])
+class AvEventProcessCreate : public IEventProcessCreate
+{
+public:
+	AvEventProcessCreate(int PID, int parentPID, int creatingPID, int creatingTID, std::string imageFileName, std::string commandLine)
+	{
+		this->PID = PID;
+		this->parentPID = parentPID;
+		this->creatingPID = creatingPID;
+		this->creatingTID = creatingTID;
+		this->imageFileName = imageFileName;
+		this->commandLine = commandLine;
+	}
+
+	// Inherited via IEventProcessCreate
+	virtual int getPID() override;
+	virtual int getParentPID() override;
+	virtual int getCreatingPID() override;
+	virtual int getCreatingTID() override;
+	virtual std::string& getImageFileName() override;
+	virtual std::string& getCommandLine() override;
+private:
+	int PID;
+	int parentPID;
+	int creatingPID;
+	int creatingTID;
+	std::string imageFileName;
+	std::string commandLine;
+};
+
+// AvEventProcessCreate parser
+class AvEventProcessCreateParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};

@@ -284,3 +284,57 @@ AvEvent* AvObEventThreadHandleDublicateParser::parse(PVOID event)
 		eventThHandleDublicate->DublicateTargetPID));
 	return eventInstanse;
 }
+
+int AvEventProcessCreate::getPID()
+{
+	return this->PID;
+}
+
+int AvEventProcessCreate::getParentPID()
+{
+	return this->parentPID;
+}
+
+int AvEventProcessCreate::getCreatingPID()
+{
+	return this->creatingPID;
+}
+
+int AvEventProcessCreate::getCreatingTID()
+{
+	return this->creatingTID;
+}
+
+std::string& AvEventProcessCreate::getImageFileName()
+{
+	return this->imageFileName;
+}
+
+std::string& AvEventProcessCreate::getCommandLine()
+{
+	return this->commandLine;
+}
+
+AvEvent* AvEventProcessCreateParser::parse(PVOID event)
+{
+	PAV_EVENT_PROCESS_CREATE eventProcessCreate = (PAV_EVENT_PROCESS_CREATE)event;
+	// copy wide char strings from KM supplied buffers.
+	wchar_t* imageFileName = this->wcscpyZeroTerminate(eventProcessCreate->imageFileName, eventProcessCreate->imageFileNameSize);
+	wchar_t* commandLine = this->wcscpyZeroTerminate(eventProcessCreate->commandLine, eventProcessCreate->commandLineSize);
+
+	std::wstring imageFileName_ws(imageFileName), commandLine_ws(commandLine);
+	std::string imageFileName_std(imageFileName_ws.begin(), imageFileName_ws.end());
+	std::string commandLine_std(commandLine_ws.begin(), commandLine_ws.end());
+	free(imageFileName);
+	free(commandLine);
+
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventProcessCreate(
+		eventProcessCreate->PID,
+		eventProcessCreate->parentPID,
+		eventProcessCreate->creatingPID,
+		eventProcessCreate->creatingTID,
+		imageFileName_std,
+		commandLine_std
+	));
+	return instance;
+}

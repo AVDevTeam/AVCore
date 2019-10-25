@@ -35,6 +35,7 @@ typedef enum _AV_EVENT_TYPE
 	AvProcessHandleDublicate, // (ObFilter process handle dublicate)
 	AvThreadHandleCreate, // (ObFilter thread handle create)
 	AvThreadHandleDublicate, // (ObFilter thread handle dublicate)
+	AvProcessCreate, // (PsSetCreateProcessNotifyRoutineEx[2]) 
 
 } AV_EVENT_TYPE;
 

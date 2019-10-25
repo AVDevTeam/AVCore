@@ -94,5 +94,18 @@ typedef struct _AV_EVENT_THREAD_HANDLE_DUBLICATE
 
 } AV_EVENT_THREAD_HANDLE_DUBLICATE, * PAV_EVENT_THREAD_HANDLE_DUBLICATE;
 
+// Defines parameters of AvProcessCreate event
+typedef struct _AV_EVENT_PROCESS_CREATE
+{
+	int PID;
+	int parentPID;
+	int creatingPID;
+	int creatingTID;
+	wchar_t* imageFileName;
+	int imageFileNameSize;
+	wchar_t* commandLine;
+	int commandLineSize;
+
+} AV_EVENT_PROCESS_CREATE, * PAV_EVENT_PROCESS_CREATE;
 
 #pragma endregion Events structures

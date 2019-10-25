@@ -99,6 +99,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 {
 	switch (eventType)
 	{
+		/*
 		case AvFileCreate:
 			std::cout << "Processing AvFileCreate event\n";
 			break;
@@ -113,6 +114,10 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			break;
 		case AvThreadHandleDublicate:
 			std::cout << "Processing AvThreadHandleDublicate event\n";
+			break;
+		*/
+		case AvProcessCreate:
+			std::cout << "Processing AvProcessCreate event\n";
 			break;
 	}
 	try

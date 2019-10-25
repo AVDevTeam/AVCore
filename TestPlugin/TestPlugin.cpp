@@ -53,9 +53,18 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 		std::cout << "\tSource dublicate PID: " << eventThHandleDublicate->getDublicateSourcePID() << "\n";
 		std::cout << "\tTarget dublicate PID: " << eventThHandleDublicate->getDublicateTargetPID() << "\n";
 	}
+	else if (callbackId == CallbackProcessCreate)
+	{
+		IEventProcessCreate* eventProcessCreate = reinterpret_cast<IEventProcessCreate*>(event);
+		std::cout << "\tNew process PID: " << eventProcessCreate->getPID() << "\n";
+		std::cout << "\tParent PID: " << eventProcessCreate->getParentPID() << "\n";
+		std::cout << "\tCreating PID: " << eventProcessCreate->getCreatingPID() << "\n";
+		std::cout << "\tCreating TID: " << eventProcessCreate->getCreatingTID() << "\n";
+		std::cout << "\tImage file name: " << eventProcessCreate->getImageFileName() << "\n";
+		std::cout << "\tCommand line: " << eventProcessCreate->getCommandLine() << "\n";
+	}
 	return AvEventStatusAllow;
 }
-
 
 void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 {
@@ -86,11 +95,14 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	std::list<std::string>* blockListTest = this->getConfig()->getListParam("BlockList");
 	delete blockListTest;
 
+	/*
 	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 1);
 	manager->registerCallback(this, CallbackPrHandleCreate, AvProcessHandleCreate, 1);
 	manager->registerCallback(this, CallbackPrHandleDublicate, AvProcessHandleDublicate , 1);
 	manager->registerCallback(this, CallbackThHandleCreate, AvThreadHandleCreate , 1);
 	manager->registerCallback(this, CallbackThHandleDublicate, AvThreadHandleDublicate , 1);
+	*/
+	manager->registerCallback(this, CallbackProcessCreate, AvProcessCreate, 1);
 }
 
 void TestPlugin::deinit()

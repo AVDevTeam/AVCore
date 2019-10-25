@@ -41,9 +41,19 @@ void testEventsParsers(PluginManager* manager)
 	testThreadDublicate.TargetTID = 1111;
 	testThreadDublicate.DublicateSourcePID = 2222;
 	testThreadDublicate.DublicateTargetPID = 3333;
+	AV_EVENT_PROCESS_CREATE testProcessCreate = { 0 };
+	testProcessCreate.PID = 111;
+	testProcessCreate.parentPID = 222;
+	testProcessCreate.creatingPID = 333;
+	testProcessCreate.creatingTID = 444;
+	testProcessCreate.imageFileName = (wchar_t*)L"TEST_IMAGE_PATH";
+	testProcessCreate.imageFileNameSize = sizeof(L"TEST_IMAGE_PATH");
+	testProcessCreate.commandLine = (wchar_t*)L"TEST_COMMAND_LINE";
+	testProcessCreate.commandLineSize = sizeof(L"TEST_COMMAND_LINE");
 
 	manager->processEvent(AvThreadHandleCreate, &testThreadCreate);
 	manager->processEvent(AvThreadHandleDublicate, &testThreadDublicate);
+	manager->processEvent(AvProcessCreate, &testProcessCreate);
 }
 
 int _cdecl
@@ -65,6 +75,7 @@ main(
 	manager.addEventParser(AvProcessHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleDublicateParser()));
 	manager.addEventParser(AvThreadHandleCreate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleCreateParser()));
 	manager.addEventParser(AvThreadHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleDublicateParser()));
+	manager.addEventParser(AvProcessCreate, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
 
 	//manager.loadPlugin((char*)"TestPlugin.dll");
 	//testEventsParsers(&manager);

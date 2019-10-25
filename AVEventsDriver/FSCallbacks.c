@@ -93,8 +93,6 @@ Return Value:
 	AV_EVENT_RESPONSE UMResponse;
 	ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
 
-	DbgPrint("PID %ul opens %wZ\n", curProcess, FileObject->FileName);
-
 	// Send event to the AVCore UM service and wait for the response
 	status = AVCommSendEvent(AvFileCreate,
 		&eventFileCreate,

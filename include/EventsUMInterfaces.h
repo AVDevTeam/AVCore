@@ -71,3 +71,16 @@ public:
 	virtual int getDublicateTargetPID() = 0;
 };
 
+// Interface for AvEventProcessCreate that will be used
+// in plugins to access event parameters.
+class IEventProcessCreate
+{
+public:
+	virtual int getPID() = 0;
+	virtual int getParentPID() = 0;
+	virtual int getCreatingPID() = 0;
+	virtual int getCreatingTID() = 0;
+	virtual std::string& getImageFileName() = 0;
+	virtual std::string& getCommandLine() = 0;
+};
+
