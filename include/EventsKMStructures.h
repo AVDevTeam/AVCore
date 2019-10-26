@@ -108,4 +108,28 @@ typedef struct _AV_EVENT_PROCESS_CREATE
 
 } AV_EVENT_PROCESS_CREATE, * PAV_EVENT_PROCESS_CREATE;
 
+// Defines parameters of AvProcessCreate event
+typedef struct _AV_EVENT_PROCESS_EXIT
+{
+	int PID;
+
+} AV_EVENT_PROCESS_EXIT, * PAV_EVENT_PROCESS_EXIT;
+
+// Defines parameters of AvThreadCreate/Eixt event
+typedef struct _AV_EVENT_THREAD_CREATE_EXIT
+{
+	int PID;
+	int TID;
+
+} AV_EVENT_THREAD_CREATE, AV_EVENT_THREAD_EXIT, * PAV_EVENT_THREAD_CREATE, * PAV_EVENT_THREAD_EXIT;
+
+// Defines parameters of AvImageLoad event
+typedef struct _AV_EVENT_IMAGE_LOAD
+{
+	int PID;
+	wchar_t* imageName;
+	int imageNameSize;
+	unsigned char systemModeImage;
+} AV_EVENT_IMAGE_LOAD, * PAV_EVENT_IMAGE_LOAD;
+
 #pragma endregion Events structures

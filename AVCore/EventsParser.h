@@ -232,3 +232,96 @@ public:
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;
 };
+
+// Class for process exit event (PsSetCreateProcessNotifyRoutineEx[2])
+class AvEventProcessEixt : public IEventProcessExit
+{
+public:
+	AvEventProcessEixt(int PID) { this->PID = PID; }
+
+	// Inherited via IEventProcessExit
+	virtual int getPID() override;
+private:
+	int PID;
+};
+
+// AvEventProcessEixt parser
+class AvEventProcessEixtParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for thread create event (PsSetCreateThreadNotifyRoutine)
+class AvEventThreadCreate : public IEventThreadCreate
+{
+public:
+	AvEventThreadCreate(int PID, int TID) { this->PID = PID; this->TID = TID; }
+
+	// Inherited via IEventThreadCreate
+	virtual int getPID() override;
+	virtual int getTID() override;
+private:
+	int PID;
+	int TID;
+};
+
+// AvEventThreadCreate parser
+class AvEventThreadCreateParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for thread exit event (PsSetCreateThreadNotifyRoutine)
+class AvEventThreadExit : public IEventThreadExit
+{
+public:
+	AvEventThreadExit(int PID, int TID) { this->PID = PID; this->TID = TID; }
+
+	// Inherited via IEventThreadCreate
+	virtual int getPID() override;
+	virtual int getTID() override;
+private:
+	int PID;
+	int TID;
+};
+
+// AvEventThreadExit parser
+class AvEventThreadExitParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for image load event (PsSetImageNotifyRoutine)
+class AvEventImageLoad : public IEventImageLoad
+{
+public:
+	AvEventImageLoad(int PID, std::string imageName, unsigned char isSystemModule) 
+	{ 
+		this->PID = PID;
+		this->imageName = imageName;
+		this->isSystemModule = isSystemModule;
+	}
+
+	// Inherited via IEventImageLoad
+	virtual int getPID() override;
+	virtual std::string& getImageName() override;
+	virtual unsigned char getIsSystemModule() override;
+private:
+	int PID;
+	std::string imageName;
+	unsigned char isSystemModule;
+};
+
+// AvEventImageLoad parser
+class AvEventImageLoadParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};

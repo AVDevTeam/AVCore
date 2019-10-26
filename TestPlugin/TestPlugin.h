@@ -9,6 +9,10 @@ typedef enum {
 	CallbackThHandleCreate,
 	CallbackThHandleDublicate,
 	CallbackProcessCreate,
+	CallbackProcessExit,
+	CallbackThreadCreate,
+	CallbackThreadExit,
+	CallbackImageLoad,
 } CALLBACK_ID;
 
 class TestPlugin : public IPlugin

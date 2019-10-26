@@ -16,6 +16,11 @@ void AVCreateProcessCallback(
 
 	if (CreateInfo)
 	{ // Process create notification
+		if (AVCommIsExcludedPID(CreateInfo->CreatingThreadId.UniqueProcess))
+		{
+			return;
+		}
+
 		AV_EVENT_PROCESS_CREATE eventProcessCreate = { 0 };
 		eventProcessCreate.PID = (int)(__int64)ProcessId;
 		eventProcessCreate.parentPID = (int)(__int64)CreateInfo->ParentProcessId;
@@ -74,7 +79,22 @@ void AVCreateProcessCallback(
 	}
 	else
 	{
-		// TODO. Process exits.
+		AV_EVENT_PROCESS_EXIT eventProcessExit = { 0 };
+		eventProcessExit.PID = (int)(__int64)ProcessId;
+
+		AV_EVENT_RESPONSE UMResponse;
+		ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
+		NTSTATUS status = AVCommSendEvent(AvProcessExit,
+			&eventProcessExit,
+			sizeof(AV_EVENT_PROCESS_EXIT),
+			&UMResponse,
+			&replyLength);
+
+		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+		{
+			// TODO. Maybe some exlude list logic.
+		}
 	}
 }
 
@@ -84,9 +104,51 @@ void AVCreateThreadCallback(
 	BOOLEAN Create
 )
 {
-	UNREFERENCED_PARAMETER(ProcessId);
-	UNREFERENCED_PARAMETER(ThreadId);
-	UNREFERENCED_PARAMETER(Create);
+	if (!AVCommIsInitialized() || AVCommIsExcludedPID(ProcessId))
+	{
+		return;
+	}
+
+	if (Create)
+	{
+		AV_EVENT_THREAD_CREATE eventThreadCreate;
+		eventThreadCreate.PID = (int)(__int64)ProcessId;
+		eventThreadCreate.TID = (int)(__int64)ThreadId;
+
+		AV_EVENT_RESPONSE UMResponse;
+		ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
+		NTSTATUS status = AVCommSendEvent(AvThreadCreate,
+			&eventThreadCreate,
+			sizeof(AV_EVENT_THREAD_CREATE),
+			&UMResponse,
+			&replyLength);
+
+		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+		{
+			// TODO.Response processing login?
+		}
+	}
+	else
+	{
+		AV_EVENT_THREAD_EXIT eventThreadExit;
+		eventThreadExit.PID = (int)(__int64)ProcessId;
+		eventThreadExit.TID = (int)(__int64)ThreadId;
+
+		AV_EVENT_RESPONSE UMResponse;
+		ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
+		NTSTATUS status = AVCommSendEvent(AvThreadExit,
+			&eventThreadExit,
+			sizeof(AV_EVENT_THREAD_EXIT),
+			&UMResponse,
+			&replyLength);
+
+		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+		{
+			// TODO.Response processing login?
+		}
+	}
 }
 
 // TODO. IFDEF x86/x64 (x64 support for x86 modules).
@@ -96,7 +158,48 @@ void AVLoadImageCallback(
 	PIMAGE_INFO ImageInfo
 )
 {
-	UNREFERENCED_PARAMETER(FullImageName);
-	UNREFERENCED_PARAMETER(ProcessId);
-	UNREFERENCED_PARAMETER(ImageInfo);
+	if (!AVCommIsInitialized() || AVCommIsExcludedPID(ProcessId))
+	{
+		return;
+	}
+
+	AV_EVENT_IMAGE_LOAD eventImageLoad = { 0 };
+	eventImageLoad.PID = (int)(__int64)ProcessId;
+	eventImageLoad.systemModeImage = (UCHAR)ImageInfo->SystemModeImage;
+
+	SIZE_T umBuffImageNameSize;
+	NTSTATUS status = STATUS_SUCCESS;
+	if (FullImageName)
+	{
+		// DEBUG!!! MIGHT DEADLOCK IN WINDOWS 7 ACCORDING TO MS DOCS [https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/nc-ntddk-pload_image_notify_routine, remarks]
+		eventImageLoad.imageNameSize = FullImageName->Length;
+		status = AVCommCreateBuffer(FullImageName->Buffer, eventImageLoad.imageNameSize, &eventImageLoad.imageName, &umBuffImageNameSize);
+		if (status != STATUS_SUCCESS)
+		{
+			// couldn't allocate memory in UM
+			return;
+		}
+	}
+
+	AV_EVENT_RESPONSE UMResponse;
+	ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
+
+	// DEBUG!!! MIGHT DEADLOCK IN WINDOWS 7 ACCORDING TO MS DOCS [https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/ntddk/nc-ntddk-pload_image_notify_routine, remarks]
+	status = AVCommSendEvent(AvImageLoad,
+		&eventImageLoad,
+		sizeof(AV_EVENT_IMAGE_LOAD),
+		&UMResponse,
+		&replyLength);
+
+	if (FullImageName)
+	{
+		NTSTATUS freeStatus = AVCommFreeBuffer(&eventImageLoad.imageName, &umBuffImageNameSize);
+		if (freeStatus != STATUS_SUCCESS) { return; }
+	}
+
+	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
+	{
+		// TODO.Response processing login?
+	}
+
 }

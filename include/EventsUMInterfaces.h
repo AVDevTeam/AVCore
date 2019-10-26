@@ -84,3 +84,39 @@ public:
 	virtual std::string& getCommandLine() = 0;
 };
 
+// Interface for AvEventProcessExit that will be used
+// in plugins to access event parameters.
+class IEventProcessExit
+{
+public:
+	virtual int getPID() = 0;
+};
+
+// Interface for AvEventThreadCreate that will be used
+// in plugins to access event parameters.
+class IEventThreadCreate
+{
+public:
+	virtual int getPID() = 0;
+	virtual int getTID() = 0;
+};
+
+// Interface for AvEventThreadExit that will be used
+// in plugins to access event parameters.
+class IEventThreadExit
+{
+public:
+	virtual int getPID() = 0;
+	virtual int getTID() = 0;
+};
+
+// Interface for AvEventImageLoad that will be used
+// in plugins to access event parameters.
+class IEventImageLoad
+{
+public:
+	virtual int getPID() = 0;
+	virtual std::string& getImageName() = 0;
+	virtual unsigned char getIsSystemModule() = 0;
+};
+
