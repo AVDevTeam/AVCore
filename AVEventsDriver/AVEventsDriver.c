@@ -332,7 +332,11 @@ Return Value:
 	}
 
 	// TODO. IFDEF x86/x64 (x64 support for x86 modules, PsSetLoadImageNotifyRoutineEx).
+#ifdef _WIN64
+	status = PsSetLoadImageNotifyRoutineEx((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback, PS_IMAGE_NOTIFY_CONFLICTING_ARCHITECTURE);
+#else
 	status = PsSetLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
+#endif
 	if (!NT_SUCCESS(status))
 	{
 		AVCommStop();

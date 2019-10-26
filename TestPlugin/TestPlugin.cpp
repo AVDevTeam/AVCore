@@ -67,7 +67,25 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 	{
 		IEventProcessExit* eventProcessExit = reinterpret_cast<IEventProcessExit*>(event);
 		std::cout << "\tProcess exits. PID: " << eventProcessExit->getPID() << "\n";
-
+	}
+	else if (callbackId == CallbackThreadCreate)
+	{
+		IEventThreadCreate* eventThreadCreate = reinterpret_cast<IEventThreadCreate*>(event);
+		std::cout << "\tNew thread in process with PID: " << eventThreadCreate->getPID() << "\n";
+		std::cout << "\tNew thread TID: " << eventThreadCreate->getTID() << "\n";
+	}
+	else if (callbackId == CallbackThreadExit)
+	{
+		IEventThreadExit* eventThreadExit = reinterpret_cast<IEventThreadExit*>(event);
+		std::cout << "\tThread exits in process with PID: " << eventThreadExit->getPID() << "\n";
+		std::cout << "\tExiting thread TID: " << eventThreadExit->getTID() << "\n";
+	}
+	else if (callbackId == CallbackImageLoad)
+	{
+		IEventImageLoad* eventImageLoad = reinterpret_cast<IEventImageLoad*>(event);
+		std::cout << "\tModule loads into process with PID: " << eventImageLoad->getPID() << "\n";
+		std::cout << "\tisSystemModule: " << eventImageLoad->getIsSystemModule() << "\n";
+		std::cout << "\tImage name: " << eventImageLoad->getImageName() << "\n";
 	}
 	return AvEventStatusAllow;
 }
@@ -101,15 +119,21 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	std::list<std::string>* blockListTest = this->getConfig()->getListParam("BlockList");
 	delete blockListTest;
 
-	/*
 	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 1);
+
 	manager->registerCallback(this, CallbackPrHandleCreate, AvProcessHandleCreate, 1);
 	manager->registerCallback(this, CallbackPrHandleDublicate, AvProcessHandleDublicate , 1);
+	
 	manager->registerCallback(this, CallbackThHandleCreate, AvThreadHandleCreate , 1);
 	manager->registerCallback(this, CallbackThHandleDublicate, AvThreadHandleDublicate , 1);
-	*/
+
 	manager->registerCallback(this, CallbackProcessCreate, AvProcessCreate, 1);
 	manager->registerCallback(this, CallbackProcessExit, AvProcessExit, 1);
+
+	manager->registerCallback(this, CallbackThreadCreate, AvThreadCreate, 1);
+	manager->registerCallback(this, CallbackThreadExit, AvThreadExit, 1);
+
+	manager->registerCallback(this, CallbackImageLoad, AvImageLoad, 1);
 }
 
 void TestPlugin::deinit()

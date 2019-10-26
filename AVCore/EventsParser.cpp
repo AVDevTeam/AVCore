@@ -352,3 +352,74 @@ AvEvent* AvEventProcessEixtParser::parse(PVOID event)
 	));
 	return instance;
 }
+
+int AvEventThreadCreate::getPID()
+{
+	return this->PID;
+}
+
+int AvEventThreadCreate::getTID()
+{
+	return this->TID;
+}
+
+AvEvent* AvEventThreadCreateParser::parse(PVOID event)
+{
+	PAV_EVENT_THREAD_CREATE eventThreadCreate = (PAV_EVENT_THREAD_CREATE)event;
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventThreadCreate(
+		eventThreadCreate->PID,
+		eventThreadCreate->TID));
+	return instance;
+}
+
+int AvEventThreadExit::getPID()
+{
+	return this->PID;
+}
+
+int AvEventThreadExit::getTID()
+{
+	return this->TID;
+}
+
+AvEvent* AvEventThreadExitParser::parse(PVOID event)
+{
+	PAV_EVENT_THREAD_EXIT eventThreadExit = (PAV_EVENT_THREAD_EXIT)event;
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventThreadExit(
+		eventThreadExit->PID,
+		eventThreadExit->TID));
+	return instance;
+}
+
+int AvEventImageLoad::getPID()
+{
+	return this->PID;
+}
+
+std::string& AvEventImageLoad::getImageName()
+{
+	return this->imageName;
+}
+
+unsigned char AvEventImageLoad::getIsSystemModule()
+{
+	return this->isSystemModule;
+}
+
+AvEvent* AvEventImageLoadParser::parse(PVOID event)
+{
+	PAV_EVENT_IMAGE_LOAD eventImageLoad = (PAV_EVENT_IMAGE_LOAD)event;
+	// copy wide char strings from KM supplied buffers.
+	wchar_t* imageName = this->wcscpyZeroTerminate(eventImageLoad->imageName, eventImageLoad->imageNameSize);
+
+	std::wstring imageName_ws(imageName);
+	std::string imageName_std(imageName_ws.begin(), imageName_ws.end());
+	free(imageName);
+
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventImageLoad(
+		eventImageLoad->PID,
+		imageName_std,
+		eventImageLoad->systemModeImage
+	));
+	return instance;
+}
