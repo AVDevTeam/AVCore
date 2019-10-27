@@ -461,12 +461,7 @@ based on PID.
 */
 UCHAR AVCommIsExcludedPID(HANDLE PID)
 {
-	return Globals.AVCoreServicePID == PID
-		|| PID == (HANDLE)0
-		|| PID == (HANDLE)4
-		|| PID == (HANDLE)380
-		|| PID == (HANDLE)468
-		;
+	return Globals.AVCoreServicePID == PID;
 }
 
 /*
