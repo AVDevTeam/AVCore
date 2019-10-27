@@ -162,20 +162,23 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 		EventParser* eventParser = this->parsersMap[eventType];
 		AvEvent* parsedEvent = eventParser->parse(event);
 		priorityMap* eventPriorityMap = this->callbacksMap[eventType];
+		AV_EVENT_RETURN_STATUS status = AvEventStatusAllow;
 		for (priorityMap::iterator it = eventPriorityMap->begin(); it != eventPriorityMap->end(); it++)
 		{
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
 			this->logger->log("Processing callback with priority " + std::to_string(priority) + " in plugin " + curCallback.second->getName());
-			AV_EVENT_RETURN_STATUS status = curCallback.second->callback(curCallback.first, parsedEvent);
+			status = curCallback.second->callback(curCallback.first, parsedEvent);
 			if (status == AvEventStatusBlock)
-				return status;
+			{
+				break;
+			}
 		}
 		delete parsedEvent;
 
 		// leave event processing section
 		this->eventProcessingMutex.unlock_shared();
-		return AvEventStatusAllow;
+		return status;
 	}
 	catch (const std::string& ex)
 	{

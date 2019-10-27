@@ -372,12 +372,11 @@ Arguments:
 	_out_ outUmSize - pointer to the variable where the size of allocated UM buffer will be stored.
 	of the buffer allocated in the UM address space. Should be zero.
 */
-NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize)
+NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, void **outUmBuffer, PSIZE_T outUmSize)
 {
-	PVOID UmBuffer = NULL;
 	*outUmSize = srcSize;
 	// allocat memory in UM address space of AVCore service.
-	NTSTATUS status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, &UmBuffer, 0, outUmSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	NTSTATUS status = ZwAllocateVirtualMemory(Globals.AVCoreServiceHandle, outUmBuffer, 0, outUmSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 	if (status != STATUS_SUCCESS)
 	{
 		// couldn't allocate memory in UM
@@ -388,11 +387,10 @@ NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer,
 	KAPC_STATE pkapcState;
 	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
 	// copy buffer from KM to allocated buffer in UM.
-	memcpy(UmBuffer, srcBuffer, srcSize);
+	memcpy(*outUmBuffer, srcBuffer, srcSize);
 	// Restore stack
 	KeUnstackDetachProcess(&pkapcState);
 
-	*outUmBuffer = UmBuffer;
 	return status;
 }
 
@@ -406,7 +404,7 @@ Arguments:
 */
 NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize)
 {
-	return ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, &UmBuffer, UmBufferSize, MEM_DECOMMIT);
+	return ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, UmBuffer, UmBufferSize, MEM_DECOMMIT);
 }
 
 /*
@@ -436,10 +434,6 @@ NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBu
 		return STATUS_MEMORY_NOT_ALLOCATED;
 	}
 
-	
-	//LARGE_INTEGER timeout;
-	//timeout.QuadPart = -(LONGLONG)1 * 10 * 1000 * 1000;
-
 	// Send event to the AVCore UM service and wait for the response
 	status = FltSendMessage(Globals.Filter,
 		&Globals.EventsClientPort,
@@ -449,7 +443,7 @@ NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBu
 		UMResponseLength,
 		NULL);
 
-	NTSTATUS freeStatus = AVCommFreeBuffer(avMessage.EventBuffer, &umBuffEventSize);
+	NTSTATUS freeStatus = AVCommFreeBuffer(&avMessage.EventBuffer, &umBuffEventSize);
 	if (freeStatus != STATUS_SUCCESS) { return freeStatus; }
 
 	return status;

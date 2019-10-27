@@ -23,7 +23,12 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 		IEventFSCreate* eventFSCreate = reinterpret_cast<IEventFSCreate*>(event);
 		this->logger->log("CallbackFileCreate");
 		this->logger->log("\tFile path: " + eventFSCreate->getFilePath());
-		this->logger->log("\tRequestor PID: " + std::to_string(eventFSCreate->getRequestorPID()));	}
+		this->logger->log("\tRequestor PID: " + std::to_string(eventFSCreate->getRequestorPID()));
+		if (eventFSCreate->getFilePath().find("secretfile.txt") != std::string::npos)
+		{
+			return AvEventStatusBlock;
+		}
+	}
 	else if (callbackId == CallbackPrHandleCreate)
 	{
 		IEventObProcessHandleCreate* eventPrHandleCreate = reinterpret_cast<IEventObProcessHandleCreate*>(event);
@@ -106,22 +111,26 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 	else if (callbackId == CallbackRegCreateKey)
 	{
 		IEventRegCreateKey* eventRegCreateKey = reinterpret_cast<IEventRegCreateKey*>(event);
-		if (eventRegCreateKey->getRequestorPID() != 3732)
-			return AvEventStatusAllow;
 		this->logger->log("CallbackRegCreateKey");
 		this->logger->log("\tPID: " + std::to_string(eventRegCreateKey->getRequestorPID()));
 		this->logger->log("\tProcess PID: " + std::to_string(eventRegCreateKey->getRequestorPID()));
 		this->logger->log("\tKey path: " + eventRegCreateKey->getKeyPath());
+		if (eventRegCreateKey->getKeyPath().find("secretkey") != std::string::npos)
+		{
+			return AvEventStatusBlock;
+		}
 	}
 	else if (callbackId == CallbackRegOpenKey)
 	{
 		IEventRegOpenKey* eventRegOpenKey = reinterpret_cast<IEventRegOpenKey*>(event);
-		if (eventRegOpenKey->getRequestorPID() != 3732)
-			return AvEventStatusAllow;
 		this->logger->log("CallbackRegOpenKey");
 		this->logger->log("\tPID: " + std::to_string(eventRegOpenKey->getRequestorPID()));
 		this->logger->log("\tProcess PID: " + std::to_string(eventRegOpenKey->getRequestorPID()));
 		this->logger->log("\tKey path: " + eventRegOpenKey->getKeyPath());
+		if (eventRegOpenKey->getKeyPath().find("secretkey") != std::string::npos)
+		{
+			return AvEventStatusBlock;
+		}
 	}
 	return AvEventStatusAllow;
 }

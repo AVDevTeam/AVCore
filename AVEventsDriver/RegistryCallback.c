@@ -40,7 +40,7 @@ NTSTATUS sendRegCreateKey(PUNICODE_STRING keyPath)
 {
 	ASSERT(keyPath != NULL);
 
-	AV_EVENT_REG_CREATE_KEY eventCreateKey;
+	AV_EVENT_REG_CREATE_KEY eventCreateKey = { 0 };
 	SIZE_T umBuffKeyPathSize;
 	NTSTATUS status = STATUS_SUCCESS;
 
@@ -80,7 +80,7 @@ NTSTATUS sendRegOpenKey(PUNICODE_STRING keyPath)
 {
 	ASSERT(keyPath != NULL);
 
-	AV_EVENT_REG_OPEN_KEY eventOpenKey;
+	AV_EVENT_REG_OPEN_KEY eventOpenKey = { 0 };
 	SIZE_T umBuffKeyPathSize;
 	NTSTATUS status = STATUS_SUCCESS;
 

@@ -111,7 +111,7 @@ void AVCreateThreadCallback(
 
 	if (Create)
 	{
-		AV_EVENT_THREAD_CREATE eventThreadCreate;
+		AV_EVENT_THREAD_CREATE eventThreadCreate = { 0 };
 		eventThreadCreate.PID = (int)(__int64)ProcessId;
 		eventThreadCreate.TID = (int)(__int64)ThreadId;
 
@@ -131,7 +131,7 @@ void AVCreateThreadCallback(
 	}
 	else
 	{
-		AV_EVENT_THREAD_EXIT eventThreadExit;
+		AV_EVENT_THREAD_EXIT eventThreadExit = { 0 };
 		eventThreadExit.PID = (int)(__int64)ProcessId;
 		eventThreadExit.TID = (int)(__int64)ThreadId;
 

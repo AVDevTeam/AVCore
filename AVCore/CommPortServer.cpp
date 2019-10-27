@@ -220,6 +220,16 @@ void CommPortListener::listen()
 
 			// Process event using pluginManager.
 			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
+			switch (replyMsg.EventResponse.Status)
+			{
+			case AvEventStatusAllow:
+				this->pluginManager->getLogger()->log("Listener got status allow");
+				break;
+			case AvEventStatusBlock:
+				this->pluginManager->getLogger()->log("Listener got status block");
+				break;
+			}
+
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,

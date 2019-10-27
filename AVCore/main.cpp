@@ -52,6 +52,11 @@ main(
 int main(int argc, TCHAR* argv[])
 {
 	OutputDebugString("AVCore: Main: Entry");
+	std::string test("C:\\Users\\user\\Desktop\\secretfile.txt");
+	if (test.find("secretfile.txt") != std::string::npos)
+	{
+		int t = 1;
+	}
 
 	SERVICE_TABLE_ENTRY ServiceTable[] =
 	{
