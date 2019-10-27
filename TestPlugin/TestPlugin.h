@@ -13,14 +13,17 @@ typedef enum {
 	CallbackThreadCreate,
 	CallbackThreadExit,
 	CallbackImageLoad,
+	CallbackRegCreateKey,
+	CallbackRegOpenKey,
 } CALLBACK_ID;
 
 class TestPlugin : public IPlugin
 {
 public:
 	// Inherited via IPlugin
+	virtual ~TestPlugin() override;
 	AV_EVENT_RETURN_STATUS callback(int, void*) override;
-	void init(IManager* manager, HMODULE module, IConfig * configManager) override;
+	void init(IManager* manager, HMODULE module, IConfig* configManager) override;
 	void deinit() override;
 
 	virtual std::string& getName() override;
@@ -32,4 +35,5 @@ private:
 	std::string description = std::string("Just a test plugin.");
 	HMODULE module;
 	IConfig* configManager;
+	ILogger* logger;
 };

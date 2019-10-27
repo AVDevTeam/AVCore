@@ -86,7 +86,7 @@ void UMModuleConfig::setDwordParam(std::string& paramName, DWORD value)
 void UMModuleConfig::setStringParam(std::string& paramName, std::string& value)
 {
 	std::string local(value);
-	LSTATUS status = RegSetValueExA(this->configKey, paramName.c_str(), NULL, REG_SZ, (LPBYTE)local.c_str(), value.size() + 1);
+	LSTATUS status = RegSetValueExA(this->configKey, paramName.c_str(), NULL, REG_SZ, (LPBYTE)local.c_str(), (DWORD)value.size() + 1);
 	if (status != ERROR_SUCCESS)
 		throw "Error reading dword from registry";
 }

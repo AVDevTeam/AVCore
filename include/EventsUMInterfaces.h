@@ -14,6 +14,7 @@
 class IEventFSCreate
 {
 public:
+	virtual ~IEventFSCreate() {}
 	virtual int getRequestorPID() = 0;
 	virtual char getRequestorMode() = 0;
 	virtual std::string& getFilePath() = 0;
@@ -24,6 +25,7 @@ public:
 class IEventObProcessHandleCreate
 {
 public:
+	virtual ~IEventObProcessHandleCreate() {}
 	virtual int getRequestorPID() = 0;
 	virtual unsigned char getIsKernelHandle() = 0;
 	virtual int getTargetPID() = 0;
@@ -35,6 +37,7 @@ public:
 class IEventObProcessHandleDublicate
 {
 public:
+	virtual ~IEventObProcessHandleDublicate() {}
 	virtual int getRequestorPID() = 0;
 	virtual unsigned char getIsKernelHandle() = 0;
 	virtual int getTargetPID() = 0;
@@ -48,6 +51,7 @@ public:
 class IEventObThreadHandleCreate
 {
 public:
+	virtual ~IEventObThreadHandleCreate() {}
 	virtual int getRequestorPID() = 0;
 	virtual int getRequestorTID() = 0;
 	virtual unsigned char getIsKernelHandle() = 0;
@@ -61,6 +65,7 @@ public:
 class IEventObThreadHandleDublicate
 {
 public:
+	virtual ~IEventObThreadHandleDublicate() {}
 	virtual int getRequestorPID() = 0;
 	virtual int getRequestorTID() = 0;
 	virtual unsigned char getIsKernelHandle() = 0;
@@ -76,6 +81,7 @@ public:
 class IEventProcessCreate
 {
 public:
+	virtual ~IEventProcessCreate() {}
 	virtual int getPID() = 0;
 	virtual int getParentPID() = 0;
 	virtual int getCreatingPID() = 0;
@@ -89,6 +95,7 @@ public:
 class IEventProcessExit
 {
 public:
+	virtual ~IEventProcessExit() {}
 	virtual int getPID() = 0;
 };
 
@@ -97,6 +104,7 @@ public:
 class IEventThreadCreate
 {
 public:
+	virtual ~IEventThreadCreate() {}
 	virtual int getPID() = 0;
 	virtual int getTID() = 0;
 };
@@ -106,6 +114,7 @@ public:
 class IEventThreadExit
 {
 public:
+	virtual ~IEventThreadExit() {}
 	virtual int getPID() = 0;
 	virtual int getTID() = 0;
 };
@@ -115,8 +124,28 @@ public:
 class IEventImageLoad
 {
 public:
+	virtual ~IEventImageLoad() {}
 	virtual int getPID() = 0;
 	virtual std::string& getImageName() = 0;
 	virtual unsigned char getIsSystemModule() = 0;
 };
 
+// Interface for AvEventRegCreateKey that will be used
+// in plugins to access event parameters.
+class IEventRegCreateKey
+{
+public:
+	virtual ~IEventRegCreateKey() {}
+	virtual int getRequestorPID() = 0;
+	virtual std::string& getKeyPath() = 0;
+};
+
+// Interface for AvEventRegOpenKey that will be used
+// in plugins to access event parameters.
+class IEventRegOpenKey
+{
+public:
+	virtual ~IEventRegOpenKey() {}
+	virtual int getRequestorPID() = 0;
+	virtual std::string& getKeyPath() = 0;
+};

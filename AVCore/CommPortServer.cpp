@@ -46,7 +46,7 @@ void CommPortServer::start(IManager* manager)
 		NULL,
 		0,
 		KM_EVENTS_LISTENER_THREAD_COUNT);
-	std::cout << "Created completion port\n";
+	this->pluginManager->getLogger()->log("Created completion port.");
 
 	if (NULL == this->completionPort)
 	{
@@ -86,7 +86,7 @@ void CommPortServer::start(IManager* manager)
 		}
 		else
 		{
-			fprintf(stderr, "[UserScanInit]: FilterGetMessage failed.\n");
+			this->pluginManager->getLogger()->log("[UserScanInit]: FilterGetMessage failed. Error: " + std::to_string(hr));
 			HeapFree(GetProcessHeap(), 0, msg);
 			throw "FAILED";
 		}
@@ -122,7 +122,7 @@ void CommPortServer::closePorts()
 	HRESULT  hr = S_OK;
 	if (!CloseHandle(this->eventsPort))
 	{
-		fprintf(stderr, "[UserScanFinalize]: Failed to close the connection port.\n");
+		this->pluginManager->getLogger()->log("[UserScanFinalize]: Failed to close the connection port.");
 		hr = HRESULT_FROM_WIN32(GetLastError());
 	}
 
@@ -130,7 +130,7 @@ void CommPortServer::closePorts()
 
 	if (!CloseHandle(this->completionPort))
 	{
-		fprintf(stderr, "[UserScanFinalize]: Failed to close the completion port.\n");
+		this->pluginManager->getLogger()->log("[UserScanFinalize]: Failed to close the completion port.");
 		hr = HRESULT_FROM_WIN32(GetLastError());
 	}
 
@@ -167,7 +167,9 @@ void CommPortListener::listen()
 
 	ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 
-	std::cout << "Current listnere thread id: " << this->thread->get_id() << "\n";
+	std::ostringstream ss;
+	ss << this->thread->get_id();
+	this->pluginManager->getLogger()->log("Current listnere thread id: " + ss.str());
 
 	//  This thread is waiting for scan message from the driver
 	for (;;)
@@ -187,13 +189,13 @@ void CommPortListener::listen()
 			//  *lpOverlapped will be NULL, and GetLastError will return ERROR_ABANDONED_WAIT_0
 			if (hr == E_HANDLE)
 			{
-				printf("Completion port becomes unavailable.\n");
+				this->pluginManager->getLogger()->log("Completion port becomes unavailable.");
 				hr = S_OK;
 
 			}
 			else if (hr == HRESULT_FROM_WIN32(ERROR_ABANDONED_WAIT_0))
 			{
-				printf("Completion port was closed.\n");
+				this->pluginManager->getLogger()->log("Completion port was closed.");
 				hr = S_OK;
 			}
 
@@ -225,7 +227,7 @@ void CommPortListener::listen()
 
 			if (FAILED(hr))
 			{
-				fprintf(stderr, "[UserScanWorker]: Failed to reply thread handle to the minifilter, %lu\n", hr);
+				this->pluginManager->getLogger()->log("[UserScanWorker]: Failed to reply thread handle to the minifilter. Error: " + std::to_string(hr));
 				break;
 			}
 		}
@@ -237,7 +239,7 @@ void CommPortListener::listen()
 
 		if (FAILED(hr))
 		{
-			fprintf(stderr, "[UserScanWorker]: Failed to handle the message.\n");
+			this->pluginManager->getLogger()->log("[UserScanWorker]: Failed to handle the message. Error code: " + std::to_string(hr));
 		}
 
 		//  If fianlized flag is set from main thread, 
@@ -255,13 +257,13 @@ void CommPortListener::listen()
 
 		if (hr == HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED))
 		{
-			printf("FilterGetMessage aborted.\n");
+			this->pluginManager->getLogger()->log("FilterGetMessage aborted.");
 			break;
 
 		}
 		else if (hr != HRESULT_FROM_WIN32(ERROR_IO_PENDING))
 		{
-			fprintf(stderr, "[UserScanWorker]: Failed to get message from the minifilter. \n0x%x, 0x%x\n", hr, HRESULT_FROM_WIN32(GetLastError()));
+			this->pluginManager->getLogger()->log("[UserScanWorker]: Failed to get message from the minifilter. Error code: " + std::to_string(hr));
 			break;
 		}
 
@@ -273,5 +275,7 @@ void CommPortListener::listen()
 		HeapFree(GetProcessHeap(), 0, message);
 	}
 
-	std::cout << "***Thread id " << this->thread->get_id() << " exiting\n";
+	ss.clear();
+	ss << this->thread->get_id();
+	this->pluginManager->getLogger()->log("***Thread id " + ss.str() + " exiting.");
 }

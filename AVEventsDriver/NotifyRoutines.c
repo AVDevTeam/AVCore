@@ -201,5 +201,4 @@ void AVLoadImageCallback(
 	{
 		// TODO.Response processing login?
 	}
-
 }

@@ -154,6 +154,7 @@
     <ClCompile Include="CommPortServer.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="EventsParser.cpp" />
+    <ClCompile Include="FileLogger.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PipeServer.cpp" />
     <ClCompile Include="PluginManager.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="CommPortServer.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="EventsParser.h" />
+    <ClInclude Include="FileLogger.h" />
     <ClInclude Include="PipeServer.h" />
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="SettingsManager.h" />
