@@ -14,6 +14,8 @@
 #include "EventsUMStructures.h"
 #include <mutex>
 
+#include <sstream> // to convert thread::id to string
+
 #ifndef MAKE_HRESULT
 #define MAKE_HRESULT(sev,fac,code) \
     ((HRESULT) (((unsigned long)(sev)<<31) | ((unsigned long)(fac)<<16) | ((unsigned long)(code))) )

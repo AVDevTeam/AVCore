@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "EventsUMInterfaces.h"
 #include <string>
+#include <iostream>
 
 // Base class for all UM events.
 // contains helper functions.
@@ -16,6 +17,7 @@ class AvEvent
 {
 public:
 	AvEvent() {};
+	virtual ~AvEvent() {}
 };
 
 // Base class for event parsers.
@@ -36,9 +38,9 @@ class AvFSEventCreate : public IEventFSCreate, AvEvent
 public:
 	// constructor that is used by AvFSEventCreateParser.
 	AvFSEventCreate(char, int, std::string);
-	~AvFSEventCreate();
 
 	// Inherited via IEventFSCreate
+	virtual ~AvFSEventCreate() override;
 	virtual int getRequestorPID() override;
 	virtual char getRequestorMode() override;
 	virtual std::string& getFilePath() override;
@@ -72,7 +74,9 @@ public:
 		this->targetPID = targetPID;
 		this->desiredAccess = desiredAccess;
 	}
+
 	// Inherited via IEventObProcessHandleCreate
+	virtual ~AvObEventProcessHandleCreate() override;
 	virtual int getRequestorPID() override;
 	virtual unsigned char  getIsKernelHandle() override;
 	virtual int getTargetPID() override;
@@ -105,6 +109,7 @@ public:
 	}
 
 	// Inherited via IEventObProcessHandleDublicate
+	virtual ~AvObEventProcessHandleDublicate() override;
 	virtual int getDublicateSourcePID() override;
 	virtual int getDublicateTargetPID() override;
 	virtual int getRequestorPID() override;
@@ -137,6 +142,7 @@ public:
 		this->targetTID = targetTID;
 	}
 	// Inherited via IEventObThreadHandleCreate
+	virtual ~AvObEventThreadHandleCreate() override;
 	virtual int getRequestorTID() override;
 	virtual int getTargetTID() override;
 	virtual int getRequestorPID() override;
@@ -173,6 +179,7 @@ public:
 	}
 
 	// Inherited via IEventObThreadHandleDublicate
+	virtual ~AvObEventThreadHandleDublicate() override;
 	virtual int getRequestorTID() override;
 	virtual int getTargetTID() override;
 	virtual int getDublicateSourcePID() override;
@@ -208,8 +215,9 @@ public:
 		this->imageFileName = imageFileName;
 		this->commandLine = commandLine;
 	}
-
+	
 	// Inherited via IEventProcessCreate
+	virtual ~AvEventProcessCreate() override;
 	virtual int getPID() override;
 	virtual int getParentPID() override;
 	virtual int getCreatingPID() override;
@@ -240,6 +248,7 @@ public:
 	AvEventProcessEixt(int PID) { this->PID = PID; }
 
 	// Inherited via IEventProcessExit
+	virtual ~AvEventProcessEixt() override;
 	virtual int getPID() override;
 private:
 	int PID;
@@ -260,6 +269,7 @@ public:
 	AvEventThreadCreate(int PID, int TID) { this->PID = PID; this->TID = TID; }
 
 	// Inherited via IEventThreadCreate
+	virtual ~AvEventThreadCreate() override;
 	virtual int getPID() override;
 	virtual int getTID() override;
 private:
@@ -282,6 +292,7 @@ public:
 	AvEventThreadExit(int PID, int TID) { this->PID = PID; this->TID = TID; }
 
 	// Inherited via IEventThreadCreate
+	virtual ~AvEventThreadExit() override;
 	virtual int getPID() override;
 	virtual int getTID() override;
 private:
@@ -309,6 +320,7 @@ public:
 	}
 
 	// Inherited via IEventImageLoad
+	virtual ~AvEventImageLoad() override;
 	virtual int getPID() override;
 	virtual std::string& getImageName() override;
 	virtual unsigned char getIsSystemModule() override;
@@ -320,6 +332,60 @@ private:
 
 // AvEventImageLoad parser
 class AvEventImageLoadParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for reg key create event (CmRegisterCallback)
+class AvEventRegCreateKey : public IEventRegCreateKey
+{
+public:
+	AvEventRegCreateKey(int requestorPID, std::string keyPath)
+	{
+		this->requestorPID = requestorPID;
+		this->keyPath = keyPath;
+	}
+
+	// Inherited via IEventRegCreateKey
+	virtual ~AvEventRegCreateKey() override;
+	virtual int getRequestorPID() override;
+	virtual std::string& getKeyPath() override;
+private:
+	int requestorPID;
+	std::string keyPath;
+};
+
+// AvEventRegCreateKey parser
+class AvEventRegCreateKeyParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+// Class for reg key open event (CmRegisterCallback)
+class AvEventRegOpenKey : public IEventRegOpenKey
+{
+public:
+	AvEventRegOpenKey(int requestorPID, std::string keyPath)
+	{
+		this->requestorPID = requestorPID;
+		this->keyPath = keyPath;
+	}
+
+	// Inherited via IEventRegOpenKey
+	virtual ~AvEventRegOpenKey() override;
+	virtual int getRequestorPID() override;
+	virtual std::string& getKeyPath() override;
+private:
+	int requestorPID;
+	std::string keyPath;
+};
+
+// AvEventRegOpenKey parser
+class AvEventRegOpenKeyParser : EventParser
 {
 public:
 	// Inherited via EventParser

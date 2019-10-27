@@ -3,89 +3,125 @@
 #include "EventsUMInterfaces.h"
 #include "KMUMcomm.h"
 #include <iostream>
+#include <fstream>
+#include <mutex>
+
+std::mutex fdump_mutex;
 
 /*
 This file contains the actual plugin logic.
 */
+
+TestPlugin::~TestPlugin()
+{
+}
 
 AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 {
 	if (callbackId == CallbackFileCreate)
 	{
 		IEventFSCreate* eventFSCreate = reinterpret_cast<IEventFSCreate*>(event);
-		std::cout << "\tFile path: " << eventFSCreate->getFilePath() << "\n";
-		std::cout << "\tRequestor PID: " << eventFSCreate->getRequestorPID() << "\n";
-	}
+		this->logger->log("CallbackFileCreate");
+		this->logger->log("\tFile path: " + eventFSCreate->getFilePath());
+		this->logger->log("\tRequestor PID: " + std::to_string(eventFSCreate->getRequestorPID()));	}
 	else if (callbackId == CallbackPrHandleCreate)
 	{
 		IEventObProcessHandleCreate* eventPrHandleCreate = reinterpret_cast<IEventObProcessHandleCreate*>(event);
-		std::cout << "\tRequestor PID: " << eventPrHandleCreate->getRequestorPID() << "\n";
-		std::cout << "\tTarget PID: " << eventPrHandleCreate->getTargetPID() << "\n";
-		std::cout << "\tDesired access: " << std::hex << eventPrHandleCreate->getDesiredAccess() << std::dec << "\n";
+		this->logger->log("CallbackPrHandleCreate");
+		this->logger->log("\tRequestor PID: " + std::to_string(eventPrHandleCreate->getRequestorPID()));
+		this->logger->log("\tTarget PID: " + std::to_string(eventPrHandleCreate->getTargetPID()));
+		this->logger->log("\tDesired access: " + std::to_string(eventPrHandleCreate->getDesiredAccess()));
 	}
 	else if (callbackId == CallbackPrHandleDublicate)
 	{
 		IEventObProcessHandleDublicate* eventPrHandleDublicate = reinterpret_cast<IEventObProcessHandleDublicate*>(event);
-		std::cout << "\tRequestor PID: " << eventPrHandleDublicate->getRequestorPID() << "\n";
-		std::cout << "\tTarget PID: " << eventPrHandleDublicate->getTargetPID() << "\n";
-		std::cout << "\tDesired access: " << std::hex << eventPrHandleDublicate->getDesiredAccess() << std::dec << "\n";
-		std::cout << "\tSource dublicate PID: " << eventPrHandleDublicate->getDublicateSourcePID() << "\n";
-		std::cout << "\tTarget dublicate PID: " << eventPrHandleDublicate->getDublicateTargetPID() << "\n";
+		this->logger->log("CallbackPrHandleDublicate");
+		this->logger->log("\tRequestor PID: " + std::to_string(eventPrHandleDublicate->getRequestorPID()));
+		this->logger->log("\tTarget PID: " + std::to_string(eventPrHandleDublicate->getTargetPID()));
+		this->logger->log("\tDesired access: " + std::to_string(eventPrHandleDublicate->getDesiredAccess()));
+		this->logger->log("\tSource dublicate PID: " + std::to_string(eventPrHandleDublicate->getDublicateSourcePID()));
+		this->logger->log("\tTarget dublicate PID: " + std::to_string(eventPrHandleDublicate->getDublicateTargetPID()));
 	}
 	else if (callbackId == CallbackThHandleCreate)
 	{
 		IEventObThreadHandleCreate* eventThHandleCreate = reinterpret_cast<IEventObThreadHandleCreate*>(event);
-		std::cout << "\tRequestor PID: " << eventThHandleCreate->getRequestorPID() << "\n";
-		std::cout << "\tRequestor TID: " << eventThHandleCreate->getRequestorTID() << "\n";
-		std::cout << "\tTarget PID: " << eventThHandleCreate->getTargetPID() << "\n";
-		std::cout << "\tTarget TID: " << eventThHandleCreate->getTargetTID() << "\n";
-		std::cout << "\tDesired access: " << std::hex << eventThHandleCreate->getDesiredAccess() << std::dec;
-		std::cout << "\n";
+		this->logger->log("CallbackThHandleCreate");
+		this->logger->log("\tRequestor PID: " + std::to_string(eventThHandleCreate->getRequestorPID()));
+		this->logger->log("\tRequestor TID: " + std::to_string(eventThHandleCreate->getRequestorTID()));
+		this->logger->log("\tTarget PID: " + std::to_string(eventThHandleCreate->getTargetPID()));
+		this->logger->log("\tTarget TID: " + std::to_string(eventThHandleCreate->getTargetTID()));
+		this->logger->log("\tDesired access: " + std::to_string(eventThHandleCreate->getDesiredAccess()));
 	}
 	else if (callbackId == CallbackThHandleDublicate)
 	{
 		IEventObThreadHandleDublicate* eventThHandleDublicate = reinterpret_cast<IEventObThreadHandleDublicate*>(event);
-		std::cout << "\tRequestor PID: " << eventThHandleDublicate->getRequestorPID() << "\n";
-		std::cout << "\tRequestor TID: " << eventThHandleDublicate->getRequestorTID() << "\n";
-		std::cout << "\tTarget PID: " << eventThHandleDublicate->getTargetPID() << "\n";
-		std::cout << "\tTarget TID: " << eventThHandleDublicate->getTargetTID() << "\n";
-		std::cout << "\tDesired access: " << std::hex << eventThHandleDublicate->getDesiredAccess() << std::dec << "\n";
-		std::cout << "\tSource dublicate PID: " << eventThHandleDublicate->getDublicateSourcePID() << "\n";
-		std::cout << "\tTarget dublicate PID: " << eventThHandleDublicate->getDublicateTargetPID() << "\n";
+		this->logger->log("CallbackThHandleDublicate");
+		this->logger->log("\tRequestor PID: " + std::to_string(eventThHandleDublicate->getRequestorPID()));
+		this->logger->log("\tRequestor TID: " + std::to_string(eventThHandleDublicate->getRequestorTID()));
+		this->logger->log("\tTarget PID: " + std::to_string(eventThHandleDublicate->getTargetPID()));
+		this->logger->log("\tTarget TID: " + std::to_string(eventThHandleDublicate->getTargetTID()));
+		this->logger->log("\tDesired access: " + std::to_string(eventThHandleDublicate->getDesiredAccess()));
+		this->logger->log("\tSource dublicate PID: " + std::to_string(eventThHandleDublicate->getDublicateSourcePID()));
+		this->logger->log("\tTarget dublicate PID: " + std::to_string(eventThHandleDublicate->getDublicateTargetPID()));
 	}
 	else if (callbackId == CallbackProcessCreate)
 	{
 		IEventProcessCreate* eventProcessCreate = reinterpret_cast<IEventProcessCreate*>(event);
-		std::cout << "\tNew process PID: " << eventProcessCreate->getPID() << "\n";
-		std::cout << "\tParent PID: " << eventProcessCreate->getParentPID() << "\n";
-		std::cout << "\tCreating PID: " << eventProcessCreate->getCreatingPID() << "\n";
-		std::cout << "\tCreating TID: " << eventProcessCreate->getCreatingTID() << "\n";
-		std::cout << "\tImage file name: " << eventProcessCreate->getImageFileName() << "\n";
-		std::cout << "\tCommand line: " << eventProcessCreate->getCommandLine() << "\n";
+		this->logger->log("CallbackProcessCreate");
+		this->logger->log("\tNew process PID: " + std::to_string(eventProcessCreate->getPID()));
+		this->logger->log("\tParent PID: " + std::to_string(eventProcessCreate->getParentPID()));
+		this->logger->log("\tCreating PID: " + std::to_string(eventProcessCreate->getCreatingPID()));
+		this->logger->log("\tCreating TID: " + std::to_string(eventProcessCreate->getCreatingTID()));
+		this->logger->log("\tImage file name: " + eventProcessCreate->getImageFileName());
+		this->logger->log("\tCommand line: " + eventProcessCreate->getCommandLine());
 	}
 	else if (callbackId == CallbackProcessExit)
 	{
 		IEventProcessExit* eventProcessExit = reinterpret_cast<IEventProcessExit*>(event);
-		std::cout << "\tProcess exits. PID: " << eventProcessExit->getPID() << "\n";
+		this->logger->log("CallbackProcessExit");
+		this->logger->log("\tProcess exits. PID: " + std::to_string(eventProcessExit->getPID()));
 	}
 	else if (callbackId == CallbackThreadCreate)
 	{
 		IEventThreadCreate* eventThreadCreate = reinterpret_cast<IEventThreadCreate*>(event);
-		std::cout << "\tNew thread in process with PID: " << eventThreadCreate->getPID() << "\n";
-		std::cout << "\tNew thread TID: " << eventThreadCreate->getTID() << "\n";
+		this->logger->log("CallbackThreadCreate");
+		this->logger->log("\tNew thread in process with PID: " + std::to_string(eventThreadCreate->getPID()));
+		this->logger->log("\tNew thread TID: " + eventThreadCreate->getTID());
 	}
 	else if (callbackId == CallbackThreadExit)
 	{
 		IEventThreadExit* eventThreadExit = reinterpret_cast<IEventThreadExit*>(event);
-		std::cout << "\tThread exits in process with PID: " << eventThreadExit->getPID() << "\n";
-		std::cout << "\tExiting thread TID: " << eventThreadExit->getTID() << "\n";
+		this->logger->log("CallbackThreadExit");
+		this->logger->log("\tThread exits in process with PID: " + std::to_string(eventThreadExit->getPID()));
+		this->logger->log("\tExiting thread TID: " + std::to_string(eventThreadExit->getTID()));
 	}
 	else if (callbackId == CallbackImageLoad)
 	{
 		IEventImageLoad* eventImageLoad = reinterpret_cast<IEventImageLoad*>(event);
-		std::cout << "\tModule loads into process with PID: " << eventImageLoad->getPID() << "\n";
-		std::cout << "\tisSystemModule: " << eventImageLoad->getIsSystemModule() << "\n";
-		std::cout << "\tImage name: " << eventImageLoad->getImageName() << "\n";
+		this->logger->log("CallbackImageLoad");
+		this->logger->log("\tModule loads into process with PID: " + std::to_string(eventImageLoad->getPID()));
+		this->logger->log("\tisSystemModule: " + std::to_string(eventImageLoad->getIsSystemModule()));
+		this->logger->log("\tImage name: " + eventImageLoad->getImageName());
+	}
+	else if (callbackId == CallbackRegCreateKey)
+	{
+		IEventRegCreateKey* eventRegCreateKey = reinterpret_cast<IEventRegCreateKey*>(event);
+		if (eventRegCreateKey->getRequestorPID() != 3732)
+			return AvEventStatusAllow;
+		this->logger->log("CallbackRegCreateKey");
+		this->logger->log("\tPID: " + std::to_string(eventRegCreateKey->getRequestorPID()));
+		this->logger->log("\tProcess PID: " + std::to_string(eventRegCreateKey->getRequestorPID()));
+		this->logger->log("\tKey path: " + eventRegCreateKey->getKeyPath());
+	}
+	else if (callbackId == CallbackRegOpenKey)
+	{
+		IEventRegOpenKey* eventRegOpenKey = reinterpret_cast<IEventRegOpenKey*>(event);
+		if (eventRegOpenKey->getRequestorPID() != 3732)
+			return AvEventStatusAllow;
+		this->logger->log("CallbackRegOpenKey");
+		this->logger->log("\tPID: " + std::to_string(eventRegOpenKey->getRequestorPID()));
+		this->logger->log("\tProcess PID: " + std::to_string(eventRegOpenKey->getRequestorPID()));
+		this->logger->log("\tKey path: " + eventRegOpenKey->getKeyPath());
 	}
 	return AvEventStatusAllow;
 }
@@ -93,6 +129,7 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
 void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 {
 	this->module = module;
+	this->logger = manager->getLogger();
 
 	this->configManager = config;
 	paramMap* paramMap = new std::map<std::string, ConfigParamType>();
@@ -134,6 +171,9 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	manager->registerCallback(this, CallbackThreadExit, AvThreadExit, 1);
 
 	manager->registerCallback(this, CallbackImageLoad, AvImageLoad, 1);
+
+	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 1);
+	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 1);
 }
 
 void TestPlugin::deinit()

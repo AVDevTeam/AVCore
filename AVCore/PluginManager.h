@@ -17,6 +17,8 @@ typedef std::map <AV_EVENT_TYPE, priorityMap*> eventsMap;
 class PluginManager : public IManager
 {
 public:
+	PluginManager(ILogger* logger) { this->logger = logger; }
+	virtual ~PluginManager() override;
 
 	IPlugin * loadPlugin(std::string path);
 	void unloadPlugin(std::string name);
@@ -38,6 +40,8 @@ public:
 	virtual void leaveCriticalEventProcessingSection() override;
 	virtual void lockEventsProcessing() override;
 	virtual void unlockEventsProcessing() override;
+
+	virtual ILogger* getLogger() override;
 
 private:
 	/*
@@ -65,4 +69,8 @@ private:
 	// cruatial structures processed in event listeners
 	// (it is used to pause all event listening threads).
 	std::shared_mutex eventProcessingMutex;
+
+	// logger
+	ILogger* logger;
+
 };

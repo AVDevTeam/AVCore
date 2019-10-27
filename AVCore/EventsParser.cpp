@@ -7,10 +7,6 @@ AvFSEventCreate::AvFSEventCreate(char requestorMode, int requestorPID, std::stri
 	this->FilePath = FilePath;
 }
 
-AvFSEventCreate::~AvFSEventCreate()
-{
-}
-
 wchar_t* AvFSEventCreateParser::getVoluemLetter(wchar_t* deviceName)
 {
 	wchar_t volumeNames[512] = { 0 }; // todo dynamic allocation
@@ -44,6 +40,10 @@ std::string& AvFSEventCreate::getFilePath()
 	return this->FilePath;
 }
 
+AvFSEventCreate::~AvFSEventCreate()
+{
+}
+
 int AvFSEventCreate::getRequestorPID()
 {
 	return this->RequestorPID;
@@ -68,7 +68,7 @@ wchar_t* EventParser::wcscpyZeroTerminate(wchar_t* srcBuffer, int srcSize)
 {
 	int dstSize = srcSize;
 	dstSize += 2; // two additional bytes for wide char NULL-terminator.
-	wchar_t* dstBuffer = (wchar_t*)malloc(dstSize);
+	wchar_t* dstBuffer = new wchar_t[dstSize];
 	if (dstBuffer == NULL)
 	{
 		throw "OutOfMemory"; // TODO! Error handling (Exceptions or RetVals ?!)
@@ -113,6 +113,10 @@ AvEvent* AvFSEventCreateParser::parse(PVOID event)
 	return eventInstanse;
 }
 
+AvObEventProcessHandleCreate::~AvObEventProcessHandleCreate()
+{
+}
+
 int AvObEventProcessHandleCreate::getRequestorPID()
 {
 	return this->requestorPID;
@@ -142,6 +146,10 @@ AvEvent* AvObEventProcessHandleCreateParser::parse(PVOID event)
 		eventPrHandleCreate->TargetPID,
 		eventPrHandleCreate->DesiredAccess));
 	return eventInstanse;
+}
+
+AvObEventProcessHandleDublicate::~AvObEventProcessHandleDublicate()
+{
 }
 
 int AvObEventProcessHandleDublicate::getDublicateSourcePID()
@@ -187,6 +195,10 @@ AvEvent* AvObEventProcessHandleDublicateParser::parse(PVOID event)
 	return eventInstanse;
 }
 
+AvObEventThreadHandleCreate::~AvObEventThreadHandleCreate()
+{
+}
+
 int AvObEventThreadHandleCreate::getRequestorTID()
 {
 	return this->requestorTID;
@@ -228,6 +240,10 @@ AvEvent* AvObEventThreadHandleCreateParser::parse(PVOID event)
 		eventThHandleCreate->TargetTID,
 		eventThHandleCreate->DesiredAccess));
 	return eventInstanse;
+}
+
+AvObEventThreadHandleDublicate::~AvObEventThreadHandleDublicate()
+{
 }
 
 int AvObEventThreadHandleDublicate::getRequestorTID()
@@ -285,6 +301,10 @@ AvEvent* AvObEventThreadHandleDublicateParser::parse(PVOID event)
 	return eventInstanse;
 }
 
+AvEventProcessCreate::~AvEventProcessCreate()
+{
+}
+
 int AvEventProcessCreate::getPID()
 {
 	return this->PID;
@@ -325,8 +345,8 @@ AvEvent* AvEventProcessCreateParser::parse(PVOID event)
 	std::wstring imageFileName_ws(imageFileName), commandLine_ws(commandLine);
 	std::string imageFileName_std(imageFileName_ws.begin(), imageFileName_ws.end());
 	std::string commandLine_std(commandLine_ws.begin(), commandLine_ws.end());
-	free(imageFileName);
-	free(commandLine);
+	delete imageFileName;
+	delete commandLine;
 
 	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventProcessCreate(
 		eventProcessCreate->PID,
@@ -337,6 +357,10 @@ AvEvent* AvEventProcessCreateParser::parse(PVOID event)
 		commandLine_std
 	));
 	return instance;
+}
+
+AvEventProcessEixt::~AvEventProcessEixt()
+{
 }
 
 int AvEventProcessEixt::getPID()
@@ -351,6 +375,10 @@ AvEvent* AvEventProcessEixtParser::parse(PVOID event)
 		eventProcessExit->PID
 	));
 	return instance;
+}
+
+AvEventThreadCreate::~AvEventThreadCreate()
+{
 }
 
 int AvEventThreadCreate::getPID()
@@ -372,6 +400,10 @@ AvEvent* AvEventThreadCreateParser::parse(PVOID event)
 	return instance;
 }
 
+AvEventThreadExit::~AvEventThreadExit()
+{
+}
+
 int AvEventThreadExit::getPID()
 {
 	return this->PID;
@@ -389,6 +421,10 @@ AvEvent* AvEventThreadExitParser::parse(PVOID event)
 		eventThreadExit->PID,
 		eventThreadExit->TID));
 	return instance;
+}
+
+AvEventImageLoad::~AvEventImageLoad()
+{
 }
 
 int AvEventImageLoad::getPID()
@@ -420,6 +456,66 @@ AvEvent* AvEventImageLoadParser::parse(PVOID event)
 		eventImageLoad->PID,
 		imageName_std,
 		eventImageLoad->systemModeImage
+	));
+	return instance;
+}
+
+AvEventRegCreateKey::~AvEventRegCreateKey()
+{
+}
+
+int AvEventRegCreateKey::getRequestorPID()
+{
+	return this->requestorPID;
+}
+
+std::string& AvEventRegCreateKey::getKeyPath()
+{
+	return this->keyPath;
+}
+
+AvEventRegOpenKey::~AvEventRegOpenKey()
+{
+}
+
+int AvEventRegOpenKey::getRequestorPID()
+{
+	return this->requestorPID;
+}
+
+std::string& AvEventRegOpenKey::getKeyPath()
+{
+	return this->keyPath;
+}
+
+AvEvent* AvEventRegCreateKeyParser::parse(PVOID event)
+{
+	PAV_EVENT_REG_CREATE_KEY eventRegCreateKey = (PAV_EVENT_REG_CREATE_KEY)event;
+	// copy wide char strings from KM supplied buffers.
+	wchar_t* keyPath = this->wcscpyZeroTerminate(eventRegCreateKey->keyPath, eventRegCreateKey->keyPathSize);
+
+	std::wstring keyPath_ws(keyPath);
+	std::string keyPath_std(keyPath_ws.begin(), keyPath_ws.end());
+	free(keyPath);
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventRegCreateKey(
+		eventRegCreateKey->requestorPID,
+		keyPath_std
+	));
+	return instance;
+}
+
+AvEvent* AvEventRegOpenKeyParser::parse(PVOID event)
+{
+	PAV_EVENT_REG_OPEN_KEY eventRegOpenKey = (PAV_EVENT_REG_OPEN_KEY)event;
+	// copy wide char strings from KM supplied buffers.
+	wchar_t* keyPath = this->wcscpyZeroTerminate(eventRegOpenKey->keyPath, eventRegOpenKey->keyPathSize);
+
+	std::wstring keyPath_ws(keyPath);
+	std::string keyPath_std(keyPath_ws.begin(), keyPath_ws.end());
+	free(keyPath);
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventRegCreateKey(
+		eventRegOpenKey->requestorPID,
+		keyPath_std
 	));
 	return instance;
 }

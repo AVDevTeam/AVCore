@@ -17,11 +17,13 @@
 class IManager;
 class IPlugin;
 class IConfig;
+class ILogger;
 
 // Plugin manager interface
 class IManager
 {
 public:
+	virtual ~IManager() {}
 	virtual int registerCallback(IPlugin*, int, AV_EVENT_TYPE, int) = 0;
 	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*) = 0;
 
@@ -31,12 +33,15 @@ public:
 
 	virtual void lockEventsProcessing() = 0;
 	virtual void unlockEventsProcessing() = 0;
+
+	virtual ILogger* getLogger() = 0;
 };
 
 // Interface for plugins
 class IPlugin
 {
 public:
+	virtual ~IPlugin() {}
 	/*
 	Method description:
 		Method for plugin initialization.
@@ -81,6 +86,7 @@ typedef std::pair<std::string, ConfigParamType> paramPair;
 class IConfig
 {
 public:
+	virtual ~IConfig() {}
 	/*
 	Method description:
 		Initializes IConfig store (opens registry key).
@@ -104,6 +110,15 @@ public:
 	virtual void setDwordParam(std::string& paramName, DWORD value) = 0;
 	virtual void setStringParam(std::string& paramName, std::string& value) = 0;
 	virtual void setListParam(std::string& paramName, std::list<std::string>& value) = 0;
+};
+
+// Interface for debug loggers.
+class ILogger
+{
+public:
+	virtual ~ILogger() {}
+
+	virtual void log(std::string) = 0;
 };
 
 #endif

@@ -31,6 +31,12 @@
     <Filter Include="SettingsManager">
       <UniqueIdentifier>{af0dcac3-2108-4739-b32a-437d877c9e5c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Loggers">
+      <UniqueIdentifier>{1b082301-f2ef-45c5-9ffe-7abd6e9301a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loggers\FileLogger">
+      <UniqueIdentifier>{167f2c42-c8ea-43a8-9bf1-2acd525ddcad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -54,6 +60,9 @@
     <ClCompile Include="SettingsManager.cpp">
       <Filter>SettingsManager</Filter>
     </ClCompile>
+    <ClCompile Include="FileLogger.cpp">
+      <Filter>Loggers\FileLogger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PipeServer.h">
@@ -73,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="SettingsManager.h">
       <Filter>SettingsManager</Filter>
+    </ClInclude>
+    <ClInclude Include="FileLogger.h">
+      <Filter>Loggers\FileLogger</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

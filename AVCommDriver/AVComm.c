@@ -436,6 +436,10 @@ NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBu
 		return STATUS_MEMORY_NOT_ALLOCATED;
 	}
 
+	
+	//LARGE_INTEGER timeout;
+	//timeout.QuadPart = -(LONGLONG)1 * 10 * 1000 * 1000;
+
 	// Send event to the AVCore UM service and wait for the response
 	status = FltSendMessage(Globals.Filter,
 		&Globals.EventsClientPort,
@@ -458,11 +462,11 @@ based on PID.
 UCHAR AVCommIsExcludedPID(HANDLE PID)
 {
 	return Globals.AVCoreServicePID == PID
-		|| PID == (HANDLE)468 // csrs
-		|| PID == (HANDLE)380 // csrs
-		|| PID == (HANDLE)4 // system
-		|| PID == (HANDLE)292 // lsass
-		|| PID == (HANDLE)584; // lsass
+		|| PID == (HANDLE)0
+		|| PID == (HANDLE)4
+		|| PID == (HANDLE)380
+		|| PID == (HANDLE)468
+		;
 }
 
 /*

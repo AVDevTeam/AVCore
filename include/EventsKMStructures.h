@@ -132,4 +132,11 @@ typedef struct _AV_EVENT_IMAGE_LOAD
 	unsigned char systemModeImage;
 } AV_EVENT_IMAGE_LOAD, * PAV_EVENT_IMAGE_LOAD;
 
+typedef struct _AV_EVENT_REG_CREATE_OPEN_KEY
+{
+	int requestorPID;
+	wchar_t* keyPath;
+	int keyPathSize;
+} AV_EVENT_REG_CREATE_KEY, AV_EVENT_REG_OPEN_KEY, * PAV_EVENT_REG_CREATE_KEY, * PAV_EVENT_REG_OPEN_KEY;
+
 #pragma endregion Events structures

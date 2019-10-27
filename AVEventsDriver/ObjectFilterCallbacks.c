@@ -104,7 +104,6 @@ OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
 {
 	UNREFERENCED_PARAMETER(RegistrationContext);
 
-
 	if (!AVCommIsInitialized())
 	{
 		return OB_PREOP_SUCCESS;

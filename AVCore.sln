@@ -17,6 +17,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utils", "utils", "{7F1B02CF-31B1-4D01-B411-E4C198141C00}"
 	ProjectSection(SolutionItems) = preProject
 		utils\install.bat = utils\install.bat
+		utils\start.bat = utils\start.bat
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestPlugin", "TestPlugin\TestPlugin.vcxproj", "{5F78444A-A7D4-4E7B-B0B8-A86787648172}"

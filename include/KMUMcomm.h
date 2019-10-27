@@ -40,6 +40,8 @@ typedef enum _AV_EVENT_TYPE
 	AvThreadCreate, // (PsSetThreadeCreateNotifyRoutine)
 	AvThreadExit, // (PsSetThreadeCreateNotifyRoutine)
 	AvImageLoad, // (PsSetImageNotifyRoutine[Ex])
+	AvRegCreateKey, // (RegNtPreCreateKey[Ex])
+	AvRegOpenKey, // (RegNtPreOpenKey[Ex])
 } AV_EVENT_TYPE;
 
 //  Event stucture: Kernel -> User Message

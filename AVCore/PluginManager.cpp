@@ -4,6 +4,24 @@
 
 typedef IPlugin* (* GetPlugin)();
 
+PluginManager::~PluginManager()
+{
+	std::list<std::string> pluginsToUnload;
+	for (std::map<std::string, IPlugin*>::iterator it = this->loadedPlugins.begin(); it != this->loadedPlugins.end(); it++)
+	{
+		pluginsToUnload.push_back((*it).first);
+	}
+	for (std::list<std::string>::iterator it = pluginsToUnload.begin(); it != pluginsToUnload.end(); it++)
+	{
+		this->unloadPlugin((*it));
+	}
+
+	for (std::map<int, EventParser*>::iterator it = this->parsersMap.begin(); it != this->parsersMap.end(); it++)
+	{
+		delete (*it).second;
+	}
+}
+
 IPlugin* PluginManager::loadPlugin(std::string path)
 {
 	// load plugin dll
@@ -99,36 +117,42 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 {
 	switch (eventType)
 	{
-		case AvFileCreate:
-			std::cout << "Processing AvFileCreate event\n";
-			break;
-		case AvProcessHandleCreate:
-			std::cout << "Processing AvProcessHandleCreate event\n";
-			break;
-		case AvProcessHandleDublicate:
-			std::cout << "Processing AvProcessHandleDublicate event\n";
-			break;
-		case AvThreadHandleCreate:
-			std::cout << "Processing AvThreadHandleCreate event\n";
-			break;
-		case AvThreadHandleDublicate:
-			std::cout << "Processing AvThreadHandleDublicate event\n";
-			break;
-		case AvProcessCreate:
-			std::cout << "Processing AvProcessCreate event\n";
-			break;
-		case AvProcessExit:
-			std::cout << "Processing AvProcessExit event\n";
-			break;
-		case AvThreadCreate:
-			std::cout << "Processing AvThreadCreate event\n";
-			break;
-		case AvThreadExit:
-			std::cout << "Processing AvThreadExit event\n";
-			break;
-		case AvImageLoad:
-			std::cout << "Processing AvImageLoad event\n";
-			break;
+	case AvFileCreate:
+		this->logger->log("Got AvFileCreate event.");
+		break;
+	case AvProcessHandleCreate:
+		this->logger->log("Got AvProcessHandleCreate event.");
+		break;
+	case AvProcessHandleDublicate:
+		this->logger->log("Got AvProcessHandleDublicate event.");
+		break;
+	case AvThreadHandleCreate:
+		this->logger->log("Got AvThreadHandleCreate event.");
+		break;
+	case AvThreadHandleDublicate:
+		this->logger->log("Got AvThreadHandleDublicate event.");
+		break;
+	case AvProcessCreate:
+		this->logger->log("Got AvProcessCreate event.");
+		break;
+	case AvProcessExit:
+		this->logger->log("Got AvProcessExit event.");
+		break;
+	case AvThreadCreate:
+		this->logger->log("Got AvThreadCreate event.");
+		break;
+	case AvThreadExit:
+		this->logger->log("Got AvThreadExit event.");
+		break;
+	case AvImageLoad:
+		this->logger->log("Got AvImageLoad event.");
+		break;
+	case AvRegCreateKey:
+		this->logger->log("Got AvRegCreateKey event.");
+		break;
+	case AvRegOpenKey:
+		this->logger->log("Got AvRegOpenKey event.");
+		break;
 	}
 	try
 	{
@@ -142,7 +166,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 		{
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
-			std::cout << "Processing callback with priority " << priority << " in plugin " << curCallback.second->getName() << "\n";
+			this->logger->log("Processing callback with priority " + std::to_string(priority) + " in plugin " + curCallback.second->getName());
 			AV_EVENT_RETURN_STATUS status = curCallback.second->callback(curCallback.first, parsedEvent);
 			if (status == AvEventStatusBlock)
 				return status;
@@ -155,7 +179,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	}
 	catch (const std::string& ex)
 	{
-		std::cout << "Exception: " << ex << "\n";
+		this->logger->log("Exception: " + ex);
 		return AvEventStatusAllow;
 	}
 	
@@ -179,6 +203,11 @@ void PluginManager::lockEventsProcessing()
 void PluginManager::unlockEventsProcessing()
 {
 	this->eventProcessingMutex.unlock();
+}
+
+ILogger* PluginManager::getLogger()
+{
+	return this->logger;
 }
 
 void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)
