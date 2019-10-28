@@ -17,7 +17,7 @@ typedef std::map <AV_EVENT_TYPE, priorityMap*> eventsMap;
 class PluginManager : public IManager
 {
 public:
-	PluginManager(ILogger* logger) { this->logger = logger; }
+	PluginManager(ILogger* logger);
 	virtual ~PluginManager() override;
 
 	IPlugin * loadPlugin(std::string path);
@@ -25,6 +25,8 @@ public:
 
 	// returns IPlugin from loadedPlugins map.
 	IPlugin* getPluginByName(std::string name);
+	// returns list of pugins' IDs (names)
+	std::list<std::string>* getPluginsNames();
 	// this function is used from plugins (in IPlugin init())
 	// to register events callbacks.
 	int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority);
@@ -42,8 +44,11 @@ public:
 	virtual void unlockEventsProcessing() override;
 
 	virtual ILogger* getLogger() override;
+	virtual IConfig* getConfig() override;
 
 private:
+	IConfig* pluginManagerConfig;
+
 	/*
 	Callbacks map (two levels):
 	{

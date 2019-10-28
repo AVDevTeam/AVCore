@@ -28,5 +28,5 @@ private:
 	std::string regStorePath;
 	// list of parameters. This map is set in plugins in
 	// order to expose parameters available for the plugin.
-	paramMap* configParamMap;
+	paramMap* configParamMap = nullptr;
 };

@@ -13,6 +13,8 @@ void UMModuleConfig::deinit()
 	LSTATUS status = RegCloseKey(this->configKey);
 	if (status != ERROR_SUCCESS)
 		throw "Open key error";
+	if (this->configParamMap != nullptr)
+		delete this->configParamMap;
 }
 
 void UMModuleConfig::setParamMap(paramMap* configParamMap)

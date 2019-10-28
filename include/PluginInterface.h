@@ -35,6 +35,7 @@ public:
 	virtual void unlockEventsProcessing() = 0;
 
 	virtual ILogger* getLogger() = 0;
+	virtual IConfig* getConfig() = 0;
 };
 
 // Interface for plugins

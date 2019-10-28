@@ -4,6 +4,17 @@
 
 typedef IPlugin* (* GetPlugin)();
 
+PluginManager::PluginManager(ILogger* logger)
+{
+	this->logger = logger;
+	this->pluginManagerConfig = new UMModuleConfig();
+	this->pluginManagerConfig->init("PluginManager");
+	paramMap* params = new paramMap();
+	params->insert(paramPair("Plugins", ListParam));
+	params->insert(paramPair("PluginsPath", StringParam));
+	this->pluginManagerConfig->setParamMap(params);
+}
+
 PluginManager::~PluginManager()
 {
 	std::list<std::string> pluginsToUnload;
@@ -20,6 +31,9 @@ PluginManager::~PluginManager()
 	{
 		delete (*it).second;
 	}
+
+	this->pluginManagerConfig->deinit();
+	delete this->pluginManagerConfig;
 }
 
 IPlugin* PluginManager::loadPlugin(std::string path)
@@ -43,7 +57,7 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	IPlugin * plugin = getPlugin();
 	// Create config store for the plugin.
 	UMModuleConfig* configManager = new UMModuleConfig();
-	configManager->init(plugin->getName());
+	configManager->init("Plugins\\" + plugin->getName());
 	plugin->init(this, pluginModule, configManager);
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section
@@ -88,6 +102,14 @@ IPlugin* PluginManager::getPluginByName(std::string name)
 	if (this->loadedPlugins.find(name) == this->loadedPlugins.end())
 		return nullptr;
 	return this->loadedPlugins[name];
+}
+
+std::list<std::string>* PluginManager::getPluginsNames()
+{
+	std::list<std::string>* result = new std::list<std::string>();
+	for (std::map<std::string, IPlugin*>::iterator it = this->loadedPlugins.begin(); it != this->loadedPlugins.end(); it++)
+		result->push_back((*it).first);
+	return result;
 }
 
 int PluginManager::registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority)
@@ -211,6 +233,11 @@ void PluginManager::unlockEventsProcessing()
 ILogger* PluginManager::getLogger()
 {
 	return this->logger;
+}
+
+IConfig* PluginManager::getConfig()
+{
+	return this->pluginManagerConfig;
 }
 
 void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)

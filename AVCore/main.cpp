@@ -15,6 +15,8 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 #define LOG_PATH "C:\\log.txt"
 #endif
 
+//#define TESTBUILD
+
 // DEBUG MEMORY LEAKS
 /*
 #define _DEBUG
@@ -26,6 +28,17 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 // GLOBALS
 AVCore* avCore;
 
+#ifdef TESTBUILD
+int main(int argc, char* argv[])
+{
+	printf("Enter any key\n");
+	getchar();
+
+	FileLogger* logger = new FileLogger(LOG_PATH);
+	avCore = new AVCore(logger);
+	avCore->start();
+}
+#else
 int main(int argc, char* argv[])
 {
 	SERVICE_TABLE_ENTRY ServiceTable[] =
@@ -41,6 +54,7 @@ int main(int argc, char* argv[])
 
 	return 0;
 }
+#endif
 
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv)
 {

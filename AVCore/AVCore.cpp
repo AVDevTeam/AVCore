@@ -15,7 +15,10 @@ void AVCore::start(void)
 	manager->addEventParser(AvRegCreateKey, reinterpret_cast<EventParser*>(new AvEventRegCreateKeyParser()));
 	manager->addEventParser(AvRegOpenKey, reinterpret_cast<EventParser*>(new AvEventRegOpenKeyParser()));
 
-	manager->loadPlugin("TestPlugin.dll");
+	std::list<std::string>* plugins = manager->getConfig()->getListParam("Plugins");
+	std::string pluginsFolder = manager->getConfig()->getStringParam("PluginsPath");
+	for (std::list<std::string>::iterator it = plugins->begin(); it != plugins->end(); it++)
+		manager->loadPlugin(pluginsFolder + (*it));
 
 	portServer->start(manager);
 }
