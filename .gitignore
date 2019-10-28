@@ -22,6 +22,7 @@ x86/
 bld/
 build/
 lib/
+Plugins/
 [Bb]in/
 [Oo]bj/
 [Ll]og/

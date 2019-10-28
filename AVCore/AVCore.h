@@ -6,6 +6,8 @@
 #include "FileLogger.h"
 #include <mutex>
 
+//#define TESTBUILD
+
 class AVCore
 {
 public:

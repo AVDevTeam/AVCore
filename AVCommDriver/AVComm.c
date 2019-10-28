@@ -37,7 +37,7 @@ NTSTATUS AVCommInit(PFLT_FILTER Filter);
 
 void AVCommStop(VOID);
 
-NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, PVOID *outUmBuffer, PSIZE_T outUmSize);
+NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, void** outUmBuffer, PSIZE_T outUmSize);
 
 NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize);
 
@@ -404,7 +404,7 @@ Arguments:
 */
 NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize)
 {
-	return ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, UmBuffer, UmBufferSize, MEM_DECOMMIT);
+	return ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, UmBuffer, UmBufferSize, MEM_RELEASE);
 }
 
 /*

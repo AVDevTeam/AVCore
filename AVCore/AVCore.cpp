@@ -1,5 +1,72 @@
 #include "AVCore.h"
 
+void testEventsParsers(PluginManager* manager)
+{
+	AV_EVENT_FILE_CREATE testFileCreate = { 0 };
+	testFileCreate.FileName = (wchar_t*)L"TEST_FILE_NAME";
+	testFileCreate.FileNameSize = sizeof(L"TEST_FILE_NAME");
+	testFileCreate.VolumeName = (wchar_t*)L"TEST_VOLUME_NAME";
+	testFileCreate.VolumeNameSize = sizeof(L"TEST_VOLUME_NAME");
+	testFileCreate.RequestorMode = 0;
+	testFileCreate.RequestorPID = 111;
+	AV_EVENT_PROCESS_HANDLE_CREATE testProcessHandleCreate = { 0 };
+	testProcessHandleCreate.KernelHandle = 0;
+	testProcessHandleCreate.RequestorPID = 111;
+	testProcessHandleCreate.TargetPID = 222;
+	testProcessHandleCreate.DesiredAccess = 0xFFF;
+	AV_EVENT_PROCESS_HANDLE_DUBLICATE testProcessHandleDublicate = { 0 };
+	testProcessHandleDublicate.KernelHandle = 0;
+	testProcessHandleDublicate.RequestorPID = 111;
+	testProcessHandleDublicate.TargetPID = 222;
+	testProcessHandleDublicate.DesiredAccess = 0xFFF;
+	testProcessHandleDublicate.DublicateSourcePID = 333;
+	testProcessHandleDublicate.DublicateTargetPID = 444;
+	AV_EVENT_THREAD_HANDLE_CREATE testThreadHandleCreate = { 0 };
+	testThreadHandleCreate.RequestorPID = 111;
+	testThreadHandleCreate.DesiredAccess = 222;
+	testThreadHandleCreate.RequestorTID = 333;
+	testThreadHandleCreate.TargetPID = 444;
+	testThreadHandleCreate.TargetTID = 555;
+	AV_EVENT_THREAD_HANDLE_DUBLICATE testThreadHandleDublicate = { 0 };
+	testThreadHandleDublicate.RequestorPID = 666;
+	testThreadHandleDublicate.DesiredAccess = 777;
+	testThreadHandleDublicate.RequestorTID = 888;
+	testThreadHandleDublicate.TargetPID = 999;
+	testThreadHandleDublicate.TargetTID = 1111;
+	testThreadHandleDublicate.DublicateSourcePID = 2222;
+	testThreadHandleDublicate.DublicateTargetPID = 3333;
+	AV_EVENT_PROCESS_CREATE testProcessCreate = { 0 };
+	testProcessCreate.PID = 111;
+	testProcessCreate.parentPID = 222;
+	testProcessCreate.creatingPID = 333;
+	testProcessCreate.creatingTID = 444;
+	testProcessCreate.imageFileName = (wchar_t*)L"TEST_IMAGE_PATH";
+	testProcessCreate.imageFileNameSize = sizeof(L"TEST_IMAGE_PATH");
+	testProcessCreate.commandLine = (wchar_t*)L"TEST_COMMAND_LINE";
+	testProcessCreate.commandLineSize = sizeof(L"TEST_COMMAND_LINE");
+	AV_EVENT_PROCESS_EXIT testProcessExit = { 0 };
+	testProcessExit.PID = 111;
+	AV_EVENT_THREAD_CREATE testThreadCreateExit = { 0 };
+	testThreadCreateExit.PID = 111;
+	testThreadCreateExit.TID = 222;
+	AV_EVENT_IMAGE_LOAD testImageLoad = { 0 };
+	testImageLoad.PID = 111;
+	testImageLoad.systemModeImage = 0;
+	testImageLoad.imageName = (wchar_t*)L"TEST_IMGAE_NAME";
+	testImageLoad.imageNameSize = sizeof(L"TEST_IMGAE_NAME");
+
+	manager->processEvent(AvFileCreate, &testFileCreate);
+	manager->processEvent(AvProcessHandleCreate, &testProcessHandleCreate);
+	manager->processEvent(AvProcessHandleDublicate, &testProcessHandleDublicate);
+	manager->processEvent(AvThreadHandleCreate, &testThreadHandleCreate);
+	manager->processEvent(AvThreadHandleDublicate, &testThreadHandleDublicate);
+	manager->processEvent(AvProcessCreate, &testProcessCreate);
+	manager->processEvent(AvProcessExit, &testProcessExit);
+	manager->processEvent(AvThreadCreate, &testThreadCreateExit);
+	manager->processEvent(AvThreadExit, &testThreadCreateExit);
+	manager->processEvent(AvImageLoad, &testImageLoad);
+}
+
 void AVCore::start(void)
 {
 	manager->addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
@@ -20,5 +87,9 @@ void AVCore::start(void)
 	for (std::list<std::string>::iterator it = plugins->begin(); it != plugins->end(); it++)
 		manager->loadPlugin(pluginsFolder + (*it));
 
+#ifdef TESTBUILD
+	testEventsParsers(this->manager);
+#else
 	portServer->start(manager);
+#endif
 }

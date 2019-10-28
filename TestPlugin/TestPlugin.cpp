@@ -162,10 +162,7 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	std::string value("A STRING");
 	this->configManager->setStringParam(param, value);
 
-	std::list<std::string>* blockListTest = this->getConfig()->getListParam("BlockList");
-	delete blockListTest;
-
-	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 1);
+	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 2);
 
 	manager->registerCallback(this, CallbackPrHandleCreate, AvProcessHandleCreate, 1);
 	manager->registerCallback(this, CallbackPrHandleDublicate, AvProcessHandleDublicate , 1);
@@ -181,8 +178,8 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 
 	manager->registerCallback(this, CallbackImageLoad, AvImageLoad, 1);
 
-	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 1);
-	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 1);
+	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 2);
+	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 2);
 }
 
 void TestPlugin::deinit()
