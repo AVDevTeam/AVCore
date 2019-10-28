@@ -1,21 +1,12 @@
 #include <windows.h>
-#include <stdio.h>
-#include <fltUser.h>
-#include "KMUMcomm.h"
-#include "SettingsManager.h"
-#include "CommPortServer.h"
-#include "PluginManager.h"
-#include "EventsParser.h"
-#include "ConfigManager.h"
-#include "FileLogger.h"
+#include "AVCore.h"
 
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
-HANDLE                g_ServiceStopEvent = INVALID_HANDLE_VALUE;
+
 
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv);
 VOID WINAPI ServiceCtrlHandler(DWORD);
-DWORD WINAPI ServiceWorkerThread(LPVOID lpParam);
 
 #define SERVICE_NAME  "AVCore"
 #ifdef _WIN64
@@ -32,32 +23,11 @@ DWORD WINAPI ServiceWorkerThread(LPVOID lpParam);
 #include <crtdbg.h>
 */
 
-/*
-int _cdecl
-main(
-	_Unreferenced_parameter_ int argc,
-	_Unreferenced_parameter_ char* argv[]
-)
+// GLOBALS
+AVCore* avCore;
+
+int main(int argc, char* argv[])
 {
-	SettingsManager *settingManager = new SettingsManager();
-
-
-
-	getchar();
-	//settingManager->join(); 
-	delete settingManager;
-}
-*/
-
-int main(int argc, TCHAR* argv[])
-{
-	OutputDebugString("AVCore: Main: Entry");
-	std::string test("C:\\Users\\user\\Desktop\\secretfile.txt");
-	if (test.find("secretfile.txt") != std::string::npos)
-	{
-		int t = 1;
-	}
-
 	SERVICE_TABLE_ENTRY ServiceTable[] =
 	{
 		{(LPSTR)SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain},
@@ -66,27 +36,22 @@ int main(int argc, TCHAR* argv[])
 
 	if (StartServiceCtrlDispatcher(ServiceTable) == FALSE)
 	{
-		OutputDebugString("AVCore: Main: StartServiceCtrlDispatcher returned error");
 		return GetLastError();
 	}
 
-	OutputDebugString("AVCore: Main: Exit");
 	return 0;
 }
 
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv)
 {
-	HANDLE hThread;
 	DWORD Status = E_FAIL;
-
-	OutputDebugString("AVCore: ServiceMain: Entry");
 
 	g_StatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, ServiceCtrlHandler);
 
 	if (g_StatusHandle == NULL)
 	{
 		OutputDebugString("AVCore: ServiceMain: RegisterServiceCtrlHandler returned error");
-		goto EXIT;
+		return;
 	}
 
 	// Tell the service controller we are starting
@@ -103,29 +68,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv)
 		OutputDebugString("AVCore: ServiceMain: SetServiceStatus returned error");
 	}
 
-	/*
-	 * Perform tasks neccesary to start the service here
-	 */
-	OutputDebugString("AVCore: ServiceMain: Performing Service Start Operations");
-
-	// Create stop event to wait on later.
-	g_ServiceStopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	if (g_ServiceStopEvent == NULL)
-	{
-		OutputDebugString("AVCore: ServiceMain: CreateEvent(g_ServiceStopEvent) returned error");
-
-		g_ServiceStatus.dwControlsAccepted = 0;
-		g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-		g_ServiceStatus.dwWin32ExitCode = GetLastError();
-		g_ServiceStatus.dwCheckPoint = 1;
-
-		if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
-		{
-			OutputDebugString("AVCore: ServiceMain: SetServiceStatus returned error");
-		}
-		goto EXIT;
-	}
-
 	// Tell the service controller we are started
 	g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
 	g_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
@@ -138,21 +80,30 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv)
 	}
 
 	// Start the thread that will perform the main task of the service
-	hThread = CreateThread(NULL, 0, ServiceWorkerThread, NULL, 0, NULL);
+	try
+	{
+		FileLogger* logger = new FileLogger(LOG_PATH);
+		avCore = new AVCore(logger);
+	}
+	catch (char* ex)
+	{
+		g_ServiceStatus.dwControlsAccepted = 0;
+		g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
+		g_ServiceStatus.dwWin32ExitCode = GetLastError();
+		g_ServiceStatus.dwCheckPoint = 1;
 
-	OutputDebugString("AVCore: ServiceMain: Waiting for Worker Thread to complete");
+		if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+		{
+			OutputDebugString("AVCore: ServiceMain: SetServiceStatus returned error");
+		}
+		return;
+	}
 
-	// Wait until our worker thread exits effectively signaling that the service needs to stop
-	WaitForSingleObject(hThread, INFINITE);
-
-	OutputDebugString("AVCore: ServiceMain: Worker Thread Stop Event signaled");
-
-	/*
-	 * Perform any cleanup tasks
-	 */
-	OutputDebugString("AVCore: ServiceMain: Performing Cleanup Operations");
-
-	CloseHandle(g_ServiceStopEvent);
+	avCore->start();
+	// Wait worker stop signal
+	avCore->wait();
+	// Cleanup
+	delete avCore;
 
 	g_ServiceStatus.dwControlsAccepted = 0;
 	g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
@@ -163,11 +114,6 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv)
 	{
 		OutputDebugString("AVCore: ServiceMain: SetServiceStatus returned error");
 	}
-
-EXIT:
-	OutputDebugString("AVCore: ServiceMain: Exit");
-
-	return;
 }
 
 VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
@@ -183,9 +129,6 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 		if (g_ServiceStatus.dwCurrentState != SERVICE_RUNNING)
 			break;
 
-		/*
-		 * Perform tasks neccesary to stop the service here
-		 */
 		g_ServiceStatus.dwControlsAccepted = 0;
 		g_ServiceStatus.dwCurrentState = SERVICE_STOP_PENDING;
 		g_ServiceStatus.dwWin32ExitCode = 0;
@@ -195,54 +138,10 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 		{
 			OutputDebugString("AVCore: ServiceCtrlHandler: SetServiceStatus returned error");
 		}
-		// This will signal the worker thread to start shutting down
-		SetEvent(g_ServiceStopEvent);
-
+		// This will signal the working threads to start shutting down
+		avCore->stop();
 		break;
-
 	default:
 		break;
 	}
-
-	OutputDebugString("AVCore: ServiceCtrlHandler: Exit");
-}
-
-DWORD WINAPI ServiceWorkerThread(LPVOID lpParam)
-{
-	OutputDebugString("AVCore: ServiceWorkerThread: Entry");
-	int i = 0;
-
-	FileLogger* logger = new FileLogger(LOG_PATH);
-	PluginManager* manager = new PluginManager(logger);
-	manager->addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
-	manager->addEventParser(AvProcessHandleCreate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleCreateParser()));
-	manager->addEventParser(AvProcessHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleDublicateParser()));
-	manager->addEventParser(AvThreadHandleCreate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleCreateParser()));
-	manager->addEventParser(AvThreadHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventThreadHandleDublicateParser()));
-	manager->addEventParser(AvProcessCreate, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
-	manager->addEventParser(AvProcessExit, reinterpret_cast<EventParser*>(new AvEventProcessEixtParser()));
-	manager->addEventParser(AvThreadCreate, reinterpret_cast<EventParser*>(new AvEventThreadCreateParser()));
-	manager->addEventParser(AvThreadExit, reinterpret_cast<EventParser*>(new AvEventThreadExitParser()));
-	manager->addEventParser(AvImageLoad, reinterpret_cast<EventParser*>(new AvEventImageLoadParser()));
-	manager->addEventParser(AvRegCreateKey, reinterpret_cast<EventParser*>(new AvEventRegCreateKeyParser()));
-	manager->addEventParser(AvRegOpenKey, reinterpret_cast<EventParser*>(new AvEventRegOpenKeyParser()));
-
-	manager->loadPlugin("TestPlugin.dll");
-
-	CommPortServer portServer;
-	portServer.start(manager);
-	
-
-	//  Periodically check if the service has been requested to stop
-	while (WaitForSingleObject(g_ServiceStopEvent, 0) != WAIT_OBJECT_0)
-	{
-		Sleep(5000);
-	}
-
-	portServer.stop();
-	delete manager;
-
-	OutputDebugString("AVCore: ServiceWorkerThread: Exit");
-
-	return ERROR_SUCCESS;
 }

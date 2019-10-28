@@ -103,8 +103,6 @@ void CommPortServer::stop()
 {
 	this->signalCancel();
 	CancelIoEx(completionPort, NULL);
-	for (std::list<CommPortListener*>::iterator it = this->listeners.begin(); it != this->listeners.end(); ++it)
-		(*it)->signalStop();
 
 	for (std::list<CommPortListener*>::iterator it = this->listeners.begin(); it != this->listeners.end(); ++it)
 		(*it)->thread->join();

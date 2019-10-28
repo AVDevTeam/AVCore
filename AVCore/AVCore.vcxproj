@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AVCore.cpp" />
     <ClCompile Include="CommPortServer.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="EventsParser.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="SettingsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AVCore.h" />
     <ClInclude Include="CommPortServer.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="EventsParser.h" />
