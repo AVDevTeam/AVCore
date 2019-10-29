@@ -1,6 +1,0 @@
-Got AvFileCreate event.
-Processing callback with priority 1 in plugin AVShield
-Got AvFileCreate event.
-Processing callback with priority 1 in plugin AVShield
-Got AvFileCreate event.
-Processing callback with priority 1 in plugin AVShield
