@@ -25,7 +25,7 @@ class IManager
 public:
 	virtual ~IManager() {}
 	virtual int registerCallback(IPlugin*, int, AV_EVENT_TYPE, int) = 0;
-	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*) = 0;
+	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*, void**) = 0;
 
 	// Syncronizationi methods
 	virtual void enterCriticalEventProcessingSection() = 0;
@@ -64,7 +64,7 @@ public:
 		Entry point for plugin's event processing logic. This method
 		will be called from IManager in processEvent.
 	*/
-	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event) = 0;
+	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event, void** umMessage) = 0;
 	
 	// methods that provide access to the information about the plugin.
 	virtual std::string& getName() = 0;

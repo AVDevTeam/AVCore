@@ -22,7 +22,7 @@ class TestPlugin : public IPlugin
 public:
 	// Inherited via IPlugin
 	virtual ~TestPlugin() override;
-	AV_EVENT_RETURN_STATUS callback(int, void*) override;
+	AV_EVENT_RETURN_STATUS callback(int, void*, void**) override;
 	void init(IManager* manager, HMODULE module, IConfig* configManager) override;
 	void deinit() override;
 

@@ -49,6 +49,8 @@ UCHAR AVCommIsExcludedPID(HANDLE PID);
 
 UCHAR AVCommIsInitialized(VOID);
 
+VOID AVCommGetUmBuffer(PVOID umAddr, PVOID outKmBuffer, SIZE_T size);
+
 #ifdef ALLOC_PRAGMA
     #pragma alloc_text(INIT, DriverEntry)
 	#pragma alloc_text(PAGE, DllInitialize)
@@ -59,6 +61,7 @@ UCHAR AVCommIsInitialized(VOID);
 	#pragma alloc_text(PAGE, AVCommInit)
 	#pragma alloc_text(PAGE, AVCommStop)
 	#pragma alloc_text(PAGE, AVCommCreateBuffer)
+	#pragma alloc_text(PAGE, AVCommGetUmBuffer)
 	#pragma alloc_text(PAGE, AVCommFreeBuffer)
 	#pragma alloc_text(PAGE, AVCommSendEvent)
 	#pragma alloc_text(PAGE, AVCommIsExcludedPID)
@@ -392,6 +395,17 @@ NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, void **outUmBuffer,
 	KeUnstackDetachProcess(&pkapcState);
 
 	return status;
+}
+
+VOID AVCommGetUmBuffer(PVOID umAddr, PVOID outKmBuffer, SIZE_T size)
+{
+	// Chnage stack to that of the target UM process (AVCore service)
+	KAPC_STATE pkapcState;
+	KeStackAttachProcess(Globals.AVCoreServiceEprocess, &pkapcState);
+	// copy buffer from KM to allocated buffer in UM.
+	memcpy(outKmBuffer, umAddr, size);
+	// Restore stack
+	KeUnstackDetachProcess(&pkapcState);
 }
 
 /*

@@ -10,8 +10,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 
 #define SERVICE_NAME  "AVCore"
 #ifdef _WIN64
-//#define LOG_PATH "\\\\vmware-host\\Shared Folders\\build\\log.txt"
-#define LOG_PATH "log.txt"
+#define LOG_PATH "\\\\vmware-host\\Shared Folders\\build\\log.txt"
 #else
 #define LOG_PATH "C:\\log.txt"
 #endif
@@ -36,6 +35,9 @@ int main(int argc, char* argv[])
 	FileLogger* logger = new FileLogger(LOG_PATH);
 	avCore = new AVCore(logger);
 	avCore->start();
+
+	printf("Enter any key to exit\n");
+	getchar();
 }
 #else
 int main(int argc, char* argv[])
@@ -50,7 +52,7 @@ int main(int argc, char* argv[])
 	{
 		return GetLastError();
 	}
-
+	
 	return 0;
 }
 #endif

@@ -35,7 +35,7 @@ public:
 	void addEventParser(AV_EVENT_TYPE, EventParser*);
 	// this function is called from event listeners in order to
 	// process an event by iterating through registered callbacks.
-	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
+	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*, void**);
 
 	// Syncronization methods (use shared_mutex)
 	virtual void enterCriticalEventProcessingSection() override;
