@@ -12,6 +12,7 @@ typedef enum _AV_EVENT_RETURN_STATUS
 {
 	AvEventStatusBlock,
 	AvEventStatusAllow,
+	AvEventStatusInjectAPC,
 
 } AV_EVENT_RETURN_STATUS;
 

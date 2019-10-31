@@ -6,6 +6,12 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 {
 	UNREFERENCED_PARAMETER(RegistrationContext);
 
+	// debug
+	UNREFERENCED_PARAMETER(preOpInfo);
+	return OB_PREOP_SUCCESS;
+
+	/*
+
 	if (!AVCommIsInitialized())
 	{
 		return OB_PREOP_SUCCESS;
@@ -96,6 +102,8 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 	}
 
 	return OB_PREOP_SUCCESS;
+
+	*/
 };
 
 OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
@@ -103,6 +111,12 @@ OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
 	POB_PRE_OPERATION_INFORMATION preOpInfo)
 {
 	UNREFERENCED_PARAMETER(RegistrationContext);
+
+	// debug
+	UNREFERENCED_PARAMETER(preOpInfo);
+	return OB_PREOP_SUCCESS;
+
+	/*
 
 	if (!AVCommIsInitialized())
 	{
@@ -199,4 +213,6 @@ OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
 	}
 
 	return OB_PREOP_SUCCESS;
+
+	*/
 };

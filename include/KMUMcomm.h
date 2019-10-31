@@ -71,6 +71,17 @@ typedef struct _AV_CONNECTION_CONTEXT
 
 } AV_CONNECTION_CONTEXT, *PAV_CONNECTION_CONTEXT;
 
+// This structer is used to pass
+// information about APC payload
+// from UM to KM.
+typedef struct _APC_INFO
+{
+	int PID;
+	int TID;
+	int apcBufferSize;
+	void* apcBuffer;
+} APC_INFO, * PAPC_INFO;
+
 #endif
 
 

@@ -231,7 +231,6 @@ Return Value:
 /*************************************************************************
     MiniFilter initialization and unload routines.
 *************************************************************************/
-
 NTSTATUS DriverEntry(
 	_In_ PDRIVER_OBJECT DriverObject,
 	_In_ PUNICODE_STRING RegistryPath
@@ -309,8 +308,11 @@ Return Value:
 		return status;
 	}
 
-	// TODO ifdef x64 use PsSetCreateProcessNotifyRoutineEx2
+#ifdef _WIN64
+	status = PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, FALSE);
+#else
 	status = PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, FALSE);
+#endif
 	if (!NT_SUCCESS(status))
 	{
 		AVCommStop();
@@ -327,11 +329,14 @@ Return Value:
 		FltUnregisterFilter(GlobalFilter);
 		CmUnRegisterCallback(RegFilterCookie);
 		ObUnRegisterCallbacks(ObRegistrationHandle);
+#ifdef _WIN64
+		PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, TRUE);
+#else
 		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+#endif
 		return status;
 	}
 
-	// TODO. IFDEF x86/x64 (x64 support for x86 modules, PsSetLoadImageNotifyRoutineEx).
 #ifdef _WIN64
 	status = PsSetLoadImageNotifyRoutineEx((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback, PS_IMAGE_NOTIFY_CONFLICTING_ARCHITECTURE);
 #else
@@ -343,7 +348,11 @@ Return Value:
 		FltUnregisterFilter(GlobalFilter);
 		CmUnRegisterCallback(RegFilterCookie);
 		ObUnRegisterCallbacks(ObRegistrationHandle);
+#ifdef _WIN64
+		PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, TRUE);
+#else
 		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+#endif
 		PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
 		return status;
 	}
@@ -375,7 +384,11 @@ NTSTATUS DriverUnload (
 	FltUnregisterFilter(GlobalFilter);
 	CmUnRegisterCallback(RegFilterCookie);
 	ObUnRegisterCallbacks(ObRegistrationHandle);
+#ifdef _WIN64
+	PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, TRUE);
+#else
 	PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+#endif
 	PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
 	PsRemoveLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
 

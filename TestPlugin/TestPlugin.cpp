@@ -16,7 +16,7 @@ TestPlugin::~TestPlugin()
 {
 }
 
-AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event)
+AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event, void** umMessage)
 {
 	if (callbackId == CallbackFileCreate)
 	{

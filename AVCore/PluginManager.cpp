@@ -135,10 +135,11 @@ Arguments:
 Return value:
 	event processing status that will be sent to interceptor module (KM, UM).
 */
-AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event)
+AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event, void** umMessage)
 {
 	switch (eventType)
 	{
+	/*
 	case AvFileCreate:
 		this->logger->log("Got AvFileCreate event.");
 		break;
@@ -154,6 +155,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	case AvThreadHandleDublicate:
 		this->logger->log("Got AvThreadHandleDublicate event.");
 		break;
+	*/
 	case AvProcessCreate:
 		this->logger->log("Got AvProcessCreate event.");
 		break;
@@ -169,12 +171,14 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	case AvImageLoad:
 		this->logger->log("Got AvImageLoad event.");
 		break;
+	/*
 	case AvRegCreateKey:
 		this->logger->log("Got AvRegCreateKey event.");
 		break;
 	case AvRegOpenKey:
 		this->logger->log("Got AvRegOpenKey event.");
 		break;
+		*/
 	}
 	try
 	{
@@ -190,7 +194,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
 			this->logger->log("Processing callback with priority " + std::to_string(priority) + " in plugin " + curCallback.second->getName());
-			status = curCallback.second->callback(curCallback.first, parsedEvent);
+			status = curCallback.second->callback(curCallback.first, parsedEvent, umMessage);
 			if (status == AvEventStatusBlock)
 			{
 				break;
@@ -202,9 +206,9 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 		this->eventProcessingMutex.unlock_shared();
 		return status;
 	}
-	catch (const std::string& ex)
+	catch (...)
 	{
-		this->logger->log("Exception: " + ex);
+		this->logger->log("Exception hapend during event processing.");
 		return AvEventStatusAllow;
 	}
 	

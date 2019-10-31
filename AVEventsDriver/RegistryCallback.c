@@ -16,6 +16,13 @@ NTSTATUS AVEventsRegistryCallback(
 {
 	UNREFERENCED_PARAMETER(CallbackContext);
 
+	// debug
+	UNREFERENCED_PARAMETER(RegNotifyClass);
+	UNREFERENCED_PARAMETER(RegNotifyInfo);
+	return STATUS_SUCCESS;
+
+	/*
+
 	if (!AVCommIsInitialized() || AVCommIsExcludedPID(PsGetCurrentProcessId()))
 	{
 		return STATUS_SUCCESS;
@@ -34,6 +41,8 @@ NTSTATUS AVEventsRegistryCallback(
 	default:
 		return STATUS_SUCCESS;
 	}
+
+	*/
 }
 
 NTSTATUS sendRegCreateKey(PUNICODE_STRING keyPath)

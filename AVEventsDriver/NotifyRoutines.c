@@ -1,7 +1,5 @@
 #include "AVEventsDriver.h"
 
-
-
 typedef enum
 {
 	OriginalApcEnvironment,
@@ -153,61 +151,68 @@ VOID KernelAPC(
 	DbgPrint("TEST\n");
 }
 
+VOID DebugFunc(NTSTATUS test)
+{
+	DbgPrint("status: %d\n", test);
+}
+
+void APCInject(PAPC_INFO ApcInfo)
+{
+	HANDLE pHandle = NULL;
+	PEPROCESS pEprocess = NULL;
+	PKTHREAD pThread = NULL;
+	UCHAR APCPayload[1024] = { 0 };
+	
+	NTSTATUS apcStatus = PsLookupProcessByProcessId((HANDLE)ApcInfo->PID, &pEprocess);
+	if (apcStatus == STATUS_SUCCESS)
+	{
+		OBJECT_ATTRIBUTES objectAttributes;
+		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+		CLIENT_ID client_id;
+		client_id.UniqueProcess = (HANDLE)ApcInfo->PID;
+		client_id.UniqueThread = 0;
+		apcStatus = ZwOpenProcess(&pHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
+		if (apcStatus == STATUS_SUCCESS)
+		{
+
+			apcStatus = PsLookupThreadByThreadId((HANDLE)ApcInfo->TID, &pThread);
+			if (apcStatus == STATUS_SUCCESS)
+			{
+				PVOID umAPCBuffer = NULL;
+				SIZE_T umAPCBufferSize = ApcInfo->apcBufferSize;
+				apcStatus = ZwAllocateVirtualMemory(pHandle, &umAPCBuffer, 0, &umAPCBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+				DebugFunc(apcStatus);
+				if (apcStatus == STATUS_SUCCESS)
+				{
+					// copy APC payload from UM to KM
+					if (ApcInfo->apcBufferSize > 1024)
+						ASSERT(FALSE);
+					AVCommGetUmBuffer(ApcInfo->apcBuffer, APCPayload, ApcInfo->apcBufferSize);
+
+					KAPC_STATE pkapcState;
+					KeStackAttachProcess(pEprocess, &pkapcState);
+					// copy buffer from KM to allocated buffer in UM.
+					memcpy(umAPCBuffer, APCPayload, ApcInfo->apcBufferSize);
+					// Restore stack
+					KeUnstackDetachProcess(&pkapcState);
+
+					PKAPC apc = (PKAPC)ExAllocatePool(NonPagedPool, sizeof(KAPC));
+					KeInitializeApc(apc, pThread, OriginalApcEnvironment, (PVOID)KernelAPC, NULL, (PVOID)umAPCBuffer, UserMode, NULL);
+					KeInsertQueueApc(apc, 0, NULL, 0);
+				}
+			}
+
+			ZwClose(pHandle);
+		}
+	}
+}
+
 void AVCreateThreadCallback(
 	HANDLE ProcessId,
 	HANDLE ThreadId,
 	BOOLEAN Create
 )
 {
-	if (Create)
-	{
-		/*
-		TEST APC
-		*/
-		UCHAR buffer[4] = { 0x90, 0x90, 0x90, 0xc3 };
-		//RtlFillMemory(buffer, sizeof(buffer), 0x90);
-		HANDLE pHandle = NULL;
-		PEPROCESS pEprocess = NULL;
-		PKTHREAD pThread = NULL;
-		NTSTATUS apcStatus = PsLookupProcessByProcessId(ProcessId, &pEprocess);
-		if (apcStatus == STATUS_SUCCESS)
-		{
-			OBJECT_ATTRIBUTES objectAttributes;
-			InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
-			CLIENT_ID client_id;
-			client_id.UniqueProcess = ProcessId;
-			client_id.UniqueThread = 0;
-			apcStatus = ZwOpenProcess(&pHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
-			if (apcStatus == STATUS_SUCCESS)
-			{
-					
-				apcStatus = PsLookupThreadByThreadId(ThreadId, &pThread);
-				if (apcStatus == STATUS_SUCCESS)
-				{
-					PVOID umAPCBuffer = NULL;
-					SIZE_T umAPCBufferSize = sizeof(buffer);
-					apcStatus = ZwAllocateVirtualMemory(pHandle, &umAPCBuffer, 0, &umAPCBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-					if (apcStatus == STATUS_SUCCESS)
-					{
-						KAPC_STATE pkapcState;
-						KeStackAttachProcess(pEprocess, &pkapcState);
-						// copy buffer from KM to allocated buffer in UM.
-						memcpy(umAPCBuffer, buffer, sizeof(buffer));
-						// Restore stack
-						KeUnstackDetachProcess(&pkapcState);
-
-						PKAPC apc = (PKAPC)ExAllocatePool(NonPagedPool, sizeof(KAPC));
-						KeInitializeApc(apc, pThread, OriginalApcEnvironment, (PVOID)KernelAPC, NULL, (PVOID)umAPCBuffer, UserMode, NULL);
-						KeInsertQueueApc(apc, 0, NULL, 0);
-					}
-				}
-				
-				ZwClose(pHandle);
-			}
-		}
-	}
-
-	/*
 	if (!AVCommIsInitialized() || AVCommIsExcludedPID(ProcessId))
 	{
 		return;
@@ -282,7 +287,6 @@ void AVCreateThreadCallback(
 			// TODO.Response processing login?
 		}
 	}
-	*/
 }
 
 // TODO. IFDEF x86/x64 (x64 support for x86 modules).
@@ -334,6 +338,13 @@ void AVLoadImageCallback(
 	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 	{
 		// TODO.Response processing login?
+		if (UMResponse.Status == AvEventStatusInjectAPC)
+		{
+			PAPC_INFO apcInfoInUM = UMResponse.UMMessage;
+			APC_INFO apcInfoInKM;
+			AVCommGetUmBuffer(apcInfoInUM, &apcInfoInKM, sizeof(APC_INFO));
+			APCInject(&apcInfoInKM);
+		}
 	}
 
 	

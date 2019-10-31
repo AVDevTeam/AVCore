@@ -55,16 +55,19 @@ void testEventsParsers(PluginManager* manager)
 	testImageLoad.imageName = (wchar_t*)L"TEST_IMGAE_NAME";
 	testImageLoad.imageNameSize = sizeof(L"TEST_IMGAE_NAME");
 
-	manager->processEvent(AvFileCreate, &testFileCreate);
-	manager->processEvent(AvProcessHandleCreate, &testProcessHandleCreate);
-	manager->processEvent(AvProcessHandleDublicate, &testProcessHandleDublicate);
-	manager->processEvent(AvThreadHandleCreate, &testThreadHandleCreate);
-	manager->processEvent(AvThreadHandleDublicate, &testThreadHandleDublicate);
-	manager->processEvent(AvProcessCreate, &testProcessCreate);
-	manager->processEvent(AvProcessExit, &testProcessExit);
-	manager->processEvent(AvThreadCreate, &testThreadCreateExit);
-	manager->processEvent(AvThreadExit, &testThreadCreateExit);
-	manager->processEvent(AvImageLoad, &testImageLoad);
+	PVOID umMessage;
+
+
+	manager->processEvent(AvFileCreate, &testFileCreate, &umMessage);
+	manager->processEvent(AvProcessHandleCreate, &testProcessHandleCreate, &umMessage);
+	manager->processEvent(AvProcessHandleDublicate, &testProcessHandleDublicate, &umMessage);
+	manager->processEvent(AvThreadHandleCreate, &testThreadHandleCreate, &umMessage);
+	manager->processEvent(AvThreadHandleDublicate, &testThreadHandleDublicate, &umMessage);
+	manager->processEvent(AvProcessCreate, &testProcessCreate, &umMessage);
+	manager->processEvent(AvProcessExit, &testProcessExit, &umMessage);
+	manager->processEvent(AvThreadCreate, &testThreadCreateExit, &umMessage);
+	manager->processEvent(AvThreadExit, &testThreadCreateExit, &umMessage);
+	manager->processEvent(AvImageLoad, &testImageLoad, &umMessage);
 }
 
 void AVCore::start(void)
@@ -84,11 +87,13 @@ void AVCore::start(void)
 
 	std::list<std::string>* plugins = manager->getConfig()->getListParam("Plugins");
 	std::string pluginsFolder = manager->getConfig()->getStringParam("PluginsPath");
+
 	for (std::list<std::string>::iterator it = plugins->begin(); it != plugins->end(); it++)
 		manager->loadPlugin(pluginsFolder + (*it));
 
 #ifdef TESTBUILD
-	testEventsParsers(this->manager);
+	//testEventsParsers(this->manager);
+	portServer->start(manager);
 #else
 	portServer->start(manager);
 #endif

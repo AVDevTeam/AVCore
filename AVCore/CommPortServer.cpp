@@ -215,19 +215,12 @@ void CommPortListener::listen()
 			ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 			replyMsg.ReplyHeader.MessageId = message->MessageHeader.MessageId;
 			replyMsg.EventResponse.Status = AvEventStatusAllow;
+			
+			void* UMMessage = NULL;
 
 			// Process event using pluginManager.
-			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
-			switch (replyMsg.EventResponse.Status)
-			{
-			case AvEventStatusAllow:
-				this->pluginManager->getLogger()->log("Listener got status allow");
-				break;
-			case AvEventStatusBlock:
-				this->pluginManager->getLogger()->log("Listener got status block");
-				break;
-			}
-
+			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer, &UMMessage);
+			replyMsg.EventResponse.UMMessage = UMMessage;
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,
