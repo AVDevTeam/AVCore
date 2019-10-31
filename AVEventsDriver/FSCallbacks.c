@@ -23,12 +23,6 @@ Return Value:
 	UNREFERENCED_PARAMETER(CompletionContext);
 	UNREFERENCED_PARAMETER(FltObjects);
 
-	// debug
-	UNREFERENCED_PARAMETER(Data);
-	return FLT_PREOP_SUCCESS_NO_CALLBACK;
-
-	/*
-
 	ULONG_PTR stackLow;
 	ULONG_PTR stackHigh;
 	PFILE_OBJECT FileObject = Data->Iopb->TargetFileObject;
@@ -126,6 +120,4 @@ Return Value:
 	}
 	// allow access if we were not able to communicate with UM.
 	return FLT_PREOP_SUCCESS_NO_CALLBACK;
-
-	*/
 }
