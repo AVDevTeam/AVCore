@@ -265,6 +265,13 @@ void AVCreateThreadCallback(
 		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 		{
 			// TODO.Response processing login?
+			if (UMResponse.Status == AvEventStatusInjectAPC)
+			{
+				PAPC_INFO apcInfoInUM = UMResponse.UMMessage;
+				APC_INFO apcInfoInKM;
+				AVCommGetUmBuffer(apcInfoInUM, &apcInfoInKM, sizeof(APC_INFO));
+				APCInject(&apcInfoInKM);
+			}
 		}
 	}
 	else
@@ -338,13 +345,7 @@ void AVLoadImageCallback(
 	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 	{
 		// TODO.Response processing login?
-		if (UMResponse.Status == AvEventStatusInjectAPC)
-		{
-			PAPC_INFO apcInfoInUM = UMResponse.UMMessage;
-			APC_INFO apcInfoInKM;
-			AVCommGetUmBuffer(apcInfoInUM, &apcInfoInKM, sizeof(APC_INFO));
-			APCInject(&apcInfoInKM);
-		}
+		
 	}
 
 	
