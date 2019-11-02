@@ -21,6 +21,7 @@ x64/
 x86/
 bld/
 build/
+dependencies/
 lib/
 Plugins/
 [Bb]in/
