@@ -91,7 +91,7 @@ void AVCore::start(void)
 	testEventsParsers(this->manager);
 #else
 	//portServer->start(manager);
-
+	pipeManager->join();
 
 
 
@@ -101,8 +101,20 @@ void AVCore::start(void)
 #endif
 }
 
+// Реализация ICoreImage
+
 ILogger * AVCore::getLogger()
 {
 	return logger;
+}
+
+SettingsManager * AVCore::getSettingsManager()
+{
+	return settingsManager;
+}
+
+CommandsManager * AVCore::getCommandsManager()
+{
+	return commandsManager;
 }
 

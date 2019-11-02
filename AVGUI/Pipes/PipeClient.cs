@@ -5,48 +5,92 @@ using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace AVGUI
 {
-    class PipeClient
+    public class PipeClient
     {
         private NamedPipeClientStream Pipe;
         private StreamReader reader;
         private StreamWriter writer;
 
-        public PipeClient(string _pipeName)
-        {
-            Pipe = new NamedPipeClientStream(_pipeName);
-            reader = new StreamReader(Pipe);
-            writer = new StreamWriter(Pipe);
-        }
+        Thread messageListener;     // Поток ожидащюий ответа от сервиса
+        string message = "";             // Ответ от сервиса
 
-        ~PipeClient()
-        {
-            Close();
-        }
-
+        // Подключиться к pipe
         public void Connect()
         {
             Pipe.Connect();
         }
 
+        // Закрыть соединение
         public void Close()
         {
             Pipe.Close();
             Pipe.Dispose();
         }
 
+        // Отправка сообщения клиенту
         public void SendMessage(string _message)
         {
             writer.WriteLine(_message);
             writer.Flush();
         }
 
-        public string ReciveMessage()
+        // Принять сообщения (отдельный поток)
+        public void ListenMessage()
         {
-            string message = reader.ReadLine();
-            return message;
+            messageListener.Start();
+        }
+
+        // Ждет сообщение _times секунд, если что-то пришло, то забирает его
+        public string GetMessage(int _times)
+        {
+            string retMessage = "";
+
+            for (int i = 0; i < _times; i++)
+            {
+                // Если ответ пришел
+                if (message != "")
+                {
+                    retMessage = message;
+                    message = "";
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            return retMessage;
+        }
+
+        // Бесконца ждет сообщение, если что-то пришло, то забирает его
+        public string GetMessage()
+        {
+            while (message != "")
+            {
+                Thread.Sleep(1000);
+            }
+
+            string retMessage = message;
+            message = "";
+
+            return retMessage;
+        }
+
+        public PipeClient(string _pipeName)
+        {
+            Pipe = new NamedPipeClientStream(_pipeName);    // Имя pipe'а
+            reader = new StreamReader(Pipe);                // Читать сообщения
+            writer = new StreamWriter(Pipe);                // Отправлять сообщения
+
+            messageListener = new Thread(() => { message = reader.ReadLine(); });   // Поток читает сообщение и кладет его в message
+        }
+
+
+        ~PipeClient()
+        {
+            Close();
         }
     }
 }

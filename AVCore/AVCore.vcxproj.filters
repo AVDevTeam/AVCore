@@ -34,6 +34,9 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Managers">
+      <UniqueIdentifier>{a7264d03-14ce-4118-bbda-136bae0f3ae4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -61,7 +64,13 @@
       <Filter>AVCore</Filter>
     </ClCompile>
     <ClCompile Include="PipeManager.cpp">
-      <Filter>Pipes</Filter>
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandsManager.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,11 +95,17 @@
     <ClInclude Include="AVCore.h">
       <Filter>AVCore</Filter>
     </ClInclude>
-    <ClInclude Include="PipeManager.h">
-      <Filter>Pipes</Filter>
-    </ClInclude>
     <ClInclude Include="ICoreImage.h">
       <Filter>AVCore</Filter>
+    </ClInclude>
+    <ClInclude Include="PipeManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandsManager.h">
+      <Filter>Managers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

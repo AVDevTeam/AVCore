@@ -124,6 +124,8 @@ int PipeServer::receiveMessage(std::string & _message)
 	char buffer[bufsize];
 	DWORD cbRead;
 
+	_message = "";
+
 	fSuccess = ReadFile(
 		this->hPipe,	// pipe handle 
 		buffer,			// buffer to receive reply 
@@ -150,7 +152,6 @@ int PipeServer::receiveMessage(std::string & _message)
 
 	if (cbRead != 0)
 	{
-		_message = "";
 		_message.append(buffer, cbRead);
 	}
 

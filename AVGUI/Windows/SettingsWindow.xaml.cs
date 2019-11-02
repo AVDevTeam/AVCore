@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,9 +14,10 @@ namespace AVGUI
     {
         PipeClient Pipe;
 
-        public SettingsWindow()
+        public SettingsWindow(PipeClient _pipe)
         {
             InitializeComponent();
+            Pipe = _pipe;
             ContentRendered += Main;
         }
 
@@ -23,9 +25,17 @@ namespace AVGUI
         {
             ContentRendered -= Main;
 
+            string command;
+            string answer = "";
 
+            command = JsonConvert.SerializeObject(new EntumerateModulesCommand());
 
-          
+            Pipe.SendMessage(command);  // Отправить 
+            Pipe.ListenMessage();
+
+            // Ждать сообщение 3 секунды
+            Pipe.GetMessage(3);
+
 
             //ConnectionProgressBar.Value = 100;
             //// Удалось подключиться 

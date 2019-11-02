@@ -13,20 +13,22 @@ void PipeManager::listen()
 		// Пока сообщения валятся
 		while (pipe->receiveMessage(message) != -1 && !stopSignal)
 		{
-			manage(message);
+			if (message != "")
+			{
+				// Если запрос на выполнение команды 
+				if (message.substr(1, 6) == R"("id":0)")
+				{
+					commandsManager->manage(message.substr(0, message.size() - 2));
+				}
+				// Если запрос на изменение настроек
+				else if (message.substr(1, 6) == R"("id":1)")
+				{
+					settingsManager->manage(message.substr(0, message.size() - 2));
+				}
+			}
 			Sleep(500);
 		}
 	}
-}
-
-void PipeManager::manage(std::string _message)
-{
-	logger->log(_message);
-	//std::list <std::string> *pluginNames;
-	//pluginNames = manager->getPluginsNames();
-
-	// manager.loadPlugin((char*)"TestPlugin");
-	// auto pl = manager.getPluginByName("TestPlugin");
 }
 
 void PipeManager::stop()
@@ -41,8 +43,9 @@ void PipeManager::join()
 
 PipeManager::PipeManager(ICoreImage * _AVCoreImage)
 {
-	AVCoreImage = _AVCoreImage;
-	logger = AVCoreImage->getLogger();
+	logger = _AVCoreImage->getLogger();
+	settingsManager = _AVCoreImage->getSettingsManager();
+	commandsManager = _AVCoreImage->getCommandsManager();
 
 	pipe = new PipeServer(serverName);
 	pipe->createNamedPipe();

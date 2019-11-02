@@ -23,14 +23,11 @@ namespace AVGUI
         {
             ContentRendered -= Main;
 
-
-
-
-            // Подключить к серверу
+            // Подключить к сервису
             Pipe = new PipeClient("AVCoreConnection");
             Pipe.Connect();
 
-            Pipe.SendMessage("Hello");
+           
 
         }
 
@@ -58,7 +55,7 @@ namespace AVGUI
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settingsWindow = new SettingsWindow();
+            SettingsWindow settingsWindow = new SettingsWindow(Pipe);
             settingsWindow.ShowDialog();
         }
 

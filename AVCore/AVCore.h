@@ -5,7 +5,6 @@
 #include "ConfigManager.h"
 #include "FileLogger.h"
 #include "PipeManager.h"
-#include "ICoreImage.h"
 #include <mutex>
 
 //#define TESTBUILD
@@ -18,6 +17,8 @@ public:
 	AVCore(ILogger* logger) 
 	{ 
 		this->logger = logger;
+		this->commandsManager = new CommandsManager();
+		this->settingsManager = new SettingsManager();
 		this->pipeManager = new PipeManager(this);
 		this->portServer = new CommPortServer();
 		this->manager = new PluginManager(logger);
@@ -44,6 +45,9 @@ public:
 
 private:
 	PipeManager * pipeManager;
+	SettingsManager * settingsManager;
+	CommandsManager * commandsManager;
+
 	PluginManager * manager;
 	CommPortServer * portServer;
 	ILogger* logger;
@@ -51,4 +55,6 @@ private:
 
 	// Унаследовано через ICoreImage
 	virtual ILogger * getLogger() override;
+	virtual SettingsManager * getSettingsManager() override;
+	virtual CommandsManager * getCommandsManager() override;
 };

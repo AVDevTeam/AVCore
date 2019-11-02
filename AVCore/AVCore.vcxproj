@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AVCore.cpp" />
+    <ClCompile Include="CommandsManager.cpp" />
     <ClCompile Include="CommPortServer.cpp" />
     <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="EventsParser.cpp" />
@@ -160,9 +161,11 @@
     <ClCompile Include="PipeServer.cpp" />
     <ClCompile Include="PluginManager.cpp" />
     <ClCompile Include="PipeManager.cpp" />
+    <ClCompile Include="SettingsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AVCore.h" />
+    <ClInclude Include="CommandsManager.h" />
     <ClInclude Include="CommPortServer.h" />
     <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="EventsParser.h" />
@@ -171,6 +174,7 @@
     <ClInclude Include="PipeServer.h" />
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PipeManager.h" />
+    <ClInclude Include="SettingsManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
