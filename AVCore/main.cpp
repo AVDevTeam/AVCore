@@ -34,6 +34,8 @@ int main(int argc, char* argv[])
 
 	FileLogger* logger = new FileLogger(LOG_PATH);
 	avCore = new AVCore(logger);
+
+
 	avCore->start();
 
 	printf("Enter any key to exit\n");

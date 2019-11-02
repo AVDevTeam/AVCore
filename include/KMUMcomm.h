@@ -78,6 +78,9 @@ typedef struct _APC_INFO
 {
 	int PID;
 	int TID;
+#ifdef _WIN64
+	char WOW64;
+#endif
 	int apcBufferSize;
 	void* apcBuffer;
 } APC_INFO, * PAPC_INFO;

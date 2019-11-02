@@ -1,5 +1,8 @@
 #include "AVEventsDriver.h"
 
+#define INJ_MEMORY_TAG ' jnI'
+#define APC_INFO_MEMORY_TAG ' apC'
+
 typedef enum
 {
 	OriginalApcEnvironment,
@@ -8,26 +11,52 @@ typedef enum
 
 } KAPC_ENVIRONMENT;
 
+typedef
+VOID
+(NTAPI* PKNORMAL_ROUTINE)(
+	_In_ PVOID NormalContext,
+	_In_ PVOID SystemArgument1,
+	_In_ PVOID SystemArgument2
+	);
+
+typedef
+VOID
+(NTAPI* PKKERNEL_ROUTINE)(
+	_In_ PKAPC Apc,
+	_Inout_ PKNORMAL_ROUTINE* NormalRoutine,
+	_Inout_ PVOID* NormalContext,
+	_Inout_ PVOID* SystemArgument1,
+	_Inout_ PVOID* SystemArgument2
+	);
+
+typedef
+VOID
+(NTAPI* PKRUNDOWN_ROUTINE) (
+	_In_ PKAPC Apc
+	);
+
 NTKERNELAPI
 VOID
+NTAPI
 KeInitializeApc(
-	PRKAPC Apc,
-	PRKTHREAD Thread,
-	KAPC_ENVIRONMENT Environment,
-	PVOID KernelRoutine,
-	PVOID RundownRoutine,
-	PVOID NormalRoutine,
-	KPROCESSOR_MODE ApcMode,
-	PVOID NormalContext
+	_Out_ PRKAPC Apc,
+	_In_ PETHREAD Thread,
+	_In_ KAPC_ENVIRONMENT Environment,
+	_In_ PKKERNEL_ROUTINE KernelRoutine,
+	_In_opt_ PKRUNDOWN_ROUTINE RundownRoutine,
+	_In_opt_ PKNORMAL_ROUTINE NormalRoutine,
+	_In_opt_ KPROCESSOR_MODE ApcMode,
+	_In_opt_ PVOID NormalContext
 );
 
 NTKERNELAPI
 BOOLEAN
+NTAPI
 KeInsertQueueApc(
-	PKAPC Apc,
-	PVOID SystemArgument1,
-	PVOID SystemArgument2,
-	KPRIORITY Increment
+	_Inout_ PRKAPC Apc,
+	_In_opt_ PVOID SystemArgument1,
+	_In_opt_ PVOID SystemArgument2,
+	_In_ KPRIORITY Increment
 );
 
 DECLSPEC_IMPORT NTSTATUS ZwQueryInformationProcess(
@@ -37,6 +66,188 @@ DECLSPEC_IMPORT NTSTATUS ZwQueryInformationProcess(
 	ULONG            ProcessInformationLength,
 	PULONG           ReturnLength
 );
+
+NTSTATUS
+NTAPI
+InjpQueueApc(
+	_In_ KPROCESSOR_MODE ApcMode,
+	_In_ PKNORMAL_ROUTINE NormalRoutine,
+	_In_ PVOID NormalContext,
+	_In_ PVOID SystemArgument1,
+	_In_ PVOID SystemArgument2,
+	_In_ PETHREAD Thread
+);
+
+
+
+NTSTATUS
+NTAPI
+InjInject(
+	_In_ PAPC_INFO ApcInfoIn
+)
+{
+	HANDLE pHandle = NULL;
+	PEPROCESS pEprocess = NULL;
+	PKTHREAD pThread = NULL;
+	UCHAR APCPayload[1024] = { 0 };
+
+	APC_INFO ApcInfoLocal;
+	ApcInfoLocal.apcBuffer = ApcInfoIn->apcBuffer;
+	ApcInfoLocal.apcBufferSize = ApcInfoIn->apcBufferSize;
+	ApcInfoLocal.PID = ApcInfoIn->PID;
+	ApcInfoLocal.TID = ApcInfoIn->TID;
+	ApcInfoLocal.WOW64 = ApcInfoIn->WOW64;
+	PAPC_INFO ApcInfo = &ApcInfoLocal;
+
+	ExFreePoolWithTag(ApcInfoIn, APC_INFO_MEMORY_TAG);
+
+	NTSTATUS apcStatus = PsLookupProcessByProcessId((HANDLE)ApcInfo->PID, &pEprocess);
+	if (apcStatus == STATUS_SUCCESS)
+	{
+		OBJECT_ATTRIBUTES objectAttributes;
+		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+		CLIENT_ID client_id;
+		client_id.UniqueProcess = (HANDLE)ApcInfo->PID;
+		client_id.UniqueThread = 0;
+		apcStatus = ZwOpenProcess(&pHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
+		if (apcStatus == STATUS_SUCCESS)
+		{
+
+			apcStatus = PsLookupThreadByThreadId((HANDLE)ApcInfo->TID, &pThread);
+			if (apcStatus == STATUS_SUCCESS)
+			{
+				PVOID umAPCBuffer = NULL;
+				SIZE_T umAPCBufferSize = ApcInfo->apcBufferSize;
+				apcStatus = ZwAllocateVirtualMemory(pHandle, &umAPCBuffer, 0, &umAPCBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+				if (apcStatus == STATUS_SUCCESS)
+				{
+					// copy APC payload from UM to KM
+					if (ApcInfo->apcBufferSize > 1024)
+						ASSERT(FALSE);
+					AVCommGetUmBuffer(ApcInfo->apcBuffer, APCPayload, ApcInfo->apcBufferSize);
+
+					KAPC_STATE pkapcState;
+					KeStackAttachProcess(pEprocess, &pkapcState);
+					// copy buffer from KM to allocated buffer in UM.
+					memcpy(umAPCBuffer, APCPayload, ApcInfo->apcBufferSize);
+					// Restore stack
+					KeUnstackDetachProcess(&pkapcState);
+
+#ifdef _WIN64
+					if (ApcInfo->WOW64)
+					{
+						PsWrapApcWow64Thread(NULL, &umAPCBuffer);
+					}
+#endif
+
+					PKNORMAL_ROUTINE ApcRoutine = (PKNORMAL_ROUTINE)(ULONG_PTR)umAPCBuffer;
+
+					InjpQueueApc(UserMode,
+						ApcRoutine,
+						NULL,
+						NULL,
+						NULL,
+						pThread);
+				}
+			}
+
+			ZwClose(pHandle);
+		}
+	}
+	return apcStatus;
+}
+
+
+VOID
+NTAPI
+InjpInjectApcNormalRoutine(
+	_In_ PVOID NormalContext,
+	_In_ PVOID SystemArgument1,
+	_In_ PVOID SystemArgument2
+)
+{
+	UNREFERENCED_PARAMETER(SystemArgument1);
+	UNREFERENCED_PARAMETER(SystemArgument2);
+
+	PAPC_INFO InjectionInfo = NormalContext;
+	InjInject(InjectionInfo);
+}
+
+VOID
+NTAPI
+InjpInjectApcKernelRoutine(
+	_In_ PKAPC Apc,
+	_Inout_ PKNORMAL_ROUTINE* NormalRoutine,
+	_Inout_ PVOID* NormalContext,
+	_Inout_ PVOID* SystemArgument1,
+	_Inout_ PVOID* SystemArgument2
+)
+{
+	UNREFERENCED_PARAMETER(NormalRoutine);
+	UNREFERENCED_PARAMETER(NormalContext);
+	UNREFERENCED_PARAMETER(SystemArgument1);
+	UNREFERENCED_PARAMETER(SystemArgument2);
+
+	//
+	// Common kernel routine for both user-mode and
+	// kernel-mode APCs queued by the InjpQueueApc
+	// function.  Just release the memory of the APC
+	// structure and return back.
+	//
+
+	ExFreePoolWithTag(Apc, INJ_MEMORY_TAG);
+}
+
+NTSTATUS
+NTAPI
+InjpQueueApc(
+	_In_ KPROCESSOR_MODE ApcMode,
+	_In_ PKNORMAL_ROUTINE NormalRoutine,
+	_In_ PVOID NormalContext,
+	_In_ PVOID SystemArgument1,
+	_In_ PVOID SystemArgument2,
+	_In_ PETHREAD Thread
+)
+{
+	//
+	// Allocate memory for the KAPC structure.
+	//
+
+	PKAPC Apc = ExAllocatePoolWithTag(NonPagedPoolNx,
+		sizeof(KAPC),
+		INJ_MEMORY_TAG);
+
+	if (!Apc)
+	{
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+
+	//
+	// Initialize and queue the APC.
+	//
+
+	KeInitializeApc(Apc,                                  // Apc
+		Thread,                 // Thread
+		OriginalApcEnvironment,               // Environment
+		&InjpInjectApcKernelRoutine,          // KernelRoutine
+		NULL,                                 // RundownRoutine
+		NormalRoutine,                        // NormalRoutine
+		ApcMode,                              // ApcMode
+		NormalContext);                       // NormalContext
+
+	BOOLEAN Inserted = KeInsertQueueApc(Apc,              // Apc
+		SystemArgument1,  // SystemArgument1
+		SystemArgument2,  // SystemArgument2
+		0);               // Increment
+
+	if (!Inserted)
+	{
+		ExFreePoolWithTag(Apc, INJ_MEMORY_TAG);
+		return STATUS_UNSUCCESSFUL;
+	}
+
+	return STATUS_SUCCESS;
+}
 
 // TODO. IFDEF x86/x64 (-/-Ex2 support)
 void AVCreateProcessCallback(
@@ -84,6 +295,7 @@ void AVCreateProcessCallback(
 			if (status != STATUS_SUCCESS)
 			{
 				// couldn't allocate memory in UM
+
 				return;
 			}
 		}
@@ -136,77 +348,6 @@ void AVCreateProcessCallback(
 	}
 }
 
-VOID KernelAPC(
-	struct _KAPC* Apc,
-	PVOID* NormalRoutine,
-	PVOID* NormalContext,
-	PVOID* SystemArgument1,
-	PVOID* SystemArgument2)
-{
-	UNREFERENCED_PARAMETER(Apc);
-	UNREFERENCED_PARAMETER(NormalRoutine);
-	UNREFERENCED_PARAMETER(NormalContext);
-	UNREFERENCED_PARAMETER(SystemArgument1);
-	UNREFERENCED_PARAMETER(SystemArgument2);
-	DbgPrint("TEST\n");
-}
-
-VOID DebugFunc(NTSTATUS test)
-{
-	DbgPrint("status: %d\n", test);
-}
-
-void APCInject(PAPC_INFO ApcInfo)
-{
-	HANDLE pHandle = NULL;
-	PEPROCESS pEprocess = NULL;
-	PKTHREAD pThread = NULL;
-	UCHAR APCPayload[1024] = { 0 };
-	
-	NTSTATUS apcStatus = PsLookupProcessByProcessId((HANDLE)ApcInfo->PID, &pEprocess);
-	if (apcStatus == STATUS_SUCCESS)
-	{
-		OBJECT_ATTRIBUTES objectAttributes;
-		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
-		CLIENT_ID client_id;
-		client_id.UniqueProcess = (HANDLE)ApcInfo->PID;
-		client_id.UniqueThread = 0;
-		apcStatus = ZwOpenProcess(&pHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
-		if (apcStatus == STATUS_SUCCESS)
-		{
-
-			apcStatus = PsLookupThreadByThreadId((HANDLE)ApcInfo->TID, &pThread);
-			if (apcStatus == STATUS_SUCCESS)
-			{
-				PVOID umAPCBuffer = NULL;
-				SIZE_T umAPCBufferSize = ApcInfo->apcBufferSize;
-				apcStatus = ZwAllocateVirtualMemory(pHandle, &umAPCBuffer, 0, &umAPCBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-				DebugFunc(apcStatus);
-				if (apcStatus == STATUS_SUCCESS)
-				{
-					// copy APC payload from UM to KM
-					if (ApcInfo->apcBufferSize > 1024)
-						ASSERT(FALSE);
-					AVCommGetUmBuffer(ApcInfo->apcBuffer, APCPayload, ApcInfo->apcBufferSize);
-
-					KAPC_STATE pkapcState;
-					KeStackAttachProcess(pEprocess, &pkapcState);
-					// copy buffer from KM to allocated buffer in UM.
-					memcpy(umAPCBuffer, APCPayload, ApcInfo->apcBufferSize);
-					// Restore stack
-					KeUnstackDetachProcess(&pkapcState);
-
-					PKAPC apc = (PKAPC)ExAllocatePool(NonPagedPool, sizeof(KAPC));
-					KeInitializeApc(apc, pThread, OriginalApcEnvironment, (PVOID)KernelAPC, NULL, (PVOID)umAPCBuffer, UserMode, NULL);
-					KeInsertQueueApc(apc, 0, NULL, 0);
-				}
-			}
-
-			ZwClose(pHandle);
-		}
-	}
-}
-
 void AVCreateThreadCallback(
 	HANDLE ProcessId,
 	HANDLE ThreadId,
@@ -220,35 +361,6 @@ void AVCreateThreadCallback(
 
 	if (Create)
 	{
-		UCHAR buffer[128];
-		RtlFillMemory(&buffer, sizeof(buffer), 0x90);
-		PEPROCESS pHandle = NULL;
-		PKTHREAD pThread = NULL;
-		NTSTATUS apcStatus = PsLookupProcessByProcessId(ProcessId, &pHandle);
-		if (apcStatus == STATUS_SUCCESS)
-		{
-			apcStatus = PsLookupThreadByThreadId(ThreadId, &pThread);
-			if (apcStatus == STATUS_SUCCESS)
-			{
-				PVOID umAPCBuffer = NULL;
-				SIZE_T umAPCBufferSize = sizeof(buffer);
-				apcStatus = ZwAllocateVirtualMemory(pHandle, &umAPCBuffer, 0, &umAPCBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-				if (apcStatus == STATUS_SUCCESS)
-				{
-					KAPC_STATE pkapcState;
-					KeStackAttachProcess(pHandle, &pkapcState);
-					// copy buffer from KM to allocated buffer in UM.
-					memcpy(umAPCBuffer, buffer, sizeof(buffer));
-					// Restore stack
-					KeUnstackDetachProcess(&pkapcState);
-
-					KAPC apc;
-					KeInitializeApc(&apc, pThread, 0, (PVOID)&KernelAPC, NULL, (PVOID)umAPCBuffer, UserMode, NULL);
-					KeInsertQueueApc(&apc, 0, NULL, 0);
-				}
-			}
-		}
-
 		AV_EVENT_THREAD_CREATE eventThreadCreate = { 0 };
 		eventThreadCreate.PID = (int)(__int64)ProcessId;
 		eventThreadCreate.TID = (int)(__int64)ThreadId;
@@ -268,9 +380,16 @@ void AVCreateThreadCallback(
 			if (UMResponse.Status == AvEventStatusInjectAPC)
 			{
 				PAPC_INFO apcInfoInUM = UMResponse.UMMessage;
-				APC_INFO apcInfoInKM;
-				AVCommGetUmBuffer(apcInfoInUM, &apcInfoInKM, sizeof(APC_INFO));
-				APCInject(&apcInfoInKM);
+				PAPC_INFO apcInfoInKM = ExAllocatePoolWithTag(NonPagedPoolNx,
+					sizeof(APC_INFO),
+					APC_INFO_MEMORY_TAG);
+				AVCommGetUmBuffer(apcInfoInUM, apcInfoInKM, sizeof(APC_INFO));
+				InjpQueueApc(KernelMode,
+					&InjpInjectApcNormalRoutine,
+					apcInfoInKM,
+					NULL,
+					NULL,
+					PsGetCurrentThread());
 			}
 		}
 	}
@@ -343,9 +462,21 @@ void AVLoadImageCallback(
 	}
 
 	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
-	{
-		// TODO.Response processing login?
-		
+	{	
+		if (UMResponse.Status == AvEventStatusInjectAPC)
+		{
+			PAPC_INFO apcInfoInUM = UMResponse.UMMessage;
+			PAPC_INFO apcInfoInKM = ExAllocatePoolWithTag(NonPagedPoolNx,
+				sizeof(APC_INFO),
+				APC_INFO_MEMORY_TAG);
+			AVCommGetUmBuffer(apcInfoInUM, apcInfoInKM, sizeof(APC_INFO));
+			InjpQueueApc(KernelMode,
+				&InjpInjectApcNormalRoutine,
+				apcInfoInKM,
+				NULL,
+				NULL,
+				PsGetCurrentThread());
+		}
 	}
 
 	
