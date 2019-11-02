@@ -90,6 +90,19 @@ void AVCore::start(void)
 #ifdef TESTBUILD
 	testEventsParsers(this->manager);
 #else
-	portServer->start(manager);
+	//portServer->start(manager);
+
+
+
+
+
+
+
 #endif
 }
+
+ILogger * AVCore::getLogger()
+{
+	return logger;
+}
+

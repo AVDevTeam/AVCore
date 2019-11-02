@@ -16,10 +16,14 @@ namespace AVGUI
 
         public PipeClient(string _pipeName)
         {
-            // def name = AVCorePipe
             Pipe = new NamedPipeClientStream(_pipeName);
             reader = new StreamReader(Pipe);
             writer = new StreamWriter(Pipe);
+        }
+
+        ~PipeClient()
+        {
+            Close();
         }
 
         public void Connect()

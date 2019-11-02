@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using Newtonsoft.Json;
 
 namespace AVGUI
 {
@@ -9,16 +10,27 @@ namespace AVGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        PipeClient Pipe;
+        int ScanMode = 1;
+   
         public MainWindow()
         {
             InitializeComponent();
-            Loaded += Main;
+            ContentRendered += Main;
         }
 
         public void Main(Object sender, EventArgs e)
         {
-            Loaded -= Main;
+            ContentRendered -= Main;
 
+
+
+
+            // Подключить к серверу
+            Pipe = new PipeClient("AVCoreConnection");
+            Pipe.Connect();
+
+            Pipe.SendMessage("Hello");
 
         }
 
@@ -31,15 +43,17 @@ namespace AVGUI
             {
                 case 0:
                     ScanButtonTextBlock.Text = "ПОЛНОЕ СКАНИРОВАНИЕ";
+                    ScanMode = 0;
                     break;
                 case 1:
                     ScanButtonTextBlock.Text = "БЫСТРОЕ СКАНИРОВАНИЕ";
+                    ScanMode = 1;
                     break;
                 case 2:
                     ScanButtonTextBlock.Text = "ВЫБОРОЧНОЕ СКАНИРОВАНИЕ";
+                    ScanMode = 2;
                     break;
             }
-
         }
 
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -48,9 +62,12 @@ namespace AVGUI
             settingsWindow.ShowDialog();
         }
 
+        // Кликнули по кнопке скана
         private void ScanButton_Click(object sender, RoutedEventArgs e)
         {
-
+            // Отправить команду на сканирование
+            string command = JsonConvert.SerializeObject(new ScanCommand(ScanMode));
+            Pipe.SendMessage(command);
         }
     }
 }
