@@ -84,6 +84,7 @@ void AVCore::start(void)
 	manager->addEventParser(AvImageLoad, reinterpret_cast<EventParser*>(new AvEventImageLoadParser()));
 	manager->addEventParser(AvRegCreateKey, reinterpret_cast<EventParser*>(new AvEventRegCreateKeyParser()));
 	manager->addEventParser(AvRegOpenKey, reinterpret_cast<EventParser*>(new AvEventRegOpenKeyParser()));
+	manager->addEventParser(AvApcProcessInject, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
 
 	std::list<std::string>* plugins = manager->getConfig()->getListParam("Plugins");
 	std::string pluginsFolder = manager->getConfig()->getStringParam("PluginsPath");

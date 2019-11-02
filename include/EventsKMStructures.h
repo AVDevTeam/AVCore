@@ -107,7 +107,7 @@ typedef struct _AV_EVENT_PROCESS_CREATE
 	wchar_t* commandLine;
 	int commandLineSize;
 
-} AV_EVENT_PROCESS_CREATE, * PAV_EVENT_PROCESS_CREATE;
+} AV_EVENT_PROCESS_CREATE, * PAV_EVENT_PROCESS_CREATE, AV_EVENT_APC_PROCESS_INJECT, * PAV_EVENT_APC_PROCESS_INJECT;
 
 // Defines parameters of AvProcessCreate event
 typedef struct _AV_EVENT_PROCESS_EXIT

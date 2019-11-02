@@ -42,6 +42,7 @@ typedef enum _AV_EVENT_TYPE
 	AvImageLoad, // (PsSetImageNotifyRoutine[Ex])
 	AvRegCreateKey, // (RegNtPreCreateKey[Ex])
 	AvRegOpenKey, // (RegNtPreOpenKey[Ex])
+	AvApcProcessInject, // (PsSetCreateProcessNotifyRoutineEx sent from injdrv)
 } AV_EVENT_TYPE;
 
 //  Event stucture: Kernel -> User Message
@@ -78,6 +79,9 @@ typedef struct _APC_INFO
 {
 	int PID;
 	int TID;
+#ifdef _WIN64
+	char WOW64;
+#endif
 	int apcBufferSize;
 	void* apcBuffer;
 } APC_INFO, * PAPC_INFO;
