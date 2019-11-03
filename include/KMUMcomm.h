@@ -20,7 +20,8 @@ Environment:
 #endif
 
 //  Name of AV filter server ports
-#define AV_SCAN_PORT_NAME                    L"\\AVCoreEventsPort"
+#define AV_SCAN_PORT_NAME L"\\AVCoreEventsPort"
+#define AV_UM_EVENTS_PIPE_NAME "\\\\.\\pipe\\AVCoreUMEvents"
 
 //  Message type enumeration, please see AV_SCANNER_NOTIFICATION below
 typedef enum _AV_MESSAGE_TYPE
@@ -43,6 +44,7 @@ typedef enum _AV_EVENT_TYPE
 	AvRegCreateKey, // (RegNtPreCreateKey[Ex])
 	AvRegOpenKey, // (RegNtPreOpenKey[Ex])
 	AvApcProcessInject, // (PsSetCreateProcessNotifyRoutineEx sent from injdrv)
+	AvWinApiCall, // UM event (detours hooks)
 } AV_EVENT_TYPE;
 
 //  Event stucture: Kernel -> User Message

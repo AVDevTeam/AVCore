@@ -15,6 +15,7 @@ typedef enum {
 	CallbackImageLoad,
 	CallbackRegCreateKey,
 	CallbackRegOpenKey,
+	CallbackWinApiCall,
 } CALLBACK_ID;
 
 class TestPlugin : public IPlugin

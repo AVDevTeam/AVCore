@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "AVCore.h"
+#include "UMEventsListener.h"
 
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
@@ -37,6 +38,7 @@ int main(int argc, char* argv[])
 	avCore->start();
 
 	printf("Enter any key to exit\n");
+	getchar();
 	getchar();
 }
 #else

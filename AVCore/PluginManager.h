@@ -33,6 +33,8 @@ public:
 	// this function is used on PluginManager initialization in order
 	// to register parsers for implemented events.
 	void addEventParser(AV_EVENT_TYPE, EventParser*);
+
+	void* parseKMEvent(AV_EVENT_TYPE, void*);
 	// this function is called from event listeners in order to
 	// process an event by iterating through registered callbacks.
 	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*, void**);

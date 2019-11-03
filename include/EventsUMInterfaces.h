@@ -7,6 +7,7 @@
 #endif
 
 #include "EventsKMStructures.h"
+#include <list>
 #include <string>
 
 // Interface for AvFSEventCreate that will be used
@@ -148,4 +149,13 @@ public:
 	virtual ~IEventRegOpenKey() {}
 	virtual int getRequestorPID() = 0;
 	virtual std::string& getKeyPath() = 0;
+};
+
+class IEventWinApiCall
+{
+public:
+	virtual ~IEventWinApiCall() {}
+	virtual int getPID() = 0;
+	virtual std::string getFunctionName() = 0;
+	virtual std::list<std::string> getFunctionArgs() = 0;
 };

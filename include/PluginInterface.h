@@ -25,6 +25,8 @@ class IManager
 public:
 	virtual ~IManager() {}
 	virtual int registerCallback(IPlugin*, int, AV_EVENT_TYPE, int) = 0;
+
+	virtual void* parseKMEvent(AV_EVENT_TYPE, void*) = 0;
 	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*, void**) = 0;
 
 	// Syncronizationi methods

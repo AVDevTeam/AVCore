@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "EventsUMInterfaces.h"
 #include <string>
+#include <list>
 #include <iostream>
 
 // Base class for all UM events.
@@ -390,4 +391,24 @@ class AvEventRegOpenKeyParser : EventParser
 public:
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;
+};
+
+class AvEventWinApiCall : IEventWinApiCall
+{
+public:
+	AvEventWinApiCall(int PID, std::string functionName, std::list<std::string> arguments)
+	{
+		this->PID = PID;
+		this->functionName = functionName;
+		this->argumetns = arguments;
+	}
+
+	// Inherited via IEventWinApiCall
+	virtual int getPID() override;
+	virtual std::string getFunctionName() override;
+	virtual std::list<std::string> getFunctionArgs() override;
+private:
+	int PID;
+	std::string functionName;
+	std::list<std::string> argumetns;
 };

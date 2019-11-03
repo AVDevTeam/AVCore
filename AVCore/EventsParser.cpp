@@ -519,3 +519,18 @@ AvEvent* AvEventRegOpenKeyParser::parse(PVOID event)
 	));
 	return instance;
 }
+
+int AvEventWinApiCall::getPID()
+{
+	return this->PID;
+}
+
+std::string AvEventWinApiCall::getFunctionName()
+{
+	return this->functionName;
+}
+
+std::list<std::string> AvEventWinApiCall::getFunctionArgs()
+{
+	return this->argumetns;
+}

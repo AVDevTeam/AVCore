@@ -37,6 +37,9 @@
     <Filter Include="Loggers\FileLogger">
       <UniqueIdentifier>{167f2c42-c8ea-43a8-9bf1-2acd525ddcad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PluginManager\UMEventsListner">
+      <UniqueIdentifier>{2d8626e8-d895-4a02-ac5c-88d493050a82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,6 +69,9 @@
     <ClCompile Include="AVCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UMEventsListener.cpp">
+      <Filter>PluginManager\UMEventsListner</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PipeServer.h">
@@ -91,6 +97,9 @@
     </ClInclude>
     <ClInclude Include="AVCore.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UMEventsListener.h">
+      <Filter>PluginManager\UMEventsListner</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

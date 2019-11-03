@@ -139,7 +139,6 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 {
 	switch (eventType)
 	{
-	/*
 	case AvFileCreate:
 		this->logger->log("Got AvFileCreate event.");
 		break;
@@ -155,7 +154,6 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	case AvThreadHandleDublicate:
 		this->logger->log("Got AvThreadHandleDublicate event.");
 		break;
-	*/
 	case AvProcessCreate:
 		this->logger->log("Got AvProcessCreate event.");
 		break;
@@ -171,22 +169,21 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	case AvImageLoad:
 		this->logger->log("Got AvImageLoad event.");
 		break;
-	/*
 	case AvRegCreateKey:
 		this->logger->log("Got AvRegCreateKey event.");
 		break;
 	case AvRegOpenKey:
 		this->logger->log("Got AvRegOpenKey event.");
 		break;
-		*/
+	case AvApcProcessInject:
+		this->logger->log("Got AvApcProcessInject event.");
+		break;
 	}
 	try
 	{
 		// enter event processing section
 		this->eventProcessingMutex.lock_shared();
 
-		EventParser* eventParser = this->parsersMap[eventType];
-		AvEvent* parsedEvent = eventParser->parse(event);
 		priorityMap* eventPriorityMap = this->callbacksMap[eventType];
 		AV_EVENT_RETURN_STATUS status = AvEventStatusAllow;
 		for (priorityMap::iterator it = eventPriorityMap->begin(); it != eventPriorityMap->end(); it++)
@@ -194,13 +191,13 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
 			this->logger->log("Processing callback with priority " + std::to_string(priority) + " in plugin " + curCallback.second->getName());
-			status = curCallback.second->callback(curCallback.first, parsedEvent, umMessage);
+			status = curCallback.second->callback(curCallback.first, event, umMessage);
 			if (status == AvEventStatusBlock)
 			{
 				break;
 			}
 		}
-		delete parsedEvent;
+		delete event;
 
 		// leave event processing section
 		this->eventProcessingMutex.unlock_shared();
@@ -248,4 +245,11 @@ void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)
 {
 	this->parsersMap.insert(std::pair<int, EventParser*>(eventType, parser));
 	this->callbacksMap.insert(std::pair<AV_EVENT_TYPE, priorityMap*>(eventType, new priorityMap()));
+}
+
+void* PluginManager::parseKMEvent(AV_EVENT_TYPE eventType, void* event)
+{
+	EventParser* eventParser = this->parsersMap[eventType];
+	AvEvent* parsedEvent = eventParser->parse(event);
+	return reinterpret_cast<void*>(parsedEvent);
 }

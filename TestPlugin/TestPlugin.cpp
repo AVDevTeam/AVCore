@@ -24,10 +24,6 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event, void** 
 		this->logger->log("CallbackFileCreate");
 		this->logger->log("\tFile path: " + eventFSCreate->getFilePath());
 		this->logger->log("\tRequestor PID: " + std::to_string(eventFSCreate->getRequestorPID()));
-		if (eventFSCreate->getFilePath().find("secretfile.txt") != std::string::npos)
-		{
-			return AvEventStatusBlock;
-		}
 	}
 	else if (callbackId == CallbackPrHandleCreate)
 	{
@@ -115,10 +111,6 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event, void** 
 		this->logger->log("\tPID: " + std::to_string(eventRegCreateKey->getRequestorPID()));
 		this->logger->log("\tProcess PID: " + std::to_string(eventRegCreateKey->getRequestorPID()));
 		this->logger->log("\tKey path: " + eventRegCreateKey->getKeyPath());
-		if (eventRegCreateKey->getKeyPath().find("secretkey") != std::string::npos)
-		{
-			return AvEventStatusBlock;
-		}
 	}
 	else if (callbackId == CallbackRegOpenKey)
 	{
@@ -127,10 +119,17 @@ AV_EVENT_RETURN_STATUS TestPlugin::callback(int callbackId, void* event, void** 
 		this->logger->log("\tPID: " + std::to_string(eventRegOpenKey->getRequestorPID()));
 		this->logger->log("\tProcess PID: " + std::to_string(eventRegOpenKey->getRequestorPID()));
 		this->logger->log("\tKey path: " + eventRegOpenKey->getKeyPath());
-		if (eventRegOpenKey->getKeyPath().find("secretkey") != std::string::npos)
-		{
-			return AvEventStatusBlock;
-		}
+	}
+	else if (callbackId == CallbackWinApiCall)
+	{
+		IEventWinApiCall* eventWinApiCall = reinterpret_cast<IEventWinApiCall*>(event);
+		this->logger->log("CallbackWinApiCall");
+		this->logger->log("\tPID: " + std::to_string(eventWinApiCall->getPID()));
+		this->logger->log("\tFunction: " + eventWinApiCall->getFunctionName());
+		auto args = eventWinApiCall->getFunctionArgs();
+		this->logger->log("\tArguments:");
+		for (auto it = args.begin(); it != args.end(); it++)
+			this->logger->log("\t\t- " + (*it));
 	}
 	return AvEventStatusAllow;
 }
@@ -162,24 +161,26 @@ void TestPlugin::init(IManager * manager, HMODULE module, IConfig * config)
 	std::string value("A STRING");
 	this->configManager->setStringParam(param, value);
 
-	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 2);
+	manager->registerCallback(this, CallbackFileCreate, AvFileCreate, 100);
 
-	manager->registerCallback(this, CallbackPrHandleCreate, AvProcessHandleCreate, 1);
-	manager->registerCallback(this, CallbackPrHandleDublicate, AvProcessHandleDublicate , 1);
+	manager->registerCallback(this, CallbackPrHandleCreate, AvProcessHandleCreate, 100);
+	manager->registerCallback(this, CallbackPrHandleDublicate, AvProcessHandleDublicate , 100);
 	
-	manager->registerCallback(this, CallbackThHandleCreate, AvThreadHandleCreate , 1);
-	manager->registerCallback(this, CallbackThHandleDublicate, AvThreadHandleDublicate , 1);
+	manager->registerCallback(this, CallbackThHandleCreate, AvThreadHandleCreate , 100);
+	manager->registerCallback(this, CallbackThHandleDublicate, AvThreadHandleDublicate , 100);
 
-	manager->registerCallback(this, CallbackProcessCreate, AvProcessCreate, 1);
-	manager->registerCallback(this, CallbackProcessExit, AvProcessExit, 1);
+	manager->registerCallback(this, CallbackProcessCreate, AvProcessCreate, 100);
+	manager->registerCallback(this, CallbackProcessExit, AvProcessExit, 100);
 
-	manager->registerCallback(this, CallbackThreadCreate, AvThreadCreate, 1);
-	manager->registerCallback(this, CallbackThreadExit, AvThreadExit, 1);
+	manager->registerCallback(this, CallbackThreadCreate, AvThreadCreate, 100);
+	manager->registerCallback(this, CallbackThreadExit, AvThreadExit, 100);
 
-	manager->registerCallback(this, CallbackImageLoad, AvImageLoad, 1);
+	manager->registerCallback(this, CallbackImageLoad, AvImageLoad, 100);
 
-	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 2);
-	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 2);
+	manager->registerCallback(this, CallbackRegCreateKey, AvRegCreateKey, 100);
+	manager->registerCallback(this, CallbackRegOpenKey, AvRegOpenKey, 100);
+
+	manager->registerCallback(this, CallbackWinApiCall, AvWinApiCall, 100);
 }
 
 void TestPlugin::deinit()

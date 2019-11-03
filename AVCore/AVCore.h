@@ -4,6 +4,7 @@
 #include "EventsParser.h"
 #include "ConfigManager.h"
 #include "FileLogger.h"
+#include "UMEventsListener.h"
 #include <mutex>
 
 //#define TESTBUILD
@@ -41,4 +42,5 @@ private:
 	CommPortServer * portServer;
 	ILogger* logger;
 	HANDLE stopEvent = INVALID_HANDLE_VALUE;
+	UMEventsManager* umEventsManager;
 };

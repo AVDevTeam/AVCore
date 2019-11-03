@@ -219,7 +219,10 @@ void CommPortListener::listen()
 			void* UMMessage = NULL;
 
 			// Process event using pluginManager.
-			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer, &UMMessage);
+			replyMsg.EventResponse.Status = this->pluginManager->processEvent(
+				message->Event.EventType, 
+				this->pluginManager->parseKMEvent(message->Event.EventType, message->Event.EventBuffer),
+				&UMMessage);
 			replyMsg.EventResponse.UMMessage = UMMessage;
 
 			hr = FilterReplyMessage(eventsPort,
