@@ -25,31 +25,42 @@ namespace AVGUI
         {
             ContentRendered -= Main;
 
-            string command;
+            // Запрос на список всех модулей сервиса
             string answer = "";
+            string command = JsonConvert.SerializeObject(new EntumerateModulesCommand());
 
-            command = JsonConvert.SerializeObject(new EntumerateModulesCommand());
-
-            Pipe.SendMessage(command);  // Отправить 
+            Pipe.SendMessage(command);
             Pipe.ListenMessage();
 
-            // Ждать сообщение 3 секунды
-            Pipe.GetMessage(3);
+            answer = Pipe.GetMessage(1);
 
+            // Пока ответ от сервера не пришел
+            int i = 0;
+            while (answer == "")
+            {
+                i++;
 
-            //ConnectionProgressBar.Value = 100;
-            //// Удалось подключиться 
-            //if (Pipe.Connect() != -1)
-            //{
-            //    ConnectionTextBlock.Text = "Подключение установлено";
-            //    //pipe.SendMessage("EnumeratePlugins");
+                // Ожидать по секунде и снова проверять
+                answer = Pipe.GetMessage(1);
 
-            //}
-            //// Не удалось
-            //else
-            //{
-            //    ConnectionTextBlock.Text = "Не удалось подключиться";
-            //}
+                // Если за 3 секунды ответа не последовала - задать вопрос о продолжении
+                if (i == 3)
+                {
+                    i = 0;
+                    if (MessageBox.Show("AVCore didn't give modules list. Tra again?", "Get modules list failed",
+                   MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    {
+                        ConnectionTextBlock.Text = "AVCore didnt give modules list. Try open settings window again later";
+                        break;
+                    }
+                }
+
+            }
+
+            if (answer != "")
+            {
+                ConnectionTextBlock.Text = answer;
+            }
 
         }
 

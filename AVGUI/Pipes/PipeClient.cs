@@ -18,10 +18,18 @@ namespace AVGUI
         Thread messageListener;     // Поток ожидащюий ответа от сервиса
         string message = "";             // Ответ от сервиса
 
-        // Подключиться к pipe
-        public void Connect()
+        // Подключиться к pipe (_time - кол-вол миллисекунд для таймаута)
+        public bool Connect(int _time)
         {
-            Pipe.Connect();
+            try
+            {
+                Pipe.Connect(_time);
+            }
+            catch (TimeoutException e)
+            {
+                return false;
+            }
+            return true;
         }
 
         // Закрыть соединение

@@ -12,7 +12,7 @@ namespace AVGUI
     {
         PipeClient Pipe;
         int ScanMode = 1;
-   
+
         public MainWindow()
         {
             InitializeComponent();
@@ -25,10 +25,16 @@ namespace AVGUI
 
             // Подключить к сервису
             Pipe = new PipeClient("AVCoreConnection");
-            Pipe.Connect();
 
-           
-
+            // Пока пользователь не нажем "нет" попытки подключиться будут потовряться 
+            while (!Pipe.Connect(1000))
+            {
+                if (MessageBox.Show("Connetion to AVCover failed. Tra again?", "Connetion to AVCover failed",
+                    MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                {
+                    break;
+                }
+            }
         }
 
         // Слайдер для изменения режима сканирования

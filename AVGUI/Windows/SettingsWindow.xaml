@@ -26,9 +26,7 @@
 
         <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3" Background="LightGray">
 
-            <TextBlock Margin="105,110,114,211" TextWrapping="Wrap" Text="Подключение к сервису" FontSize="30" FontFamily="Times New Roman" Name ="ConnectionTextBlock"/>
-
-            <ProgressBar Margin="55,280,69,91"  Height="50" Width="405" Name="ConnectionProgressBar" ValueChanged="ConnectionProgressBar_ValueChanged"/>
+            <TextBlock Margin="105,110,114,101" TextAlignment="Center" TextWrapping="Wrap" Text="Ожидание списка модулей" FontSize="30" FontFamily="Times New Roman" Name ="ConnectionTextBlock"/>
 
         </Grid>
 

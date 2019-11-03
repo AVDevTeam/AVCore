@@ -171,6 +171,7 @@
     <ClInclude Include="EventsParser.h" />
     <ClInclude Include="FileLogger.h" />
     <ClInclude Include="ICoreImage.h" />
+    <ClInclude Include="IPluginManagerImage.h" />
     <ClInclude Include="PipeServer.h" />
     <ClInclude Include="PluginManager.h" />
     <ClInclude Include="PipeManager.h" />

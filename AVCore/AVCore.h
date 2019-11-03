@@ -1,27 +1,28 @@
 #pragma once
 #include "CommPortServer.h"
-#include "PluginManager.h"
+//#include "PluginManager.h"
 #include "EventsParser.h"
 #include "ConfigManager.h"
 #include "FileLogger.h"
 #include "PipeManager.h"
+#include "IPluginManagerImage.h"
 #include <mutex>
 
 //#define TESTBUILD
 
 
 
-class AVCore : ICoreImage
+class AVCore : public ICoreImage, public IPluginManagerImage
 {
 public:
 	AVCore(ILogger* logger) 
 	{ 
+		this->manager = new PluginManager(logger);
 		this->logger = logger;
-		this->commandsManager = new CommandsManager();
+		this->commandsManager = new CommandsManager(this);
 		this->settingsManager = new SettingsManager();
 		this->pipeManager = new PipeManager(this);
 		this->portServer = new CommPortServer();
-		this->manager = new PluginManager(logger);
 		this->stopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if (this->stopEvent == NULL)
 		{
@@ -57,4 +58,7 @@ private:
 	virtual ILogger * getLogger() override;
 	virtual SettingsManager * getSettingsManager() override;
 	virtual CommandsManager * getCommandsManager() override;
+
+	// Унаследовано через IPluginManagerImage
+	virtual PluginManager * getPluginManager() override;
 };

@@ -37,6 +37,9 @@
     <Filter Include="Managers">
       <UniqueIdentifier>{a7264d03-14ce-4118-bbda-136bae0f3ae4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AVCore\Images">
+      <UniqueIdentifier>{d34141d6-b963-4aac-83c0-7ea7a4fc016d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -95,9 +98,6 @@
     <ClInclude Include="AVCore.h">
       <Filter>AVCore</Filter>
     </ClInclude>
-    <ClInclude Include="ICoreImage.h">
-      <Filter>AVCore</Filter>
-    </ClInclude>
     <ClInclude Include="PipeManager.h">
       <Filter>Managers</Filter>
     </ClInclude>
@@ -106,6 +106,12 @@
     </ClInclude>
     <ClInclude Include="CommandsManager.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ICoreImage.h">
+      <Filter>AVCore\Images</Filter>
+    </ClInclude>
+    <ClInclude Include="IPluginManagerImage.h">
+      <Filter>AVCore\Images</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

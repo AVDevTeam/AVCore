@@ -118,3 +118,9 @@ CommandsManager * AVCore::getCommandsManager()
 	return commandsManager;
 }
 
+// Реализация IPluginManagerImage
+
+PluginManager * AVCore::getPluginManager()
+{
+	return manager;
+}

@@ -18,7 +18,9 @@ void PipeManager::listen()
 				// Если запрос на выполнение команды 
 				if (message.substr(1, 6) == R"("id":0)")
 				{
-					commandsManager->manage(message.substr(0, message.size() - 2));
+					// Обработать команду и вернуть ответ
+					std::string ans = commandsManager->manage(message.substr(0, message.size() - 2));
+					pipe->sendMessage(ans);
 				}
 				// Если запрос на изменение настроек
 				else if (message.substr(1, 6) == R"("id":1)")
