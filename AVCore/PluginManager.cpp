@@ -137,6 +137,7 @@ Return value:
 */
 AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event, void** umMessage)
 {
+#ifdef _DEBUG 
 	switch (eventType)
 	{
 	case AvFileCreate:
@@ -179,6 +180,7 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 		this->logger->log("Got AvApcProcessInject event.");
 		break;
 	}
+#endif
 	try
 	{
 		// enter event processing section
@@ -190,7 +192,9 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 		{
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
+#ifdef _DEBUG
 			this->logger->log("Processing callback with priority " + std::to_string(priority) + " in plugin " + curCallback.second->getName());
+#endif
 			status = curCallback.second->callback(curCallback.first, event, umMessage);
 			if (status == AvEventStatusBlock)
 			{

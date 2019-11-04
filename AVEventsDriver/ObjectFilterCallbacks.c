@@ -6,6 +6,7 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 {
 	UNREFERENCED_PARAMETER(RegistrationContext);
 
+#ifdef PROCESS_HANDLE_EVENTS
 	if (!AVCommIsInitialized())
 	{
 		return OB_PREOP_SUCCESS;
@@ -96,6 +97,10 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 	}
 
 	return OB_PREOP_SUCCESS;
+#else
+	UNREFERENCED_PARAMETER(preOpInfo);
+	return OB_PREOP_SUCCESS;
+#endif
 };
 
 OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
@@ -104,6 +109,7 @@ OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
 {
 	UNREFERENCED_PARAMETER(RegistrationContext);
 
+#ifdef THREAD_HANDLE_EVENTS
 	if (!AVCommIsInitialized())
 	{
 		return OB_PREOP_SUCCESS;
@@ -199,4 +205,8 @@ OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
 	}
 
 	return OB_PREOP_SUCCESS;
+#else
+	UNREFERENCED_PARAMETER(preOpInfo);
+	return OB_PREOP_SUCCESS;
+#endif
 };

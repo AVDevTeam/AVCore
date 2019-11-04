@@ -1,44 +1,5 @@
 #include "AVEventsDriver.h"
 
-typedef enum
-{
-	OriginalApcEnvironment,
-	AttachedApcEnvironment,
-	CurrentApcEnvironment
-
-} KAPC_ENVIRONMENT;
-
-NTKERNELAPI
-VOID
-KeInitializeApc(
-	PRKAPC Apc,
-	PRKTHREAD Thread,
-	KAPC_ENVIRONMENT Environment,
-	PVOID KernelRoutine,
-	PVOID RundownRoutine,
-	PVOID NormalRoutine,
-	KPROCESSOR_MODE ApcMode,
-	PVOID NormalContext
-);
-
-NTKERNELAPI
-BOOLEAN
-KeInsertQueueApc(
-	PKAPC Apc,
-	PVOID SystemArgument1,
-	PVOID SystemArgument2,
-	KPRIORITY Increment
-);
-
-DECLSPEC_IMPORT NTSTATUS ZwQueryInformationProcess(
-	HANDLE           ProcessHandle,
-	PROCESSINFOCLASS ProcessInformationClass,
-	PVOID            ProcessInformation,
-	ULONG            ProcessInformationLength,
-	PULONG           ReturnLength
-);
-
-// TODO. IFDEF x86/x64 (-/-Ex2 support)
 void AVCreateProcessCallback(
 	PEPROCESS Process,
 	HANDLE ProcessId,
@@ -54,6 +15,7 @@ void AVCreateProcessCallback(
 
 	if (CreateInfo)
 	{ // Process create notification
+#ifdef PROCESS_CREATE_EVENTS
 		if (AVCommIsExcludedPID(CreateInfo->CreatingThreadId.UniqueProcess))
 		{
 			return;
@@ -114,9 +76,13 @@ void AVCreateProcessCallback(
 				CreateInfo->CreationStatus = STATUS_ACCESS_DENIED;
 			}
 		}
+#else
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 	}
 	else
 	{
+#ifdef PROCESS_EXIT_EVENTS
 		AV_EVENT_PROCESS_EXIT eventProcessExit = { 0 };
 		eventProcessExit.PID = (int)(__int64)ProcessId;
 
@@ -134,6 +100,9 @@ void AVCreateProcessCallback(
 			// TODO. Maybe some exlude list logic.
 		}
 	}
+#else
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 }
 
 void AVCreateThreadCallback(
@@ -149,6 +118,7 @@ void AVCreateThreadCallback(
 
 	if (Create)
 	{
+#ifdef THREAD_CREATE_EVENTS
 		AV_EVENT_THREAD_CREATE eventThreadCreate = { 0 };
 		eventThreadCreate.PID = (int)(__int64)ProcessId;
 		eventThreadCreate.TID = (int)(__int64)ThreadId;
@@ -166,9 +136,14 @@ void AVCreateThreadCallback(
 		{
 			// TODO.Response processing login?
 		}
+#else
+		UNREFERENCED_PARAMETER(ThreadId);
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 	}
 	else
 	{
+#ifdef THREAD_EXIT_EVENTS
 		AV_EVENT_THREAD_EXIT eventThreadExit = { 0 };
 		eventThreadExit.PID = (int)(__int64)ProcessId;
 		eventThreadExit.TID = (int)(__int64)ThreadId;
@@ -186,16 +161,21 @@ void AVCreateThreadCallback(
 		{
 			// TODO.Response processing login?
 		}
+#else
+		UNREFERENCED_PARAMETER(ThreadId);
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 	}
+
 }
 
-// TODO. IFDEF x86/x64 (x64 support for x86 modules).
 void AVLoadImageCallback(
 	PUNICODE_STRING FullImageName,
 	HANDLE ProcessId,
 	PIMAGE_INFO ImageInfo
 )
 {
+#ifdef IMAGE_EVENTS
 	if (!AVCommIsInitialized() || AVCommIsExcludedPID(ProcessId))
 	{
 		return;
@@ -240,7 +220,9 @@ void AVLoadImageCallback(
 		// TODO.Response processing login?
 		
 	}
-
-	
-
+#else
+	UNREFERENCED_PARAMETER(FullImageName);
+	UNREFERENCED_PARAMETER(ProcessId);
+	UNREFERENCED_PARAMETER(ImageInfo);
+#endif
 }
