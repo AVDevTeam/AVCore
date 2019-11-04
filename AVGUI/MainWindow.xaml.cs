@@ -63,6 +63,7 @@ namespace AVGUI
         {
             SettingsWindow settingsWindow = new SettingsWindow(Pipe);
             settingsWindow.ShowDialog();
+
         }
 
         // Кликнули по кнопке скана

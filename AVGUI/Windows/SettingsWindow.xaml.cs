@@ -26,39 +26,30 @@ namespace AVGUI
         {
             ContentRendered -= Main;
 
-            string jModulesList = GetModulesList();
+            string jPluginsList = GetModulesList();
 
             // Если модули пришли
-            if (jModulesList != "")
+            if (jPluginsList != "")
             {
-                ConnectionTextBlock.Text = jModulesList;
+                ConnectionTextBlock.Text = jPluginsList;
 
                 // Отобразить их в панели плагинов
-                EntumerateModulesAnswer ModulesListAns = JsonConvert.DeserializeObject<EntumerateModulesAnswer>(jModulesList);
-                AddModulesToPluginsPanel(ModulesListAns);
+                EntumeratePluginsReply PluginsListJson = JsonConvert.DeserializeObject<EntumeratePluginsReply>(jPluginsList);
+                AddModulesToPluginsPanel(PluginsListJson);
             }
 
         }
 
-        // Очищает панель с кнопками
-        //private void ClearHandlesPanel()
-        //{
-        //    while (HandlesPanel.Children.Count > 0)
-        //    {
-        //        HandlesPanel.Children.RemoveAt(HandlesPanel.Children.Count - 1);
-        //    }
-        //}
-
-        // Создать кнопку модуля
-        private void AddModulesToPluginsPanel(EntumerateModulesAnswer _modulesListAns)
+        // Создать кнопку плагина
+        private void AddModulesToPluginsPanel(EntumeratePluginsReply _pluginsListJson)
         {
             Button btn;
 
-            foreach (string module in _modulesListAns.Modules)
+            foreach (string plugin in _pluginsListJson.Plugins)
             {
                 btn = new Button();
-                btn.Name = module + "_btn";
-                btn.Content = module;
+                btn.Name = plugin + "_btn";
+                btn.Content = plugin;
                 btn.Click += Plugin_Clicked;
                 PluginsPanel.Children.Add(btn);
             }
@@ -68,66 +59,49 @@ namespace AVGUI
         private void Plugin_Clicked(object sender, RoutedEventArgs e)
         {
             Button btn = (Button)e.Source;
-            MessageBox.Show(btn.Content.ToString());
+
+            // Отправить запрос на информацию по плагину
+            string request = JsonConvert.SerializeObject(new GetPluginInfoRequest(btn.Content.ToString()));
+            Pipe.SendMessage(request);
+            Pipe.ListenMessage();
+            string reply = Pipe.GetMessage();
+            Pipe.StopListening();
+
+            MessageBox.Show(reply);
         }
-
-
-        // На одну из кнопок (хэндлов объекта) кликнули
-        //private void Button_Clicked(object sender, RoutedEventArgs e)
-        //{
-        //    Button btn = (Button)e.Source;
-        //    WinObj.Cursor = Cursors.Cross;
-
-        //    // Из всех переданных ранее объектов находится нужный и берется в фокус
-        //    foreach (ObjectInfo obj in m_TransmittedObjectsList)
-        //    {
-        //        if (obj.Name == btn.Name)
-        //        {
-        //            // Заполнили информацию об объекте, который хотим создать
-        //            m_NewObject = obj;
-        //            FillObjectInfoForm(m_NewObject);
-
-        //            // Так как объект еще не создан - формы невалидны
-        //            NtfTypeChangeTextBox.IsEnabled = false;             // Поле ввода нотификатора стало невалидным
-        //            NtfTypeValueChangeTextBox.IsEnabled = false;        // Поле ввода значения нотификатора стало невалидным
-        //            NtfTypeValueChangeBtn.IsEnabled = false;            // Кнопка изменения нотификатора стала невалидной
-        //            ObjectDeleteBtn.IsEnabled = false;                  // Кнопка удалить стала валидной
-        //        }
-        //    }
-        //}
 
         // Отправить запрос на список модулей
         private string GetModulesList()
         {
-            string ret = "";
-            string command = JsonConvert.SerializeObject(new EntumerateModulesCommand());
+            string reply = "";
+            string request = JsonConvert.SerializeObject(new EntumeratePluginsRequest());
 
-            Pipe.SendMessage(command);
+            Pipe.SendMessage(request);
             Pipe.ListenMessage();
 
-            while (ret == "")
+            while (reply == "")
             {
-                ret = Pipe.GetMessage(1000, 4);
+                reply = Pipe.GetMessage(1000, 4);
 
-                if (ret == "")
+                if (reply == "")
                 {
                     if (MessageBox.Show("AVCore didn't give modules list. Tra again?", "Get modules list failed",
                         MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     {
                         ConnectionTextBlock.Text = "AVCore didnt give modules list. Try open settings window again later";
-                        return "";
-                        //break;
+                        break;
                     }
                 }
             }
 
-            return ret;
+            Pipe.StopListening();
+            return reply;
         }
 
         // Закрытие окна
         private void SettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            Pipe.Close();
+            //Pipe.Close();
         }
     }
 }

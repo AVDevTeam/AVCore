@@ -49,7 +49,15 @@ namespace AVGUI
         // Принять сообщения (отдельный поток)
         public void ListenMessage()
         {
+            messageListener = new Thread(() => { message = reader.ReadLine(); });   // Поток читает сообщение и кладет его в message
+
             messageListener.Start();
+        }
+
+        // Принять сообщения (отдельный поток)
+        public void StopListening()
+        {
+            messageListener.Abort();
         }
 
         // Ждет сообщение _ms милисекунд, _times раз проверяя пришло ли, если да, то забирает его
@@ -75,7 +83,7 @@ namespace AVGUI
         // Бесконца ждет сообщение, если что-то пришло, то забирает его
         public string GetMessage()
         {
-            while (message != "")
+            while (message == "")
             {
                 Thread.Sleep(1000);
             }
@@ -92,7 +100,6 @@ namespace AVGUI
             reader = new StreamReader(Pipe);                // Читать сообщения
             writer = new StreamWriter(Pipe);                // Отправлять сообщения
 
-            messageListener = new Thread(() => { message = reader.ReadLine(); });   // Поток читает сообщение и кладет его в message
         }
 
 
