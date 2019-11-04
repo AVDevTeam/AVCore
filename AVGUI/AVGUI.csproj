@@ -59,7 +59,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="MessagesToAVCore\Commands.cs" />
+    <Compile Include="jsonMessages\EntumerateModules.cs" />
+    <Compile Include="jsonMessages\Commands.cs" />
     <Compile Include="Windows\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>

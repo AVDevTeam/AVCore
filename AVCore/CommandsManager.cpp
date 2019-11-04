@@ -19,8 +19,6 @@ std::string CommandsManager::manage(std::string _command)
 	{
 		std::list<std::string>* pluginsNamesList = pluginManager->getPluginsNames();
 		
-
-
 		json jEnumeratedModules;
 		json jModulesArray;
 
@@ -28,6 +26,7 @@ std::string CommandsManager::manage(std::string _command)
 		{
 			jModulesArray.push_back(pluginName);
 		}
+
 		jEnumeratedModules["Modules"] = jModulesArray;
 
 		ret = jEnumeratedModules.dump();

@@ -52,21 +52,21 @@ namespace AVGUI
             messageListener.Start();
         }
 
-        // Ждет сообщение _times секунд, если что-то пришло, то забирает его
-        public string GetMessage(int _times)
+        // Ждет сообщение _ms милисекунд, _times раз проверяя пришло ли, если да, то забирает его
+        public string GetMessage(int _ms, int _times)
         {
             string retMessage = "";
 
             for (int i = 0; i < _times; i++)
             {
+                Thread.Sleep(_ms / _times);
+                
                 // Если ответ пришел
                 if (message != "")
                 {
                     retMessage = message;
                     message = "";
                 }
-
-                Thread.Sleep(1000);
             }
 
             return retMessage;
