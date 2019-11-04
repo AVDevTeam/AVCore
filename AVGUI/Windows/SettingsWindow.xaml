@@ -26,7 +26,10 @@
 
         <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3" Background="LightGray">
 
-            <TextBlock Margin="105,110,114,101" TextAlignment="Center" TextWrapping="Wrap" Text="Ожидание списка модулей" FontSize="30" FontFamily="Times New Roman" Name ="ConnectionTextBlock"/>
+            <!-- Panel with plugins settings -->
+            <ScrollViewer Grid.Row="0" Grid.Column="0" >
+                <StackPanel Name="PluginsParametersPanel"/>
+            </ScrollViewer>
 
         </Grid>
 

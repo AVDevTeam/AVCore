@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -31,8 +32,6 @@ namespace AVGUI
             // Если модули пришли
             if (jPluginsList != "")
             {
-                ConnectionTextBlock.Text = jPluginsList;
-
                 // Отобразить их в панели плагинов
                 EntumeratePluginsReply PluginsListJson = JsonConvert.DeserializeObject<EntumeratePluginsReply>(jPluginsList);
                 AddModulesToPluginsPanel(PluginsListJson);
@@ -58,16 +57,67 @@ namespace AVGUI
         // Когда нажали на плагин
         private void Plugin_Clicked(object sender, RoutedEventArgs e)
         {
-            Button btn = (Button)e.Source;
+            Button thisBtn = (Button)e.Source;
 
             // Отправить запрос на информацию по плагину
-            string request = JsonConvert.SerializeObject(new GetPluginInfoRequest(btn.Content.ToString()));
+            string request = JsonConvert.SerializeObject(new GetPluginInfoRequest(thisBtn.Content.ToString()));
             Pipe.SendMessage(request);
             Pipe.ListenMessage();
             string reply = Pipe.GetMessage();
             Pipe.StopListening();
 
-            MessageBox.Show(reply);
+            // Парсим информацию о модулях
+            JObject jPluginInfo = JObject.Parse(reply);
+            foreach(var item in jPluginInfo)
+            {
+                
+                string name = item.Key;
+                JToken value = item.Value;
+                if(value is JArray)
+                {
+
+                }
+
+                // Добавить txtbox
+                Grid DynamicGrid = new Grid();
+
+                // Строки в гриде
+                ColumnDefinition gridColumn1 = new ColumnDefinition();
+                ColumnDefinition gridColumn2 = new ColumnDefinition();
+                ColumnDefinition gridColumn3 = new ColumnDefinition();
+                DynamicGrid.ColumnDefinitions.Add(gridColumn1);
+                DynamicGrid.ColumnDefinitions.Add(gridColumn2);
+                DynamicGrid.ColumnDefinitions.Add(gridColumn3);
+
+                // Добавить label с названием параметра
+                Label labl = new Label();
+                labl.Name = name + "_lbal";
+                labl.Content = name;
+                labl.HorizontalAlignment = HorizontalAlignment.Center;
+                DynamicGrid.Children.Add(labl);
+                Grid.SetColumn(labl, 0);
+
+                // Добавить поле для изменения этого параметра 
+                TextBox txtbox = new TextBox();
+                txtbox.Name = name + "_txtbox";
+                txtbox.Margin = new Thickness(5, 0, 5, 0);
+                DynamicGrid.Children.Add(txtbox);
+                Grid.SetColumn(txtbox, 1);
+
+                // Добавить кнопку применить
+                Button btn = new Button();
+                btn.Name = name + "_btn";
+                btn.Content = "Apply";
+                //btn.Click += Plugin_Clicked;
+                DynamicGrid.Children.Add(btn);
+                Grid.SetColumn(btn, 2);
+
+         
+
+                PluginsParametersPanel.Children.Add(DynamicGrid);
+                break;
+            }
+
         }
 
         // Отправить запрос на список модулей
@@ -88,7 +138,7 @@ namespace AVGUI
                     if (MessageBox.Show("AVCore didn't give modules list. Tra again?", "Get modules list failed",
                         MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
                     {
-                        ConnectionTextBlock.Text = "AVCore didnt give modules list. Try open settings window again later";
+                        MessageBox.Show("AVCore didnt give modules list. Try open settings window again later");
                         break;
                     }
                 }
