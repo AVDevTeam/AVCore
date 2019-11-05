@@ -9,22 +9,29 @@
 #include "ConfigManager.h"
 
 
-int _cdecl
-main(
-	_Unreferenced_parameter_ int argc,
-	_Unreferenced_parameter_ char* argv[]
-)
-{
-	const std::string pipeName = "\\\\.\\pipe\\AVCorePipe";
-	PipeServer pipe(pipeName);
-	pipe.createNamedPipe();
+//int _cdecl
+//main(
+//	_Unreferenced_parameter_ int argc,
+//	_Unreferenced_parameter_ char* argv[]
+//)
+//{
+//	const std::string pipeName = "\\\\.\\pipe\\AVCorePipe";
+//	PipeServer pipe(pipeName);
+//	pipe.createNamedPipe();
+//
+//
+//	pipe.start();
+//
+//	while (true) {
+//		Sleep(1000);
+//	}
+//
+//	pipe.stop();
+//
+//}
 
 
-	pipe.start();
-	pipe.stop();
-}
 
-/*
 
 int _cdecl
 main(
@@ -77,4 +84,3 @@ main(
 	portServer.stop();
 	return 0;
 }
-*/

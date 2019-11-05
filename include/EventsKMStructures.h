@@ -39,4 +39,11 @@ typedef struct _AV_EVENT_FILE_CREATE
 
 } AV_EVENT_FILE_CREATE, *PAV_EVENT_FILE_CREATE;
 
+// Defines parameters of AvNetworkPacketTransfer event
+typedef struct _AV_EVENT_NETWORK_PACKET
+{
+	int RemoteAddress;
+
+} AV_EVENT_NETWORK_PACKET, * PAV_EVENT_NETWORK_PACKET;
+
 #pragma endregion Events structures

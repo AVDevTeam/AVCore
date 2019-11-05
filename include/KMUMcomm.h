@@ -31,6 +31,7 @@ typedef enum _AV_MESSAGE_TYPE
 typedef enum _AV_EVENT_TYPE
 {
 	AvFileCreate,
+	AvNetwork
 } AV_EVENT_TYPE;
 
 //  Event stucture: Kernel -> User Message
