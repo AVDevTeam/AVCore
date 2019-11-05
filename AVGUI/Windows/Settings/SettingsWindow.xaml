@@ -24,11 +24,11 @@
             <StackPanel Name="PluginsPanel"/>
         </ScrollViewer>
 
-        <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3" Background="LightGray">
+        <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3" >
 
-            <!-- Panel with plugins settings -->
-            <ScrollViewer Grid.Row="0" Grid.Column="0" >
-                <StackPanel Name="PluginsParametersPanel"/>
+            <!-- Panel with plugins settings  new SolidColorBrush(Color.FromArgb(0xFF, 0xEB, 0xEB, 0xEB)); //#FFEBEBEB #FFF3F3F3 #FFDDDDDD -->
+            <ScrollViewer Grid.Row="0" Grid.Column="0" Background="#FFDDDDDD">
+                <StackPanel Name="PluginsParametersPanel" Margin="5"/>
             </ScrollViewer>
 
         </Grid>
