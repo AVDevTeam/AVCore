@@ -1,4 +1,5 @@
 /**
+\file
 \brief Declarations for AVCommDriver exports (KMEventsAPI).
 */
 #pragma once

@@ -1,3 +1,8 @@
+/**
+\file
+\brief Defines interface of principal AV components.
+*/
+
 #pragma once
 #include "EventsUMInterfaces.h"
 #include <Windows.h>
