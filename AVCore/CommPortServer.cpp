@@ -38,6 +38,7 @@ void CommPortServer::start(IManager* manager)
 	if (FAILED(hr))
 	{
 		eventsPort = NULL;
+		this->pluginManager->getLogger()->log("CommPortServer::start. Failed connecting to comm port.");
 		throw "FAILED";
 	}
 
@@ -50,6 +51,7 @@ void CommPortServer::start(IManager* manager)
 
 	if (NULL == this->completionPort)
 	{
+		this->pluginManager->getLogger()->log("CommPortServer::start. Failed creating complition port.");
 		throw "FAILED";
 	}
 
@@ -71,6 +73,7 @@ void CommPortServer::start(IManager* manager)
 		if (NULL == msg)
 		{
 			hr = MAKE_HRESULT(SEVERITY_ERROR, 0, E_OUTOFMEMORY);
+			this->pluginManager->getLogger()->log("CommPortServer::start. Failed pumping msg to completion port.");
 			throw "FAILED";
 		}
 
@@ -237,6 +240,7 @@ void CommPortListener::listen()
 		}
 		else
 		{
+			this->pluginManager->getLogger()->log("CommPortListener::listen(). INVALID MESSAGE");
 			throw "INVALID MESSAGE"; // This thread should not receive other kinds of message.
 		}
 

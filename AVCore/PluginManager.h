@@ -1,6 +1,9 @@
 #pragma once
 #include "PluginInterface.h"
 #include "EventsParser.h"
+#include "CommPortServer.h"
+#include "UMEventsListener.h"
+
 #include <string>
 #include <list>
 #include <map>
@@ -79,5 +82,4 @@ private:
 
 	// logger
 	ILogger* logger;
-
 };

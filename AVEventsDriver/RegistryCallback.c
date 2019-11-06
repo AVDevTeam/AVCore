@@ -1,3 +1,8 @@
+/**
+\file
+\brief Implements registry filter callbacks.
+*/
+
 #include "AVEventsDriver.h"
 
 #pragma region prototypes
@@ -8,6 +13,18 @@ NTSTATUS RegNtPreCreateKeyExCallback(PREG_CREATE_KEY_INFORMATION PreCreateKeyInf
 NTSTATUS RegNtPreOpenKeyCallback(PREG_PRE_OPEN_KEY_INFORMATION PreOpenKeyInfo);
 NTSTATUS RegNtPreOpenKeyExCallback(PREG_OPEN_KEY_INFORMATION PreOpenKeyInfo);
 
+/**
+\brief Entry point for all registy event callbacks.
+
+\param[in] CallbackContext Custom callback context (not used).
+
+\param[in] RegNotifyClass Registry event class.
+
+\param[in] RegNotifyInfo Pointer to structure that holds information about current
+registry event.
+
+\return Status of registry operation.
+*/
 NTSTATUS AVEventsRegistryCallback(
 	PVOID CallbackContext,
 	PVOID RegNotifyClass,
@@ -42,6 +59,13 @@ NTSTATUS AVEventsRegistryCallback(
 #endif
 }
 
+/**
+\brief Implements create key event handling logic.
+
+Prepares AV_EVENT_REG_CREATE_KEY event buffer and sends it to UM components.
+
+\param[in] keyPath Unicode string with the path to the target key.
+*/
 NTSTATUS sendRegCreateKey(PUNICODE_STRING keyPath)
 {
 	ASSERT(keyPath != NULL);
@@ -82,6 +106,13 @@ NTSTATUS sendRegCreateKey(PUNICODE_STRING keyPath)
 	return STATUS_SUCCESS;
 }
 
+/**
+\brief Implements open key event handling logic.
+
+Prepares AV_EVENT_REG_OPEN_KEY event buffer and sends it to UM components.
+
+\param[in] keyPath Unicode string with the path to the target key.
+*/
 NTSTATUS sendRegOpenKey(PUNICODE_STRING keyPath)
 {
 	ASSERT(keyPath != NULL);
@@ -122,20 +153,49 @@ NTSTATUS sendRegOpenKey(PUNICODE_STRING keyPath)
 	return STATUS_SUCCESS;
 }
 
+/**
+\brief Pre key create event handler.
+
+Uses sendRegCreateKey to generate event and send it to UM.
+
+\param[in] PreCreateKeyInfo Event information.
+*/
 NTSTATUS RegNtPreCreateKeyCallback(PREG_PRE_CREATE_KEY_INFORMATION PreCreateKeyInfo)
 {
 	return sendRegCreateKey(PreCreateKeyInfo->CompleteName);
 }
+
+/**
+\brief Pre key create event handler (ex).
+
+Uses sendRegCreateKey to generate event and send it to UM.
+
+\param[in] PreCreateKeyInfo Event information.
+*/
 NTSTATUS RegNtPreCreateKeyExCallback(PREG_CREATE_KEY_INFORMATION PreCreateKeyInfo)
 {
 	return sendRegCreateKey(PreCreateKeyInfo->CompleteName);
 }
 
+/**
+\brief Pre key open event handler.
+
+Uses sendRegOpenKey to generate event and send it to UM.
+
+\param[in] PreOpenKeyInfo Event information.
+*/
 NTSTATUS RegNtPreOpenKeyCallback(PREG_PRE_OPEN_KEY_INFORMATION PreOpenKeyInfo)
 {
 	return sendRegOpenKey(PreOpenKeyInfo->CompleteName);
 }
 
+/**
+\brief Pre key open event handler (ex).
+
+Uses sendRegOpenKey to generate event and send it to UM.
+
+\param[in] PreOpenKeyInfo Event information.
+*/
 NTSTATUS RegNtPreOpenKeyExCallback(PREG_OPEN_KEY_INFORMATION PreOpenKeyInfo)
 {
 	return sendRegOpenKey(PreOpenKeyInfo->CompleteName);

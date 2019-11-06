@@ -15,11 +15,13 @@ public:
 	AVCore(ILogger* logger) 
 	{ 
 		this->logger = logger;
+		this->logger->log("AVCore. Created instance.");
 		this->portServer = new CommPortServer();
 		this->manager = new PluginManager(logger);
 		this->stopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if (this->stopEvent == NULL)
 		{
+			this->logger->log("AVCore(). Error creating stop event");
 			throw "Error creating stop event";
 		}
 	}

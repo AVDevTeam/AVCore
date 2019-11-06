@@ -1,5 +1,133 @@
+/**
+\file
+\brief Implements notify routines callbacks.
+*/
+
 #include "AVEventsDriver.h"
 
+
+typedef enum
+{
+	OriginalApcEnvironment,
+	AttachedApcEnvironment,
+	CurrentApcEnvironment
+} KAPC_ENVIRONMENT;
+
+NTKERNELAPI
+VOID
+KeInitializeApc(
+	PRKAPC Apc,
+	PRKTHREAD Thread,
+	KAPC_ENVIRONMENT Environment,
+	PVOID KernelRoutine,
+	PVOID RundownRoutine,
+	PVOID NormalRoutine,
+	KPROCESSOR_MODE ApcMode,
+	PVOID NormalContext
+);
+
+NTKERNELAPI
+BOOLEAN
+KeInsertQueueApc(
+	PKAPC Apc,
+	PVOID SystemArgument1,
+	PVOID SystemArgument2,
+	KPRIORITY Increment
+);
+
+DECLSPEC_IMPORT NTSTATUS ZwQueryInformationProcess(
+	HANDLE           ProcessHandle,
+	PROCESSINFOCLASS ProcessInformationClass,
+	PVOID            ProcessInformation,
+	ULONG            ProcessInformationLength,
+	PULONG           ReturnLength
+);
+
+VOID KernelAPC(
+	struct _KAPC* Apc,
+	PVOID* NormalRoutine,
+	PVOID* NormalContext,
+	PVOID* SystemArgument1,
+	PVOID* SystemArgument2)
+{
+	UNREFERENCED_PARAMETER(NormalRoutine);
+	UNREFERENCED_PARAMETER(NormalContext);
+	UNREFERENCED_PARAMETER(SystemArgument1);
+	UNREFERENCED_PARAMETER(SystemArgument2);
+	ExFreePool(Apc);
+}
+
+/**
+\brief Implements UserMode APC injection.
+
+\param[in] ApcInfo Pointer to APC_INFO structure that contains target PID, TID
+and pointer to APC payload buffer.
+*/
+void APCInject(PAPC_INFO ApcInfo)
+{
+	HANDLE pHandle = NULL;
+	PEPROCESS pEprocess = NULL;
+	PKTHREAD pThread = NULL;
+	UCHAR APCPayload[1024] = { 0 };
+
+	NTSTATUS apcStatus = PsLookupProcessByProcessId((HANDLE)ApcInfo->PID, &pEprocess);
+	if (apcStatus == STATUS_SUCCESS)
+	{
+		OBJECT_ATTRIBUTES objectAttributes;
+		InitializeObjectAttributes(&objectAttributes, NULL, OBJ_KERNEL_HANDLE, NULL, NULL);
+		CLIENT_ID client_id;
+		client_id.UniqueProcess = (HANDLE)ApcInfo->PID;
+		client_id.UniqueThread = 0;
+		apcStatus = ZwOpenProcess(&pHandle, PROCESS_ALL_ACCESS, &objectAttributes, &client_id);
+		if (apcStatus == STATUS_SUCCESS)
+		{
+
+			apcStatus = PsLookupThreadByThreadId((HANDLE)ApcInfo->TID, &pThread);
+			if (apcStatus == STATUS_SUCCESS)
+			{
+				PVOID umAPCBuffer = NULL;
+				SIZE_T umAPCBufferSize = ApcInfo->apcBufferSize;
+				apcStatus = ZwAllocateVirtualMemory(pHandle, &umAPCBuffer, 0, &umAPCBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+				if (apcStatus == STATUS_SUCCESS)
+				{
+					// copy APC payload from UM to KM
+					if (ApcInfo->apcBufferSize > 1024)
+						ASSERT(FALSE);
+					AVCommGetUmBuffer(ApcInfo->apcBuffer, APCPayload, ApcInfo->apcBufferSize);
+
+					KAPC_STATE pkapcState;
+					KeStackAttachProcess(pEprocess, &pkapcState);
+					// copy buffer from KM to allocated buffer in UM.
+					memcpy(umAPCBuffer, APCPayload, ApcInfo->apcBufferSize);
+					// Restore stack
+					KeUnstackDetachProcess(&pkapcState);
+
+					PKAPC apc = (PKAPC)ExAllocatePool(NonPagedPool, sizeof(KAPC));
+					KeInitializeApc(apc, pThread, OriginalApcEnvironment, (PVOID)KernelAPC, NULL, (PVOID)umAPCBuffer, UserMode, NULL);
+					KeInsertQueueApc(apc, 0, NULL, 0);
+				}
+			}
+
+			ZwClose(pHandle);
+		}
+	}
+}
+
+/**
+\brief Implements process create/exit callbacks.
+
+Prepares AV_EVENT_PROCESS_CREATE and AV_EVENT_PROCESS_EXIT event buffers and
+passes them to the UM component.
+
+\param[in] Process Pointer to the KM structure for the new or exiting process.
+
+\param[in] ProcessId ID of the process that caused the event.
+
+\param[in] CreateInfo Pointer to the structure with information about new process
+(NULL for exiting process).
+
+\return None.
+*/
 void AVCreateProcessCallback(
 	PEPROCESS Process,
 	HANDLE ProcessId,
@@ -105,6 +233,20 @@ void AVCreateProcessCallback(
 #endif
 }
 
+/**
+\brief Thread create/exit callback.
+
+Prepares AV_EVENT_THREAD_CREATE, AV_EVENT_THREAD_EXIT event buffers and passes them
+to UM components.
+
+\param[in] ProcessId ID of the process that caused the event.
+
+\param[in] ThreadId ID of the new or exiting thread.
+
+\param[in] Create Indicates whether the thread starts or stops.
+
+\return None.
+*/
 void AVCreateThreadCallback(
 	HANDLE ProcessId,
 	HANDLE ThreadId,
@@ -134,7 +276,13 @@ void AVCreateThreadCallback(
 
 		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 		{
-			// TODO.Response processing login?
+			if (UMResponse.Status == AvEventStatusInjectAPC)
+			{
+				PAPC_INFO apcInfoInUM = UMResponse.UMMessage;
+				APC_INFO apcInfoInKM;
+				AVCommGetUmBuffer(apcInfoInUM, &apcInfoInKM, sizeof(APC_INFO));
+				APCInject(&apcInfoInKM);
+			}
 		}
 #else
 		UNREFERENCED_PARAMETER(ThreadId);
@@ -169,6 +317,20 @@ void AVCreateThreadCallback(
 
 }
 
+/**
+\brief Image load notification callback.
+
+Prepares AV_EVENT_IMAGE_LOAD event buffer and passes it to the UM componetns.
+
+\param[in] FullImageName Path to the image.
+
+\param[in] ProcessId ID of the process that loads the image.
+
+\param[in] ImageInfo Pointer to the structure with additional information
+about the image.
+
+\return None.
+*/
 void AVLoadImageCallback(
 	PUNICODE_STRING FullImageName,
 	HANDLE ProcessId,
@@ -218,7 +380,6 @@ void AVLoadImageCallback(
 	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 	{
 		// TODO.Response processing login?
-		
 	}
 #else
 	UNREFERENCED_PARAMETER(FullImageName);

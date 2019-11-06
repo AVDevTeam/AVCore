@@ -80,6 +80,7 @@ void testEventsParsers(PluginManager* manager)
 
 void AVCore::start(void)
 {
+	this->logger->log("AVCore. Starting.");
 	manager->addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
 	manager->addEventParser(AvProcessHandleCreate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleCreateParser()));
 	manager->addEventParser(AvProcessHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleDublicateParser()));
@@ -94,17 +95,29 @@ void AVCore::start(void)
 	manager->addEventParser(AvRegOpenKey, reinterpret_cast<EventParser*>(new AvEventRegOpenKeyParser()));
 	manager->addEventParser(AvApcProcessInject, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
 	manager->addEventParser(AvWinApiCall, nullptr);
+	this->logger->log("AVCore. Populated parsers map.");
 
 	std::list<std::string>* plugins = manager->getConfig()->getListParam("Plugins");
+	this->logger->log("AVCore. Got plugin list.");
 	std::string pluginsFolder = manager->getConfig()->getStringParam("PluginsPath");
+	this->logger->log("AVCore. Got plugin path: " + pluginsFolder);
 
 	for (std::list<std::string>::iterator it = plugins->begin(); it != plugins->end(); it++)
+	{
+		this->logger->log("AVCore. Loading plugin from: " + pluginsFolder + (*it));
 		manager->loadPlugin(pluginsFolder + (*it));
+	}
+	this->logger->log("AVCore. Loaded all plugins.");
 
 #ifdef TESTBUILD
 	testEventsParsers(this->manager);
 #else
+	this->logger->log("AVCore. Starting UM events listener.");
 	this->umEventsManager = new UMEventsManager(this->manager);
+	this->logger->log("AVCore. UM events listener started.");
+	this->logger->log("AVCore. Starting KM events listener.");
 	this->portServer->start(manager);
+	this->logger->log("AVCore. KM events listener started.");
+	this->logger->log("AVCore. Startup finished.");
 #endif
 }

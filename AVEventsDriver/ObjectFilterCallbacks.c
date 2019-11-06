@@ -1,5 +1,26 @@
+/**
+\file
+\brief Implements object filter callbacks.
+*/
+
 #include "AVEventsDriver.h"
 
+/**
+\brief Process handle events callback.
+
+Handles process handle creation and dublication events.
+Prepares AV_EVENT_PROCESS_HANDLE_CREATE/DUBLICATE event buffers and passes
+them to the UM components.
+
+This callback always returns OB_PREOP_SUCCESS. Handle operation events are
+blocked by modifing resulting access rights set.
+
+\param[in] RegistrationContext Custom event context (not used).
+
+\param[in] preOpInfo Pointer to the structure that holds information about current event.
+
+\return Always returns OB_PREOP_SUCCESS.
+*/
 OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 	PVOID RegistrationContext,
 	POB_PRE_OPERATION_INFORMATION preOpInfo)
@@ -103,6 +124,22 @@ OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
 #endif
 };
 
+/**
+\brief Thread handle events callback.
+
+Handles thread handle creation and dublication events.
+Prepares AV_EVENT_THREAD_HANDLE_CREATE/DUBLICATE event buffers and passes
+them to the UM components.
+
+This callback always returns OB_PREOP_SUCCESS. Handle operation events are
+blocked by modifing resulting access rights set.
+
+\param[in] RegistrationContext Custom event context (not used).
+
+\param[in] preOpInfo Pointer to the structure that holds information about current event.
+
+\return Always returns OB_PREOP_SUCCESS.
+*/
 OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
 	PVOID RegistrationContext,
 	POB_PRE_OPERATION_INFORMATION preOpInfo)

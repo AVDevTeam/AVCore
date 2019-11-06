@@ -1,24 +1,32 @@
+/**
+\file
+\brief Implements minifilter driver callbacks.
+*/
+
 #include "AVEventsDriver.h"
 
+/**
+\brief IRP_MJ_CREATE pre callback.
+
+Generate AV_EVENT_FILE_CREATE event structure and passes it
+to the UM via AVEventsAPI.
+
+\param[in] Data Pointer to the filter callbackData that is passed to us.
+
+\param[in] FltObjects Pointer to the FLT_RELATED_OBJECTS data structure containing
+opaque handles to this filter, instance, its associated volume and
+file object.
+
+\param[in] CompletionContext The context for the completion routine for this
+operation.
+
+\return Status of the operation.
+*/
 FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
 	_Inout_ PFLT_CALLBACK_DATA Data,
 	_In_ PCFLT_RELATED_OBJECTS FltObjects,
 	_Flt_CompletionContext_Outptr_ PVOID* CompletionContext
 )
-/*++
-Routine Description:
-	This routine is a pre-operation dispatch routine for this miniFilter.
-	This is non-pageable because it could be called on the paging path
-Arguments:
-	Data - Pointer to the filter callbackData that is passed to us.
-	FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-		opaque handles to this filter, instance, its associated volume and
-		file object.
-	CompletionContext - The context for the completion routine for this
-		operation.
-Return Value:
-	The return value is the status of the operation.
---*/
 {
 	UNREFERENCED_PARAMETER(CompletionContext);
 	UNREFERENCED_PARAMETER(FltObjects);

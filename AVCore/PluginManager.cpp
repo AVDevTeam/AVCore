@@ -7,7 +7,7 @@ typedef IPlugin* (* GetPlugin)();
 PluginManager::PluginManager(ILogger* logger)
 {
 	this->logger = logger;
-	this->pluginManagerConfig = new UMModuleConfig();
+	this->pluginManagerConfig = new UMModuleConfig(logger);
 	this->pluginManagerConfig->init("PluginManager");
 	paramMap* params = new paramMap();
 	params->insert(paramPair("Plugins", ListParam));
@@ -56,9 +56,11 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
 	// Create config store for the plugin.
-	UMModuleConfig* configManager = new UMModuleConfig();
+	UMModuleConfig* configManager = new UMModuleConfig(this->logger);
+	this->logger->log("PluginManager. Initializing plugin " + plugin->getName());
 	configManager->init("Plugins\\" + plugin->getName());
 	plugin->init(this, pluginModule, configManager);
+	this->logger->log("PluginManager. Plugin was initialized.");
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section
 	this->eventProcessingMutex.unlock();

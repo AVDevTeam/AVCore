@@ -1,3 +1,8 @@
+/**
+@file
+@brief AVEventsDriver implements file system, registry and objects events filtering logic.
+*/
+
 /*++
 Module Name:
 	AVEventsDriver.h
@@ -8,37 +13,13 @@ Abstract:
 Environment:
 	Kernel mode
 --*/
-#ifndef RTL_USE_AVL_TABLES
-#define RTL_USE_AVL_TABLES
-#endif // RTL_USE_AVL_TABLES
-
-#define AV_VISTA    (NTDDI_VERSION >= NTDDI_VISTA)
 
 #include <fltKernel.h>
 #include "KMUMcomm.h"
 #include "EventsKMStructures.h"
 #include "KMEventsAPI.h"
 
-#define AV_CONNECTION_CTX_TAG                'cCvA'
-
-#if DBG
-
-//  Debugging level flags.
-#define AVDBG_TRACE_ROUTINES            0x00000001
-#define AVDBG_TRACE_OPERATION_STATUS    0x00000002
-#define AVDBG_TRACE_DEBUG               0x00000004
-#define AVDBG_TRACE_ERROR               0x00000008
-
-#define AV_DBG_PRINT( _dbgLevel, _string )          \
-    if(FlagOn(Globals.DebugLevel,(_dbgLevel))) {    \
-        DbgPrint _string;                           \
-    }
-
-#else
-
-#define AV_DBG_PRINT(_dbgLevel, _string)            {NOTHING;}
-
-#endif
+#define AV_CONNECTION_CTX_TAG 'cCvA'
 
 EXTERN_C_START
 
@@ -50,9 +31,15 @@ FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
 
 EX_CALLBACK_FUNCTION AVEventsRegistryCallback;
 
-OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
+OB_PREOP_CALLBACK_STATUS AVObPreProcessCallback(
+	PVOID RegistrationContext,
+	POB_PRE_OPERATION_INFORMATION pObPreOperationInfo
+);
 
-OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(PVOID RegistrationContext, POB_PRE_OPERATION_INFORMATION pObPreOperationInfo);
+OB_PREOP_CALLBACK_STATUS AVObPreThreadCallback(
+	PVOID RegistrationContext,
+	POB_PRE_OPERATION_INFORMATION pObPreOperationInfo
+);
 
 void AVCreateProcessCallback(
 	PEPROCESS Process,
@@ -74,7 +61,8 @@ void AVLoadImageCallback(
 
 EXTERN_C_END
 
-// KMEventsAPI init deinit imports.
+/**
+Exports from AVCommDriver.
+*/
 DECLSPEC_IMPORT NTSTATUS AVCommInit(PFLT_FILTER Filter);
 DECLSPEC_IMPORT void AVCommStop(VOID);
-
