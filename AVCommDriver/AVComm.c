@@ -1,5 +1,6 @@
 /**
 \file
+\brief Implements KMEventsAPI
 
 Exports Driver that implements KM-UM communication interface
 in KM. Communication interfaces are provided via exports.

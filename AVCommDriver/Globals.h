@@ -1,5 +1,6 @@
 /**
 \file
+\brief Declaration of AVComm global context
 
 Header with KM-UM communication context declaration.
 */
