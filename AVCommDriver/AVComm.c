@@ -1,15 +1,9 @@
-/*++
-Module Name:
-    AVComm.c
-Abstract:
-    Exports Driver that implements KM-UM communication interface
-	in KM. Communication interfaces are provided via exports.
-Environment:
-    kernel mode only
---*/
+/**
+\file
 
-#define CLASS_INIT_GUID 1
-#define DEBUG_MAIN_SOURCE 1
+Exports Driver that implements KM-UM communication interface
+in KM. Communication interfaces are provided via exports.
+*/
 
 #include "AVComm.h"
 #include "Globals.h"
@@ -69,14 +63,17 @@ VOID AVCommGetUmBuffer(PVOID umAddr, PVOID outKmBuffer, SIZE_T size);
 
 #endif
 
-#pragma prefast(disable:28159, "There are certain cases when we have to bugcheck...")
-
-// Globals
+/**
+Global parameters. Holds KM-UM communication context.
+*/
 AV_COMM_GLOBAL_DATA Globals;
 
-/*
-Routine Description:
-	This function is called when DLL is loaded.
+/**
+This function is called when DLL is loaded.
+
+\param[in] RegistryPath Path to the service regisy key.
+
+\return Initialization status.
 */
 NTSTATUS DllInitialize(
 	_In_ PUNICODE_STRING RegistryPath
@@ -88,9 +85,12 @@ NTSTATUS DllInitialize(
 	return STATUS_SUCCESS;
 }
 
-/*
-Routine Description:
-	This function is called when DLL is being unloaded.
+/**
+\brief Unload routine.
+
+This function is called when DLL is being unloaded.
+
+\return STATUS_SUCCESS.
 */
 NTSTATUS DllUnload(VOID)
 {
@@ -98,16 +98,13 @@ NTSTATUS DllUnload(VOID)
     return STATUS_SUCCESS;
 }
 
-/*++
-DriverEntry()
-Routine Description:
-    Temporary entry point needed to initialize the class system dll.
-    It doesn't do anything.
-Arguments:
-    DriverObject - Pointer to the driver object created by the system.
-Return Value:
-   STATUS_SUCCESS
---*/
+/**
+Temporary entry point needed to initialize the class system dll.
+It only zeros out the globals.
+
+\param[in] DriverObject Pointer to the driver object created by the system.
+\return STATUS_SUCCESS
+*/
 NTSTATUS
 DriverEntry(
     IN PDRIVER_OBJECT DriverObject,
@@ -122,6 +119,26 @@ DriverEntry(
     return STATUS_SUCCESS;
 }
 
+/**
+Communication connection callback routine.
+This is called when user-mode connects to the server port.
+This function sets up KM-UM global communication context.
+
+\param[in] ClientPort This is the client connection port that will be used to send messages from the filter
+
+\param[in] ServerPortCookie Unused
+
+\param[in] ConnectionContext The connection context passed from the user. This is to recognize which type
+connection the user is trying to connect.
+
+\param[in] SizeofContext The size of the connection context.
+
+\param[out] ConnectionCookie Propagation of the connection context to disconnection callback.
+
+\return STATUS_SUCCESS - to accept the connection
+STATUS_INSUFFICIENT_RESOURCES - if memory is not enough
+STATUS_INVALID_PARAMETER_3 - Connection context is not valid.
+*/
 NTSTATUS AVCommConnectNotifyCallback(
 	_In_ PFLT_PORT ClientPort,
 	_In_ PVOID ServerPortCookie,
@@ -129,26 +146,6 @@ NTSTATUS AVCommConnectNotifyCallback(
 	_In_ ULONG SizeOfContext,
 	_Outptr_result_maybenull_ PVOID* ConnectionCookie
 )
-/*++
-Routine Description
-	Communication connection callback routine.
-	This is called when user-mode connects to the server port.
-Arguments
-	ClientPort - This is the client connection port that will be used to send messages from the filter
-
-	ServerPortCookie - Unused
-
-	ConnectionContext - The connection context passed from the user. This is to recognize which type
-			connection the user is trying to connect.
-
-	SizeofContext   - The size of the connection context.
-
-	ConnectionCookie - Propagation of the connection context to disconnection callback.
-Return Value
-	STATUS_SUCCESS - to accept the connection
-	STATUS_INSUFFICIENT_RESOURCES - if memory is not enough
-	STATUS_INVALID_PARAMETER_3 - Connection context is not valid.
---*/
 {
 	PAV_CONNECTION_CONTEXT connectionCtx = (PAV_CONNECTION_CONTEXT)ConnectionContext;
 	PAV_CONNECTION_TYPE connectionCookie = NULL;
@@ -212,18 +209,15 @@ Return Value
 	return STATUS_SUCCESS;
 }
 
+/**
+Communication disconnection callback routine.
+This is called when user-mode disconnects the server port.
+
+\param[in,out] ConnectionCookie The cookie set in AvConnectNotifyCallback(...). It is connection context.
+*/
 VOID AVCommDisconnectNotifyCallback(
 	_In_opt_ PVOID ConnectionCookie
 )
-/*++
-Routine Description
-	Communication disconnection callback routine.
-	This is called when user-mode disconnects the server port.
-Arguments
-	ConnectionCookie - The cookie set in AvConnectNotifyCallback(...). It is connection context.
-Return Value
-	None
---*/
 {
 	PAV_CONNECTION_TYPE connectionType = (PAV_CONNECTION_TYPE)ConnectionCookie;
 
@@ -249,19 +243,18 @@ Return Value
 		AV_CONNECTION_CTX_TAG);
 }
 
+/**
+A wrapper function that prepare the communicate port.
+
+\param[in] SecurityDescriptor Specifies a security descriptor to InitializeObjectAttributes(...).
+\param[in] ConnectionType The type of connection: AvConnectForScan, AvConnectForAbort, AvConnectForQuery
+
+\return Status of the prepartion.
+*/
 NTSTATUS AVCommPrepareServerPort(
 	_In_  PSECURITY_DESCRIPTOR SecurityDescriptor,
 	_In_  AV_CONNECTION_TYPE  ConnectionType
 )
-/*++
-Routine Description:
-	A wrapper function that prepare the communicate port.
-Arguments:
-	SecurityDescriptor - Specifies a security descriptor to InitializeObjectAttributes(...).
-	ConnectionType - The type of connection: AvConnectForScan, AvConnectForAbort, AvConnectForQuery
-Return Value:
-	Returns the status of the prepartion.
---*/
 {
 	NTSTATUS status;
 	OBJECT_ATTRIBUTES oa;
@@ -303,9 +296,12 @@ Return Value:
 	return status;
 }
 
-/*
-Routine Desription:
-	Initialises minifilter-driver that is used for KM-UM communications.
+/**
+Initialises minifilter-driver that is used for KM-UM communications.
+
+\param[in] Filter Pointer to minifilter driver instance that will be used to register communication port.
+
+\return Status of initialization.
 */
 NTSTATUS AVCommInit(PFLT_FILTER Filter)
 {
@@ -352,6 +348,11 @@ NTSTATUS AVCommInit(PFLT_FILTER Filter)
 	return status;
 }
 
+/**
+\brief Closes KM-UM communication.
+
+Stops communication port. Zeros out Filter pointer.
+*/
 void AVCommStop(VOID)
 {
 	if (NULL != Globals.EventsServerPort)
@@ -364,16 +365,19 @@ void AVCommStop(VOID)
 	}
 }
 
-/*
-Routine Description:
-	Allocates a block of memory in UM AVCore service and transferes
-	given KM memory block there.
-Arguments:
-	_in_ srcBuffer - pointer to the source buffer located in KM address space.
-	_in_ srcSize - number of bytes to move from srcBuffer to UM.
-	_out_ outUmBuffer - pointer to the pointer that will recieve the address
-	_out_ outUmSize - pointer to the variable where the size of allocated UM buffer will be stored.
-	of the buffer allocated in the UM address space. Should be zero.
+/**
+\brief Transfers KM buffer to UM.
+
+Allocates a block of memory in UM AVCore service and transferes
+given KM memory block there.
+
+\param[in] srcBuffer Pointer to the source buffer located in KM address space.
+\param[in] srcSize Number of bytes to move from srcBuffer to UM.
+\param[out] outUmBuffer Pointer to the pointer that will recieve the address
+\param[out\ outUmSize Pointer to the variable where the size of allocated UM buffer will be stored.
+of the buffer allocated in the UM address space. Should be zero.
+
+\return Status of operation.
 */
 NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, void **outUmBuffer, PSIZE_T outUmSize)
 {
@@ -397,6 +401,16 @@ NTSTATUS AVCommCreateBuffer(PVOID srcBuffer, SIZE_T srcSize, void **outUmBuffer,
 	return status;
 }
 
+/**
+\brief Retrieves buffer from UM.
+
+Copies buffer from UM. This API is used to copy UM responses buffer
+to KM memory. KM buffer should be large enough to receive size bytes.
+
+\param[in] umAddr Address of the buffer provided from UM.
+\param[out] outKmBuffer Pointer to the KM bufferthat will recieve contents of specified UM buffer.
+\param[in] size Size of the UM buffer.
+*/
 VOID AVCommGetUmBuffer(PVOID umAddr, PVOID outKmBuffer, SIZE_T size)
 {
 	// Chnage stack to that of the target UM process (AVCore service)
@@ -408,27 +422,33 @@ VOID AVCommGetUmBuffer(PVOID umAddr, PVOID outKmBuffer, SIZE_T size)
 	KeUnstackDetachProcess(&pkapcState);
 }
 
-/*
-Routine Description:
-	Frees the block of memory in UM address space
-	that was allocated via AVCommCreateBuffer.
-Arguments:
-	UmBuffer - pointer to the UM buffer (outUmBuffer)
-	UmBufferSize - size of UM buffer received from AVCommCreateBuffer (outUmSize)
+/**
+\brief Frees UM memory
+
+Frees the block of memory in UM address space
+that was allocated via AVCommCreateBuffer.
+
+\param[in] UmBuffer Pointer to the UM buffer (outUmBuffer)
+\param[in] UmBufferSize Size of UM buffer received from AVCommCreateBuffer (outUmSize)
+
+\return Status of operation.
 */
 NTSTATUS AVCommFreeBuffer(PVOID UmBuffer, PSIZE_T UmBufferSize)
 {
 	return ZwFreeVirtualMemory(Globals.AVCoreServiceHandle, UmBuffer, UmBufferSize, MEM_RELEASE);
 }
 
-/*
-Routine Description:
-	Sends given event to UM service via communication port.
-Arguments:
-	eventBuffer - pointer to the event structure formed in KM memory space.
-	eventBufferSize - size of eventBuffer.
-	UMResponse - pointer to buffer that will receive AV_EVENT_RESPONSE structure.
-	UMResponseLength - size of UMResponse buffer.
+/**
+\brief Sends given event to UM service via communication port.
+
+This API is blocking. Function will return after event processing in UM.
+
+\param[in] eventBuffer Pointer to the event structure formed in KM memory space.
+\param[in] eventBufferSize Size of eventBuffer.
+\param[out] UMResponse Pointer to buffer that will receive AV_EVENT_RESPONSE structure.
+\param[out] UMResponseLength Size of UMResponse buffer.
+
+\return Status of event submition.
 */
 NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
 {
@@ -463,18 +483,29 @@ NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBu
 	return status;
 }
 
-/*
-Implements KM event scanning exclusion
-based on PID.
+/**
+\brief Implements KM event scanning exclusion based on PID.
+
+This API should be called before submitting events via AVCommSendEvent
+to check whether the process is exluded (truested).
+By default AVCore service process is trusted.
+
+\param[in] PID Current PID.
+
+\return Excluded (TRUE).
 */
 UCHAR AVCommIsExcludedPID(HANDLE PID)
 {
 	return Globals.AVCoreServicePID == PID;
 }
 
-/*
+/**
+\brief Checks KM-UM communication state.
+
 Checks weather client comm port was set up (KM-UM communication
 was established).
+
+\return BOOLEAN
 */
 UCHAR AVCommIsInitialized()
 {
