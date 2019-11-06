@@ -175,7 +175,7 @@ NTSTATUS AVCommConnectNotifyCallback(
 	*connectionCookie = connectionCtx->Type;
 	switch (connectionCtx->Type)
 	{
-	case AvConnectForScan:
+	case AvConnectForEvents:
 		Globals.EventsClientPort = ClientPort;
 
 		OBJECT_ATTRIBUTES objectAttributes;
@@ -232,7 +232,7 @@ VOID AVCommDisconnectNotifyCallback(
 	//  Close communication handle
 	switch (*connectionType)
 	{
-	case AvConnectForScan:
+	case AvConnectForEvents:
 		FltCloseClientPort(Globals.Filter, &Globals.EventsClientPort);
 		Globals.EventsClientPort = NULL;
 		break;
@@ -248,7 +248,7 @@ VOID AVCommDisconnectNotifyCallback(
 A wrapper function that prepare the communicate port.
 
 \param[in] SecurityDescriptor Specifies a security descriptor to InitializeObjectAttributes(...).
-\param[in] ConnectionType The type of connection: AvConnectForScan, AvConnectForAbort, AvConnectForQuery
+\param[in] ConnectionType The type of connection: AvConnectForEvents
 
 \return Status of the prepartion.
 */
@@ -268,7 +268,7 @@ NTSTATUS AVCommPrepareServerPort(
 
 	switch (ConnectionType)
 	{
-	case AvConnectForScan:
+	case AvConnectForEvents:
 		portName = AV_SCAN_PORT_NAME;
 		pServerPort = &Globals.EventsServerPort;
 		break;
@@ -327,7 +327,7 @@ NTSTATUS AVCommInit(PFLT_FILTER Filter)
 		}
 
 		//  Prepare ports between kernel and user.
-		status = AVCommPrepareServerPort(sd, AvConnectForScan);
+		status = AVCommPrepareServerPort(sd, AvConnectForEvents);
 		if (!NT_SUCCESS(status))
 		{
 			leave;

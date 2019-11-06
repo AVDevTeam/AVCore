@@ -27,7 +27,7 @@ void CommPortServer::start(IManager* manager)
 	}
 
 	//  Prepare the scan communication port.
-	connectionCtx.Type = AvConnectForScan;
+	connectionCtx.Type = AvConnectForEvents;
 	connectionCtx.ProcessID = (HANDLE)GetCurrentProcessId();
 	hr = FilterConnectCommunicationPort(AV_SCAN_PORT_NAME,
 		0,
