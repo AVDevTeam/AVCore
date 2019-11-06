@@ -24,6 +24,7 @@ build/
 dependencies/
 lib/
 Plugins/
+docs/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
