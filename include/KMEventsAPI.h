@@ -1,13 +1,7 @@
-/*
-This file provides declarations for AVCommDriver exports.
+/**
+\brief Declarations for AVCommDriver exports (KMEventsAPI).
 */
-
-#if defined(_MSC_VER)
-#if (_MSC_VER >= 1200)
-#pragma warning(push)
-#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-#endif
-#endif
+#pragma once
 
 // Exports from AVCommDriver (KMEventsAPI)
 #pragma region EventsAPI import

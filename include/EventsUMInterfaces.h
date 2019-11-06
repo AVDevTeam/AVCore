@@ -1,17 +1,18 @@
-#pragma once
-#if defined(_MSC_VER)
-#if (_MSC_VER >= 1200)
-#pragma warning(push)
-#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-#endif
-#endif
+/**
+\file
+\brief Declares events interfaces that are used from plugins to access event data.
+*/
 
+#pragma once
 #include "EventsKMStructures.h"
 #include <list>
 #include <string>
 
-// Interface for AvFSEventCreate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvFSEventCreate interface
+Interface for AvFSEventCreate that will be used
+in plugins to access event parameters.
+*/
 class IEventFSCreate
 {
 public:
@@ -21,8 +22,11 @@ public:
 	virtual std::string& getFilePath() = 0;
 };
 
-// Interface for AvObEventProcessHandleCreate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvObEventProcessHandleCreate interface
+Interface for AvObEventProcessHandleCreate that will be used
+in plugins to access event parameters.
+*/
 class IEventObProcessHandleCreate
 {
 public:
@@ -33,8 +37,11 @@ public:
 	virtual unsigned long getDesiredAccess() = 0;
 };
 
-// Interface for AvObEventProcessHandleDublicate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvObEventProcessHandleDublicate interface
+Interface for AvObEventProcessHandleDublicate that will be used
+in plugins to access event parameters.
+*/
 class IEventObProcessHandleDublicate
 {
 public:
@@ -47,8 +54,11 @@ public:
 	virtual int getDublicateTargetPID() = 0;
 };
 
-// Interface for AvObEventThreadHandleCreate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvObEventThreadHandleCreate interface
+Interface for AvObEventThreadHandleCreate that will be used
+in plugins to access event parameters.
+*/
 class IEventObThreadHandleCreate
 {
 public:
@@ -61,8 +71,11 @@ public:
 	virtual unsigned long getDesiredAccess() = 0;
 };
 
-// Interface for AvObEventThreadHandleDublicate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvObEventThreadHandleDublicate interface
+Interface for AvObEventThreadHandleDublicate that will be used
+in plugins to access event parameters.
+*/
 class IEventObThreadHandleDublicate
 {
 public:
@@ -77,8 +90,11 @@ public:
 	virtual int getDublicateTargetPID() = 0;
 };
 
-// Interface for AvEventProcessCreate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventProcessCreate interface
+Interface for AvEventProcessCreate that will be used
+in plugins to access event parameters.
+*/
 class IEventProcessCreate
 {
 public:
@@ -91,8 +107,11 @@ public:
 	virtual std::string& getCommandLine() = 0;
 };
 
-// Interface for AvEventProcessExit that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventProcessExit interface
+Interface for AvEventProcessExit that will be used
+in plugins to access event parameters.
+*/
 class IEventProcessExit
 {
 public:
@@ -100,8 +119,11 @@ public:
 	virtual int getPID() = 0;
 };
 
-// Interface for AvEventThreadCreate that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventThreadCreate interface
+Interface for AvEventThreadCreate that will be used
+in plugins to access event parameters.
+*/
 class IEventThreadCreate
 {
 public:
@@ -110,8 +132,11 @@ public:
 	virtual int getTID() = 0;
 };
 
-// Interface for AvEventThreadExit that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventThreadExit interface
+Interface for AvEventThreadExit that will be used
+in plugins to access event parameters.
+*/
 class IEventThreadExit
 {
 public:
@@ -120,8 +145,11 @@ public:
 	virtual int getTID() = 0;
 };
 
-// Interface for AvEventImageLoad that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventImageLoad interface
+Interface for AvEventImageLoad that will be used
+in plugins to access event parameters.
+*/
 class IEventImageLoad
 {
 public:
@@ -131,8 +159,11 @@ public:
 	virtual unsigned char getIsSystemModule() = 0;
 };
 
-// Interface for AvEventRegCreateKey that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventRegCreateKey interface
+Interface for AvEventRegCreateKey that will be used
+in plugins to access event parameters.
+*/
 class IEventRegCreateKey
 {
 public:
@@ -141,8 +172,11 @@ public:
 	virtual std::string& getKeyPath() = 0;
 };
 
-// Interface for AvEventRegOpenKey that will be used
-// in plugins to access event parameters.
+/**
+\brief AvEventRegOpenKey interface
+Interface for AvEventRegOpenKey that will be used
+in plugins to access event parameters.
+*/
 class IEventRegOpenKey
 {
 public:
@@ -151,6 +185,11 @@ public:
 	virtual std::string& getKeyPath() = 0;
 };
 
+/**
+\brief AvWinApiCall interface
+Interface for AvWinApiCall that will be used
+in plugins to access event parameters.
+*/
 class IEventWinApiCall
 {
 public:
