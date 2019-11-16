@@ -17,22 +17,26 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!-- Panel with plugins list -->
-        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="3">
+        <ScrollViewer Grid.Row="0" Grid.Column="0" Grid.RowSpan="4">
             <StackPanel Name="PluginsPanel"/>
         </ScrollViewer>
 
+        <!-- Panel with plugins settings -->
         <Grid Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3" >
-
-            <!-- Panel with plugins settings  new SolidColorBrush(Color.FromArgb(0xFF, 0xEB, 0xEB, 0xEB)); //#FFEBEBEB #FFF3F3F3 #FFDDDDDD -->
             <ScrollViewer Grid.Row="0" Grid.Column="0" Background="#FFDDDDDD">
                 <StackPanel Name="PluginsParametersPanel" Margin="5"/>
             </ScrollViewer>
-
         </Grid>
 
+        <!-- Panel with accept/cancel buttons -->
+        <Grid Grid.Column="1" Grid.Row="3"  Grid.ColumnSpan="2" Grid.RowSpan="1" >
+            <Button Name="cancelBtn" Content="Cancel" Width="191" Margin="39,24,299,30" Height="51" Click="cancelBtn_Clicked"/>
+            <Button Name="acceptBtn" Content="Accept" Width="191" Margin="305,24,33,30" Height="51" Click="acceptBtn_Clicked"/>
+        </Grid>
 
     </Grid>
 </Window>

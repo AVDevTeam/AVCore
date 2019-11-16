@@ -14,7 +14,7 @@ namespace AVGUI.Windows.Settings
     // Данный класс занимается работой с отображением информации о плагинах
     class PluginsPanelManager
     {
-        PipeClient Pipe;                        
+        PipeClient Pipe;
         StackPanel PluginsPanel;                // Панель с плагинам
         StackPanel PluginsParametersPanel;      // Панелья с параметрами плагинов
 
@@ -37,7 +37,7 @@ namespace AVGUI.Windows.Settings
             PluginsPanel.Children.Add(btn);
         }
 
-        
+
 
         // Когда нажали на плагин
         public void Plugin_Clicked(object sender, RoutedEventArgs e)
@@ -58,22 +58,22 @@ namespace AVGUI.Windows.Settings
             JObject jPluginInfo = JObject.Parse(reply);
             foreach (var item in jPluginInfo)
             {
-                string value = "";              // Значение параметра
-                string name = item.Key;         // Имя параметра
-                JToken jValue = item.Value;     // Значение параметра в js
+                List<string> value = new List<string>();    // Значение параметра
+                string name = item.Key;                     // Имя параметра
+                JToken jValue = item.Value;                 // Значение параметра в js
 
                 // Если этот параметр является список
                 if (jValue is JArray)
                 {
                     foreach (string param in jValue)
                     {
-                        value += param + "\n";
+                        value.Add(param);
+                        value.Add("test");
                     }
-                    value = value.Substring(0, value.Length - 1);
                 }
                 else
                 {
-                    value += jValue.ToString();
+                    value.Add(jValue.ToString());
                 }
 
                 AddPluginParamToParametersPanel(name, value);
@@ -82,38 +82,74 @@ namespace AVGUI.Windows.Settings
         }
 
         // Добавляет GroupBox с очередным параметром
-        private void AddPluginParamToParametersPanel(string _name,  string _value)
+        private void AddPluginParamToParametersPanel(string _name, List<string> _value)
         {
             // Добавить GroupBox с названием параметра
             GroupBox grbox = new GroupBox();
-            grbox.Name = _name + "_lbal";
+            grbox.Name = _name + "_groupbox";
             grbox.Header = _name;
             grbox.Padding = new Thickness(2);
 
-            // Создать грид и поделить его на 2 колонки
+            // Создать грид и поделить его на колонки
             Grid DynamicGrid = new Grid();
+            DynamicGrid.Name = _name + "_grid";
             ColumnDefinition gridColumn1 = new ColumnDefinition();
             ColumnDefinition gridColumn2 = new ColumnDefinition();
+            ColumnDefinition gridColumn3 = new ColumnDefinition();
             DynamicGrid.ColumnDefinitions.Add(gridColumn1);
             DynamicGrid.ColumnDefinitions.Add(gridColumn2);
+            DynamicGrid.ColumnDefinitions.Add(gridColumn3);
 
-            // Добавить поле для изменения этого параметра 
+            // Список строк отражающих текущее значение какого-то параметра модуля
+            ListBox listBox = new ListBox();
+            listBox.Name = _name + "_listbox";
+            listBox.MaxHeight = 65;
+            foreach (string val in _value)
+            {
+                listBox.Items.Add(val);
+            }
+            DynamicGrid.Children.Add(listBox);
+            Grid.SetColumn(listBox, 0);
+
+            // Поле для добавления нового значения
             TextBox txtbox = new TextBox();
-            txtbox.Text = _value;
             txtbox.Name = _name + "_txtbox";
-            txtbox.Margin = new Thickness(5, 2, 5, 2);
+            txtbox.Margin = new Thickness(5, 0, 5, 0);
+            txtbox.TextWrapping = TextWrapping.Wrap;
             DynamicGrid.Children.Add(txtbox);
-            Grid.SetColumn(txtbox, 0);
+            Grid.SetColumn(txtbox, 1);
 
-            // Добавить кнопку применить
-            Button btn = new Button();
-            btn.Name = _name + "_btn";
-            btn.Content = "Apply";
-            //btn.Click += Plugin_Clicked;
-            btn.Margin = new Thickness(5, 2, 5, 2);
-            btn.Background = Brushes.White;
-            DynamicGrid.Children.Add(btn);
-            Grid.SetColumn(btn, 1);
+
+            // Грид содержащий 2 кнопки (Добавить и удалить параметр)
+            Grid DynamicBtnGrid = new Grid();
+            DynamicGrid.Name = _name + "_btnGrid";
+            ColumnDefinition btnGridColumn1 = new ColumnDefinition();
+            ColumnDefinition btnGridColumn2 = new ColumnDefinition();
+            DynamicBtnGrid.ColumnDefinitions.Add(btnGridColumn1);
+            DynamicBtnGrid.ColumnDefinitions.Add(btnGridColumn2);
+
+            // Кнопка добавить (добавляет строку из прошло инпута в список строк)
+            Button addBtn = new Button();
+            addBtn.Name = _name + "_addBtn";
+            addBtn.Content = "Add";
+            addBtn.Click += addBtn_Clicked;
+            addBtn.Margin = new Thickness(5, 0, 5, 0);
+            addBtn.Background = Brushes.White;
+            DynamicBtnGrid.Children.Add(addBtn);
+            Grid.SetColumn(addBtn, 0);
+
+            // Удаляет выбранную строку из списка строк
+            Button deleteBtn = new Button();
+            deleteBtn.Name = _name + "_deleteBtn";
+            deleteBtn.Content = "Delete";
+            deleteBtn.Click += deleteBtn_Clicked;
+            deleteBtn.Margin = new Thickness(5, 0, 5, 0);
+            deleteBtn.Background = Brushes.White;
+            DynamicBtnGrid.Children.Add(deleteBtn);
+            Grid.SetColumn(deleteBtn, 1);
+
+            DynamicGrid.Children.Add(DynamicBtnGrid);
+            Grid.SetColumn(DynamicBtnGrid, 2);
 
             // Вставить грид в GroupBox, а GroupBox в StackPanel
             grbox.Content = DynamicGrid;
@@ -126,6 +162,95 @@ namespace AVGUI.Windows.Settings
             while (PluginsParametersPanel.Children.Count > 0)
             {
                 PluginsParametersPanel.Children.RemoveAt(PluginsParametersPanel.Children.Count - 1);
+            }
+        }
+
+        // Кликнули по кнопке Add 
+        private void addBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)e.Source;
+
+            string groupboxName = btn.Name.Substring(0, btn.Name.IndexOf("_")) + "_groupbox";
+
+            Grid grid = null;
+            ListBox listBox = null;
+            TextBox textBox = null;
+
+            // Нашли нужный параметр среди всех параметров в стакпанел
+            foreach (GroupBox child in PluginsParametersPanel.Children)
+            {
+                if (child.Name == groupboxName)
+                {
+                    grid = (Grid)child.Content;
+                    break;
+                }
+            }
+
+            // Нашли в этом параметре listbox
+            foreach (var child in grid.Children)
+            {
+                if (child is ListBox)
+                {
+                    listBox = (ListBox)child;
+                    break;
+                }
+            }
+
+            // Нашли в этом параметре textbox
+            foreach (var child in grid.Children)
+            {
+                if (child is TextBox)
+                {
+                    textBox = (TextBox)child;
+                    break;
+                }
+            }
+
+            // Если поле пустое, то ничего не делать
+            if (textBox.Text == "")
+            {
+                return;
+            }
+
+            // Добавили в listBox новое значение
+            listBox.Items.Add(textBox.Text);
+            textBox.Text = "";
+        }
+
+        // Кликнули по кнопке Delete
+        private void deleteBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            Button btn = (Button)e.Source;
+
+            string groupboxName = btn.Name.Substring(0, btn.Name.IndexOf("_")) + "_groupbox";
+
+            Grid grid = null;
+            ListBox listBox = null;
+
+            // Нашли нужный параметр среди всех параметров в стакпанел
+            foreach (GroupBox child in PluginsParametersPanel.Children)
+            {
+                if (child.Name == groupboxName)
+                {
+                    grid = (Grid)child.Content;
+                    break;
+                }
+            }
+
+            // Нашли в этом параметре listbox
+            foreach (var child in grid.Children)
+            {
+                if (child is ListBox)
+                {
+                    listBox = (ListBox)child;
+                    break;
+                }
+            }
+
+            // Удалили выделенный элемент
+            if(listBox.SelectedIndex != -1)
+            {
+                listBox.Items.RemoveAt(listBox.SelectedIndex);
             }
         }
     }

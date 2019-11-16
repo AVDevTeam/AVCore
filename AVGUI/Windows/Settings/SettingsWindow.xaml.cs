@@ -47,11 +47,6 @@ namespace AVGUI
 
         }
 
-
-
-
-      
-
         // Отправить запрос на список модулей
         private string GetModulesList()
         {
@@ -84,6 +79,18 @@ namespace AVGUI
         private void SettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             //Pipe.Close();
+        }
+
+        // Настройки решили отменить
+        private void cancelBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            // TO DO отмена настроек
+        }
+
+        // Настройки решили применить
+        private void acceptBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            // TO DO принятие настроек
         }
     }
 }
