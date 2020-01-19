@@ -1,28 +1,36 @@
 #pragma once
 #include "CommPortServer.h"
-#include "PluginManager.h"
+//#include "PluginManager.h"
 #include "EventsParser.h"
 #include "ConfigManager.h"
 #include "FileLogger.h"
+#include "PipeManager.h"
+#include "IPluginManagerImage.h"
 #include <mutex>
 
 //#define TESTBUILD
 
-class AVCore
+
+
+class AVCore : public ICoreImage, public IPluginManagerImage
 {
 public:
 	AVCore(ILogger* logger) 
 	{ 
-		this->logger = logger;
-		this->portServer = new CommPortServer();
 		this->manager = new PluginManager(logger);
+		this->logger = logger;
+		this->commandsManager = new CommandsManager(this);
+		this->settingsManager = new SettingsManager();
+		this->pipeManager = new PipeManager(this);
+		this->portServer = new CommPortServer();
 		this->stopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if (this->stopEvent == NULL)
 		{
 			throw "Error creating stop event";
 		}
 	}
-	~AVCore() 
+
+	virtual ~AVCore() override
 	{ 
 		delete this->manager;
 		delete this->portServer;
@@ -37,8 +45,20 @@ public:
 	void wait(void) { WaitForSingleObject(this->stopEvent, INFINITE); }
 
 private:
+	PipeManager * pipeManager;
+	SettingsManager * settingsManager;
+	CommandsManager * commandsManager;
+
 	PluginManager * manager;
 	CommPortServer * portServer;
 	ILogger* logger;
 	HANDLE stopEvent = INVALID_HANDLE_VALUE;
+
+	// Унаследовано через ICoreImage
+	virtual ILogger * getLogger() override;
+	virtual SettingsManager * getSettingsManager() override;
+	virtual CommandsManager * getCommandsManager() override;
+
+	// Унаследовано через IPluginManagerImage
+	virtual PluginManager * getPluginManager() override;
 };

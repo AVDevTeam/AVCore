@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
@@ -28,19 +24,26 @@
     <Filter Include="ConfigurationManagers">
       <UniqueIdentifier>{d04efef8-8157-4260-b82f-4ba930ade44c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="SettingsManager">
-      <UniqueIdentifier>{af0dcac3-2108-4739-b32a-437d877c9e5c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Loggers">
       <UniqueIdentifier>{1b082301-f2ef-45c5-9ffe-7abd6e9301a9}</UniqueIdentifier>
     </Filter>
     <Filter Include="Loggers\FileLogger">
       <UniqueIdentifier>{167f2c42-c8ea-43a8-9bf1-2acd525ddcad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AVCore">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Managers">
+      <UniqueIdentifier>{a7264d03-14ce-4118-bbda-136bae0f3ae4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AVCore\Images">
+      <UniqueIdentifier>{d34141d6-b963-4aac-83c0-7ea7a4fc016d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>AVCore</Filter>
     </ClCompile>
     <ClCompile Include="PipeServer.cpp">
       <Filter>Pipes</Filter>
@@ -57,14 +60,20 @@
     <ClCompile Include="ConfigManager.cpp">
       <Filter>ConfigurationManagers</Filter>
     </ClCompile>
-    <ClCompile Include="SettingsManager.cpp">
-      <Filter>SettingsManager</Filter>
-    </ClCompile>
     <ClCompile Include="FileLogger.cpp">
       <Filter>Loggers\FileLogger</Filter>
     </ClCompile>
     <ClCompile Include="AVCore.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>AVCore</Filter>
+    </ClCompile>
+    <ClCompile Include="PipeManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingsManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandsManager.cpp">
+      <Filter>Managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,14 +92,26 @@
     <ClInclude Include="ConfigManager.h">
       <Filter>ConfigurationManagers</Filter>
     </ClInclude>
-    <ClInclude Include="SettingsManager.h">
-      <Filter>SettingsManager</Filter>
-    </ClInclude>
     <ClInclude Include="FileLogger.h">
       <Filter>Loggers\FileLogger</Filter>
     </ClInclude>
     <ClInclude Include="AVCore.h">
-      <Filter>Source Files</Filter>
+      <Filter>AVCore</Filter>
+    </ClInclude>
+    <ClInclude Include="PipeManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandsManager.h">
+      <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ICoreImage.h">
+      <Filter>AVCore\Images</Filter>
+    </ClInclude>
+    <ClInclude Include="IPluginManagerImage.h">
+      <Filter>AVCore\Images</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

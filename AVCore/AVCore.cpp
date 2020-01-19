@@ -90,6 +90,37 @@ void AVCore::start(void)
 #ifdef TESTBUILD
 	testEventsParsers(this->manager);
 #else
-	portServer->start(manager);
+	//portServer->start(manager);
+	pipeManager->join();
+
+
+
+
+
+
 #endif
+}
+
+// Реализация ICoreImage
+
+ILogger * AVCore::getLogger()
+{
+	return logger;
+}
+
+SettingsManager * AVCore::getSettingsManager()
+{
+	return settingsManager;
+}
+
+CommandsManager * AVCore::getCommandsManager()
+{
+	return commandsManager;
+}
+
+// Реализация IPluginManagerImage
+
+PluginManager * AVCore::getPluginManager()
+{
+	return manager;
 }

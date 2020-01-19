@@ -1,6 +1,8 @@
 #include <windows.h>
 #include "AVCore.h"
 
+#define TESTBUILD
+
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
 
@@ -30,8 +32,8 @@ AVCore* avCore;
 #ifdef TESTBUILD
 int main(int argc, char* argv[])
 {
-	printf("Enter any key\n");
-	getchar();
+	//printf("Enter any key\n");
+	//getchar();
 
 	FileLogger* logger = new FileLogger(LOG_PATH);
 	avCore = new AVCore(logger);
@@ -40,6 +42,8 @@ int main(int argc, char* argv[])
 #else
 int main(int argc, char* argv[])
 {
+
+
 	SERVICE_TABLE_ENTRY ServiceTable[] =
 	{
 		{(LPSTR)SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain},
@@ -136,7 +140,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 	switch (CtrlCode)
 	{
 	case SERVICE_CONTROL_STOP:
-
+		
 		OutputDebugString("AVCore: ServiceCtrlHandler: SERVICE_CONTROL_STOP Request");
 
 		if (g_ServiceStatus.dwCurrentState != SERVICE_RUNNING)

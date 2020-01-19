@@ -23,6 +23,7 @@ bld/
 build/
 lib/
 Plugins/
+Dependencies/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
