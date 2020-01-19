@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "EventsUMInterfaces.h"
 #include <string>
+#include <list>
 #include <iostream>
 
 // Base class for all UM events.
@@ -203,7 +204,7 @@ public:
 };
 
 // Class for process create event (PsSetCreateProcessNotifyRoutineEx[2])
-class AvEventProcessCreate : public IEventProcessCreate
+class AvEventProcessCreate : public IEventProcessCreate, AvEvent
 {
 public:
 	AvEventProcessCreate(int PID, int parentPID, int creatingPID, int creatingTID, std::string imageFileName, std::string commandLine)
@@ -242,7 +243,7 @@ public:
 };
 
 // Class for process exit event (PsSetCreateProcessNotifyRoutineEx[2])
-class AvEventProcessEixt : public IEventProcessExit
+class AvEventProcessEixt : public IEventProcessExit, AvEvent
 {
 public:
 	AvEventProcessEixt(int PID) { this->PID = PID; }
@@ -263,7 +264,7 @@ public:
 };
 
 // Class for thread create event (PsSetCreateThreadNotifyRoutine)
-class AvEventThreadCreate : public IEventThreadCreate
+class AvEventThreadCreate : public IEventThreadCreate, AvEvent
 {
 public:
 	AvEventThreadCreate(int PID, int TID) { this->PID = PID; this->TID = TID; }
@@ -286,7 +287,7 @@ public:
 };
 
 // Class for thread exit event (PsSetCreateThreadNotifyRoutine)
-class AvEventThreadExit : public IEventThreadExit
+class AvEventThreadExit : public IEventThreadExit, AvEvent
 {
 public:
 	AvEventThreadExit(int PID, int TID) { this->PID = PID; this->TID = TID; }
@@ -309,7 +310,7 @@ public:
 };
 
 // Class for image load event (PsSetImageNotifyRoutine)
-class AvEventImageLoad : public IEventImageLoad
+class AvEventImageLoad : public IEventImageLoad, AvEvent
 {
 public:
 	AvEventImageLoad(int PID, std::string imageName, unsigned char isSystemModule) 
@@ -339,7 +340,7 @@ public:
 };
 
 // Class for reg key create event (CmRegisterCallback)
-class AvEventRegCreateKey : public IEventRegCreateKey
+class AvEventRegCreateKey : public IEventRegCreateKey, AvEvent
 {
 public:
 	AvEventRegCreateKey(int requestorPID, std::string keyPath)
@@ -366,7 +367,7 @@ public:
 };
 
 // Class for reg key open event (CmRegisterCallback)
-class AvEventRegOpenKey : public IEventRegOpenKey
+class AvEventRegOpenKey : public IEventRegOpenKey, AvEvent
 {
 public:
 	AvEventRegOpenKey(int requestorPID, std::string keyPath)
@@ -390,4 +391,24 @@ class AvEventRegOpenKeyParser : EventParser
 public:
 	// Inherited via EventParser
 	virtual AvEvent* parse(PVOID) override;
+};
+
+class AvEventWinApiCall : IEventWinApiCall, AvEvent
+{
+public:
+	AvEventWinApiCall(int PID, std::string functionName, std::list<std::string> arguments)
+	{
+		this->PID = PID;
+		this->functionName = functionName;
+		this->argumetns = arguments;
+	}
+
+	// Inherited via IEventWinApiCall
+	virtual int getPID() override;
+	virtual std::string getFunctionName() override;
+	virtual std::list<std::string> getFunctionArgs() override;
+private:
+	int PID;
+	std::string functionName;
+	std::list<std::string> argumetns;
 };

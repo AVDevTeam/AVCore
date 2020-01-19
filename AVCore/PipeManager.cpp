@@ -10,20 +10,21 @@ void PipeManager::listen()
 	{
 		pipe->waitForClient(stopSignal);
 
-		// Ïîêà ñîîáùåíèÿ âàëÿòñÿ
+		// ÃÃ®ÃªÃ  Ã±Ã®Ã®Ã¡Ã¹Ã¥Ã­Ã¨Ã¿ Ã¢Ã Ã«Ã¿Ã²Ã±Ã¿
 		while (pipe->receiveMessage(message) != -1 && !stopSignal)
 		{
 			if (message != "")
 			{
-				std::cout << message << std::endl;
-				// Åñëè çàïğîñó òğåáóåòñÿ îòâåò
+				std::cout << "message: " << message << std::endl;
+				// Ã…Ã±Ã«Ã¨ Ã§Ã Ã¯Ã°Ã®Ã± Ã­Ã  Ã¢Ã»Ã¯Ã®Ã«Ã­Ã¥Ã­Ã¨Ã¥ ÃªÃ®Ã¬Ã Ã­Ã¤Ã» 
+
 				if (message.substr(1, 6) == R"("id":0)")
 				{
-					// Îáğàáîòàòü êîìàíäó è âåğíóòü îòâåò
+					// ÃÃ¡Ã°Ã Ã¡Ã®Ã²Ã Ã²Ã¼ ÃªÃ®Ã¬Ã Ã­Ã¤Ã³ Ã¨ Ã¢Ã¥Ã°Ã­Ã³Ã²Ã¼ Ã®Ã²Ã¢Ã¥Ã²
 					std::string ans = commandsManager->manage(message.substr(0, message.size() - 2));
 					pipe->sendMessage(ans);
 				}
-				// Èíà÷å ïğîñòî îáğàáîòàòü êîìàíäó
+				// ÃˆÃ­Ã Ã·Ã¥ Ã¯Ã°Ã®Ã±Ã²Ã® Ã®Ã¡Ã°Ã Ã¡Ã®Ã²Ã Ã²Ã¼ ÃªÃ®Ã¬Ã Ã­Ã¤Ã³
 				else if (message.substr(1, 6) == R"("id":1)")
 				{
 					std::string ans = commandsManager->manage(message.substr(0, message.size() - 2));

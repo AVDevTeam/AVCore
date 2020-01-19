@@ -2,17 +2,23 @@
 
 void UMModuleConfig::init(std::string moduleId)
 {
-	this->regStorePath = std::string("SOFTWARE\\AVCore\\") + moduleId;
+	this->regStorePath = std::string("Software\\AVCore\\") + moduleId;
 	LSTATUS status = RegCreateKeyExA(HKEY_LOCAL_MACHINE, this->regStorePath.c_str(), NULL, NULL, NULL, KEY_QUERY_VALUE | KEY_SET_VALUE, NULL, &this->configKey, NULL);
 	if (status != ERROR_SUCCESS)
+	{
+		this->logger->log("UMModuleConfig::init. Open key error.");
 		throw "Open key error";
+	}
 }
 
 void UMModuleConfig::deinit()
 {
 	LSTATUS status = RegCloseKey(this->configKey);
 	if (status != ERROR_SUCCESS)
-		throw "Open key error";
+	{
+		this->logger->log("UMModuleConfig::deinit. Close key error.");
+		throw "Close key error";
+	}
 	if (this->configParamMap != nullptr)
 		delete this->configParamMap;
 }
@@ -29,7 +35,10 @@ DWORD UMModuleConfig::getDwordParam(std::string paramName)
 	DWORD dataSize = sizeof(DWORD);
 	LSTATUS status = RegQueryValueExA(this->configKey, paramName.c_str(), NULL, &type, (LPBYTE)&data, &dataSize);
 	if (status != ERROR_SUCCESS)
+	{
+		this->logger->log("UMModuleConfig::getDwordParam. Error reading dword from registry. " + paramName);
 		throw "Error reading dword from registry";
+	}
 	return data;
 }
 
@@ -48,6 +57,7 @@ std::string UMModuleConfig::getStringParam(std::string paramName)
 		if (status != ERROR_SUCCESS)
 		{
 			free(data);
+			this->logger->log("UMModuleConfig::getStringParam. Error reading registry string value. " + paramName);
 			throw "Error reading registry string value";
 		}
 		std::string result(data);
@@ -55,7 +65,10 @@ std::string UMModuleConfig::getStringParam(std::string paramName)
 		return result;
 	}
 	else if (status != ERROR_SUCCESS)
+	{
+		this->logger->log("UMModuleConfig::getStringParam. Error reading registry string value. " + paramName);
 		throw "Error reading registry string value";
+	}
 	
 	
 	return std::string(data);
@@ -82,7 +95,10 @@ void UMModuleConfig::setDwordParam(std::string& paramName, DWORD value)
 {
 	LSTATUS status = RegSetValueExA(this->configKey, paramName.c_str(), NULL, REG_DWORD, (LPBYTE)&value, sizeof(DWORD));
 	if (status != ERROR_SUCCESS)
-		throw "Error reading dword from registry";
+	{
+		this->logger->log("UMModuleConfig::setDwordParam. Error setting dword in registry. " + paramName);
+		throw "Error setting dword in registry";
+	}
 }
 
 void UMModuleConfig::setStringParam(std::string& paramName, std::string& value)
@@ -90,7 +106,10 @@ void UMModuleConfig::setStringParam(std::string& paramName, std::string& value)
 	std::string local(value);
 	LSTATUS status = RegSetValueExA(this->configKey, paramName.c_str(), NULL, REG_SZ, (LPBYTE)local.c_str(), (DWORD)value.size() + 1);
 	if (status != ERROR_SUCCESS)
-		throw "Error reading dword from registry";
+	{
+		this->logger->log("UMModuleConfig::setStringParam. Error setting string in registry. " + paramName);
+		throw "Error setting string in registry";
+	}
 }
 
 void UMModuleConfig::setListParam(std::string& paramName, std::list<std::string>& value)

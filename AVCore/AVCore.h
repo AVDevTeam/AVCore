@@ -6,6 +6,7 @@
 #include "FileLogger.h"
 #include "PipeManager.h"
 #include "IPluginManagerImage.h"
+#include "UMEventsListener.h"
 #include <mutex>
 
 //#define TESTBUILD
@@ -22,10 +23,12 @@ public:
 		this->commandsManager = new CommandsManager(this);
 		this->settingsManager = new SettingsManager();
 		this->pipeManager = new PipeManager(this);
+		this->logger->log("AVCore. Created instance.");
 		this->portServer = new CommPortServer();
 		this->stopEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if (this->stopEvent == NULL)
 		{
+			this->logger->log("AVCore(). Error creating stop event");
 			throw "Error creating stop event";
 		}
 	}
@@ -61,4 +64,5 @@ private:
 
 	// Унаследовано через IPluginManagerImage
 	virtual PluginManager * getPluginManager() override;
+	UMEventsManager* umEventsManager;
 };

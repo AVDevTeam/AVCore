@@ -1,6 +1,25 @@
+/**
+\file
+\brief Implements notify routines callbacks.
+*/
+
 #include "AVEventsDriver.h"
 
-// TODO. IFDEF x86/x64 (-/-Ex2 support)
+/**
+\brief Implements process create/exit callbacks.
+
+Prepares AV_EVENT_PROCESS_CREATE and AV_EVENT_PROCESS_EXIT event buffers and
+passes them to the UM component.
+
+\param[in] Process Pointer to the KM structure for the new or exiting process.
+
+\param[in] ProcessId ID of the process that caused the event.
+
+\param[in] CreateInfo Pointer to the structure with information about new process
+(NULL for exiting process).
+
+\return None.
+*/
 void AVCreateProcessCallback(
 	PEPROCESS Process,
 	HANDLE ProcessId,
@@ -16,6 +35,7 @@ void AVCreateProcessCallback(
 
 	if (CreateInfo)
 	{ // Process create notification
+#ifdef PROCESS_CREATE_EVENTS
 		if (AVCommIsExcludedPID(CreateInfo->CreatingThreadId.UniqueProcess))
 		{
 			return;
@@ -76,9 +96,13 @@ void AVCreateProcessCallback(
 				CreateInfo->CreationStatus = STATUS_ACCESS_DENIED;
 			}
 		}
+#else
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 	}
 	else
 	{
+#ifdef PROCESS_EXIT_EVENTS
 		AV_EVENT_PROCESS_EXIT eventProcessExit = { 0 };
 		eventProcessExit.PID = (int)(__int64)ProcessId;
 
@@ -96,8 +120,25 @@ void AVCreateProcessCallback(
 			// TODO. Maybe some exlude list logic.
 		}
 	}
+#else
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 }
 
+/**
+\brief Thread create/exit callback.
+
+Prepares AV_EVENT_THREAD_CREATE, AV_EVENT_THREAD_EXIT event buffers and passes them
+to UM components.
+
+\param[in] ProcessId ID of the process that caused the event.
+
+\param[in] ThreadId ID of the new or exiting thread.
+
+\param[in] Create Indicates whether the thread starts or stops.
+
+\return None.
+*/
 void AVCreateThreadCallback(
 	HANDLE ProcessId,
 	HANDLE ThreadId,
@@ -111,6 +152,7 @@ void AVCreateThreadCallback(
 
 	if (Create)
 	{
+#ifdef THREAD_CREATE_EVENTS
 		AV_EVENT_THREAD_CREATE eventThreadCreate = { 0 };
 		eventThreadCreate.PID = (int)(__int64)ProcessId;
 		eventThreadCreate.TID = (int)(__int64)ThreadId;
@@ -126,11 +168,16 @@ void AVCreateThreadCallback(
 
 		if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
 		{
-			// TODO.Response processing login?
+			
 		}
+#else
+		UNREFERENCED_PARAMETER(ThreadId);
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 	}
 	else
 	{
+#ifdef THREAD_EXIT_EVENTS
 		AV_EVENT_THREAD_EXIT eventThreadExit = { 0 };
 		eventThreadExit.PID = (int)(__int64)ProcessId;
 		eventThreadExit.TID = (int)(__int64)ThreadId;
@@ -148,16 +195,35 @@ void AVCreateThreadCallback(
 		{
 			// TODO.Response processing login?
 		}
+#else
+		UNREFERENCED_PARAMETER(ThreadId);
+		UNREFERENCED_PARAMETER(ProcessId);
+#endif
 	}
+
 }
 
-// TODO. IFDEF x86/x64 (x64 support for x86 modules).
+/**
+\brief Image load notification callback.
+
+Prepares AV_EVENT_IMAGE_LOAD event buffer and passes it to the UM componetns.
+
+\param[in] FullImageName Path to the image.
+
+\param[in] ProcessId ID of the process that loads the image.
+
+\param[in] ImageInfo Pointer to the structure with additional information
+about the image.
+
+\return None.
+*/
 void AVLoadImageCallback(
 	PUNICODE_STRING FullImageName,
 	HANDLE ProcessId,
 	PIMAGE_INFO ImageInfo
 )
 {
+#ifdef IMAGE_EVENTS
 	if (!AVCommIsInitialized() || AVCommIsExcludedPID(ProcessId))
 	{
 		return;
@@ -201,4 +267,9 @@ void AVLoadImageCallback(
 	{
 		// TODO.Response processing login?
 	}
+#else
+	UNREFERENCED_PARAMETER(FullImageName);
+	UNREFERENCED_PARAMETER(ProcessId);
+	UNREFERENCED_PARAMETER(ImageInfo);
+#endif
 }
