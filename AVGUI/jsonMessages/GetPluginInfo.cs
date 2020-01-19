@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace AVGUI
 {
+    // Запрос на информацию по плагину
     class GetPluginInfoRequest
     {
         public int id = 0;
