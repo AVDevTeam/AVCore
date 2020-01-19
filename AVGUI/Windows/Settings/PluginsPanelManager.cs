@@ -18,11 +18,17 @@ namespace AVGUI.Windows.Settings
         StackPanel PluginsPanel;                // Панель с плагинам
         StackPanel PluginsParametersPanel;      // Панелья с параметрами плагинов
 
+        // Таблица формата {ИмяМодуля : {ИмяПараметра : {значение, ..., ...}, ... } 
+        Dictionary<string, Dictionary<string, List<string>>> changedParams;
+        string ChosenModuleName;
+
         public PluginsPanelManager(PipeClient _pipe, StackPanel _pluginPanel, StackPanel _pluginsParametersPanel)
         {
             Pipe = _pipe;
             PluginsPanel = _pluginPanel;
             PluginsParametersPanel = _pluginsParametersPanel;
+
+            changedParams = new Dictionary<string, Dictionary<string, List<string>>>();
         }
 
         // Создать кнопку очередного плагина
@@ -33,16 +39,20 @@ namespace AVGUI.Windows.Settings
             btn.Content = _plugin;
             btn.Margin = new Thickness(5, 2, 5, 2);
             btn.Click += Plugin_Clicked;
-            //btn.Background
             PluginsPanel.Children.Add(btn);
         }
 
-
+        // Возвращает новые параметры плагинов
+        public Dictionary<string, Dictionary<string, List<string>>> getNewSettings()
+        {
+            return changedParams;
+        }
 
         // Когда нажали на плагин
-        public void Plugin_Clicked(object sender, RoutedEventArgs e)
+        private void Plugin_Clicked(object sender, RoutedEventArgs e)
         {
             Button thisBtn = (Button)e.Source;
+            ChosenModuleName = thisBtn.Content.ToString();
 
             // Очистить панель
             CleanPluginsParametersPanel();
@@ -68,7 +78,6 @@ namespace AVGUI.Windows.Settings
                     foreach (string param in jValue)
                     {
                         value.Add(param);
-                        value.Add("test");
                     }
                 }
                 else
@@ -172,15 +181,17 @@ namespace AVGUI.Windows.Settings
 
             string groupboxName = btn.Name.Substring(0, btn.Name.IndexOf("_")) + "_groupbox";
 
-            Grid grid = null;
-            ListBox listBox = null;
-            TextBox textBox = null;
+            Grid grid           = null;
+            GroupBox groupBox   = null;
+            ListBox listBox     = null;
+            TextBox textBox     = null;
 
             // Нашли нужный параметр среди всех параметров в стакпанел
             foreach (GroupBox child in PluginsParametersPanel.Children)
             {
                 if (child.Name == groupboxName)
                 {
+                    groupBox = child;
                     grid = (Grid)child.Content;
                     break;
                 }
@@ -215,6 +226,31 @@ namespace AVGUI.Windows.Settings
             // Добавили в listBox новое значение
             listBox.Items.Add(textBox.Text);
             textBox.Text = "";
+
+            // Список новых значений измененого параметра плагина
+            List<string> value = new List<string>();
+            foreach (string item in listBox.Items)
+            {
+                value.Add(item);
+            }
+
+            // Добавили данную настройку в список на изменение
+            try
+            {
+                // Пытаемся добавить новую настройку
+                changedParams[ChosenModuleName].Add(groupBox.Header.ToString(), value);
+            }
+            // Если для данного модуля еще не было настроек, то заводим ключ с именем модуля
+            catch(KeyNotFoundException ex)
+            {
+                changedParams.Add(ChosenModuleName, null);
+                changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
+            }
+            // Если у данного модуля данная настройка уже изменялась, то нужно ее перетереть
+            catch(System.ArgumentException ex2)
+            {
+                changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
+            }
         }
 
         // Кликнули по кнопке Delete
@@ -225,6 +261,7 @@ namespace AVGUI.Windows.Settings
             string groupboxName = btn.Name.Substring(0, btn.Name.IndexOf("_")) + "_groupbox";
 
             Grid grid = null;
+            GroupBox groupBox = null;
             ListBox listBox = null;
 
             // Нашли нужный параметр среди всех параметров в стакпанел
@@ -232,6 +269,7 @@ namespace AVGUI.Windows.Settings
             {
                 if (child.Name == groupboxName)
                 {
+                    groupBox = child;
                     grid = (Grid)child.Content;
                     break;
                 }
@@ -251,6 +289,28 @@ namespace AVGUI.Windows.Settings
             if(listBox.SelectedIndex != -1)
             {
                 listBox.Items.RemoveAt(listBox.SelectedIndex);
+            }
+
+            // Измененный список значение
+            List<string> value = new List<string>();
+            foreach (string item in listBox.Items)
+            {
+                value.Add(item);
+            }
+
+            // Добавили данную настройку в список на изменение
+            try
+            {
+                changedParams[ChosenModuleName].Add(groupBox.Header.ToString(), value);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                changedParams.Add(ChosenModuleName, null);
+                changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
+            }
+            catch (System.ArgumentException ex2)
+            {
+                changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
             }
         }
     }

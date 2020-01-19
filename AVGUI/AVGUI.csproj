@@ -59,8 +59,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="jsonMessages\ChangePluginSettings.cs" />
     <Compile Include="jsonMessages\EntumeratePlugins.cs" />
-    <Compile Include="jsonMessages\Commands.cs" />
+    <Compile Include="jsonMessages\ScanCommand.cs" />
     <Compile Include="jsonMessages\GetPluginInfo.cs" />
     <Compile Include="Windows\Settings\PluginsPanelManager.cs" />
     <Compile Include="Windows\Settings\SettingsWindow.xaml.cs">

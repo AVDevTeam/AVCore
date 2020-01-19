@@ -15,17 +15,18 @@ void PipeManager::listen()
 		{
 			if (message != "")
 			{
-				// Если запрос на выполнение команды 
+				std::cout << message << std::endl;
+				// Если запросу требуется ответ
 				if (message.substr(1, 6) == R"("id":0)")
 				{
 					// Обработать команду и вернуть ответ
 					std::string ans = commandsManager->manage(message.substr(0, message.size() - 2));
 					pipe->sendMessage(ans);
 				}
-				// Если запрос на изменение настроек
+				// Иначе просто обработать команду
 				else if (message.substr(1, 6) == R"("id":1)")
 				{
-					settingsManager->manage(message.substr(0, message.size() - 2));
+					std::string ans = commandsManager->manage(message.substr(0, message.size() - 2));
 				}
 			}
 			Sleep(500);

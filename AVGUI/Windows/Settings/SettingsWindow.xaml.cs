@@ -16,6 +16,7 @@ namespace AVGUI
     public partial class SettingsWindow : Window
     {
         PipeClient Pipe;
+        PluginsPanelManager PPManager;          // Менеджер панели плагинов
 
         public SettingsWindow(PipeClient _pipe)
         {
@@ -29,7 +30,7 @@ namespace AVGUI
             ContentRendered -= Main;
 
             // Создаем менеджера панели плагинов
-            PluginsPanelManager PPManager = new PluginsPanelManager(Pipe, PluginsPanel, PluginsParametersPanel);
+            PPManager = new PluginsPanelManager(Pipe, PluginsPanel, PluginsParametersPanel);
 
             string jPluginsList = GetModulesList();
 
@@ -42,9 +43,7 @@ namespace AVGUI
                 {
                     PPManager.AddToPluginsPanel(plugin);
                 }
-                   
             }
-
         }
 
         // Отправить запрос на список модулей
@@ -84,13 +83,26 @@ namespace AVGUI
         // Настройки решили отменить
         private void cancelBtn_Clicked(object sender, RoutedEventArgs e)
         {
+
+            this.Close();
             // TO DO отмена настроек
         }
 
         // Настройки решили применить
         private void acceptBtn_Clicked(object sender, RoutedEventArgs e)
         {
-            // TO DO принятие настроек
+           // Dictionary<string, Dictionary<string, List<string>>> changedParams = new Dictionary<string, Dictionary<string, List<string>>>();
+           // changedParams = PPManager.getNewSettings();
+
+            // Отправили сообщение об изменении параметров для каждого модуля
+            foreach(var item in PPManager.getNewSettings())
+            {
+                string request = JsonConvert.SerializeObject(new ChangePluginSettingsRequest(item.Key, item.Value));
+                Pipe.SendMessage(request);
+            }
+
+
+           
         }
     }
 }
