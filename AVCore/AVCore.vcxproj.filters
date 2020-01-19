@@ -75,6 +75,9 @@
     <ClCompile Include="CommandsManager.cpp">
       <Filter>Managers</Filter>
     </ClCompile>
+    <ClCompile Include="UMEventsListener.cpp">
+      <Filter>AVCore</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PipeServer.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="IPluginManagerImage.h">
       <Filter>AVCore\Images</Filter>
+    </ClInclude>
+    <ClInclude Include="UMEventsListener.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
