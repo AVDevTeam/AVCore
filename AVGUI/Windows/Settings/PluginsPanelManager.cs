@@ -68,7 +68,6 @@ namespace AVGUI.Windows.Settings
                     foreach (string param in jValue)
                     {
                         value.Add(param);
-                        value.Add("test");
                     }
                 }
                 else

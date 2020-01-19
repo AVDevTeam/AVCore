@@ -15,6 +15,7 @@ void PipeManager::listen()
 		{
 			if (message != "")
 			{
+				std::cout << "message: " << message << std::endl;
 				// Если запрос на выполнение команды 
 				if (message.substr(1, 6) == R"("id":0)")
 				{
