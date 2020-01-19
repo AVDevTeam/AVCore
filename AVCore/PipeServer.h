@@ -15,6 +15,14 @@ public:
 	PipeServer(const std::string &_pipeName);
 	~PipeServer();
 
+	ULONG getClientPID()
+	{
+		ULONG PID = 0;
+		if (GetNamedPipeClientProcessId(this->hPipe, &PID))
+			return PID;
+		throw "GetNamedPipeClientProcessId error";
+	}
+
 public:
 	int createNamedPipe();
 	int waitForClient(int &_stopSignal);

@@ -237,8 +237,9 @@
       <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib" mkdir "$(SolutionDir)lib"
-copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(TargetName).lib"</Command>
+      <Command>if not exist "$(SolutionDir)lib\$(Platform)" mkdir "$(SolutionDir)lib\$(Platform)"
+
+copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(Platform)\$(TargetName).lib"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -258,8 +259,9 @@ copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib"
       <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib" mkdir "$(SolutionDir)lib"
-copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(TargetName).lib"</Command>
+      <Command>if not exist "$(SolutionDir)lib\$(Platform)" mkdir "$(SolutionDir)lib\$(Platform)"
+
+copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(Platform)\$(TargetName).lib"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -279,8 +281,9 @@ copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib"
       <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib" mkdir "$(SolutionDir)lib"
-copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(TargetName).lib"</Command>
+      <Command>if not exist "$(SolutionDir)lib\$(Platform)" mkdir "$(SolutionDir)lib\$(Platform)"
+
+copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(Platform)\$(TargetName).lib"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -300,8 +303,9 @@ copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib"
       <AdditionalDependencies>FltMgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib" mkdir "$(SolutionDir)lib"
-copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(TargetName).lib"</Command>
+      <Command>if not exist "$(SolutionDir)lib\$(Platform)" mkdir "$(SolutionDir)lib\$(Platform)"
+
+copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib" "$(SolutionDir)lib\$(Platform)\$(TargetName).lib"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Target Name="Custom Build Target 0" BeforeTargets="BeforeClCompile">

@@ -7,7 +7,7 @@ typedef IPlugin* (* GetPlugin)();
 PluginManager::PluginManager(ILogger* logger)
 {
 	this->logger = logger;
-	this->pluginManagerConfig = new UMModuleConfig();
+	this->pluginManagerConfig = new UMModuleConfig(logger);
 	this->pluginManagerConfig->init("PluginManager");
 	paramMap* params = new paramMap();
 	params->insert(paramPair("Plugins", ListParam));
@@ -56,9 +56,11 @@ IPlugin* PluginManager::loadPlugin(std::string path)
 	// retreive IPlugin interface from the entry point.
 	IPlugin * plugin = getPlugin();
 	// Create config store for the plugin.
-	UMModuleConfig* configManager = new UMModuleConfig();
+	UMModuleConfig* configManager = new UMModuleConfig(this->logger);
+	this->logger->log("PluginManager. Initializing plugin " + plugin->getName());
 	configManager->init("Plugins\\" + plugin->getName());
 	plugin->init(this, pluginModule, configManager);
+	this->logger->log("PluginManager. Plugin was initialized.");
 	this->loadedPlugins.insert(std::pair<std::string, IPlugin*>(plugin->getName(), plugin));
 	// leaving critical section
 	this->eventProcessingMutex.unlock();
@@ -135,8 +137,9 @@ Arguments:
 Return value:
 	event processing status that will be sent to interceptor module (KM, UM).
 */
-AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event)
+AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event, void** umMessage)
 {
+#ifdef _DEBUG 
 	switch (eventType)
 	{
 	case AvFileCreate:
@@ -175,36 +178,40 @@ AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void
 	case AvRegOpenKey:
 		this->logger->log("Got AvRegOpenKey event.");
 		break;
+	case AvApcProcessInject:
+		this->logger->log("Got AvApcProcessInject event.");
+		break;
 	}
+#endif
 	try
 	{
 		// enter event processing section
 		this->eventProcessingMutex.lock_shared();
 
-		EventParser* eventParser = this->parsersMap[eventType];
-		AvEvent* parsedEvent = eventParser->parse(event);
 		priorityMap* eventPriorityMap = this->callbacksMap[eventType];
 		AV_EVENT_RETURN_STATUS status = AvEventStatusAllow;
 		for (priorityMap::iterator it = eventPriorityMap->begin(); it != eventPriorityMap->end(); it++)
 		{
 			int priority = (*it).first;
 			callback curCallback = (*it).second;
+#ifdef _DEBUG
 			this->logger->log("Processing callback with priority " + std::to_string(priority) + " in plugin " + curCallback.second->getName());
-			status = curCallback.second->callback(curCallback.first, parsedEvent);
+#endif
+			status = curCallback.second->callback(curCallback.first, event, umMessage);
 			if (status == AvEventStatusBlock)
 			{
 				break;
 			}
 		}
-		delete parsedEvent;
+		delete event;
 
 		// leave event processing section
 		this->eventProcessingMutex.unlock_shared();
 		return status;
 	}
-	catch (const std::string& ex)
+	catch (...)
 	{
-		this->logger->log("Exception: " + ex);
+		this->logger->log("Exception hapend during event processing.");
 		return AvEventStatusAllow;
 	}
 	
@@ -244,4 +251,11 @@ void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)
 {
 	this->parsersMap.insert(std::pair<int, EventParser*>(eventType, parser));
 	this->callbacksMap.insert(std::pair<AV_EVENT_TYPE, priorityMap*>(eventType, new priorityMap()));
+}
+
+void* PluginManager::parseKMEvent(AV_EVENT_TYPE eventType, void* event)
+{
+	EventParser* eventParser = this->parsersMap[eventType];
+	AvEvent* parsedEvent = eventParser->parse(event);
+	return reinterpret_cast<void*>(parsedEvent);
 }

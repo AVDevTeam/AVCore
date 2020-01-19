@@ -1,4 +1,5 @@
 #include "AVCore.h"
+#include "UMEventsListener.h"
 
 void testEventsParsers(PluginManager* manager)
 {
@@ -54,21 +55,32 @@ void testEventsParsers(PluginManager* manager)
 	testImageLoad.systemModeImage = 0;
 	testImageLoad.imageName = (wchar_t*)L"TEST_IMGAE_NAME";
 	testImageLoad.imageNameSize = sizeof(L"TEST_IMGAE_NAME");
+	AV_EVENT_REG_OPEN_KEY testOpenKey = { 0 };
+	testOpenKey.keyPath = (wchar_t*)L"TEST_KEY_PATH";
+	testOpenKey.keyPathSize = sizeof(L"TEST_KEY_PATH");
+	testOpenKey.requestorPID = 111;
 
-	manager->processEvent(AvFileCreate, &testFileCreate);
-	manager->processEvent(AvProcessHandleCreate, &testProcessHandleCreate);
-	manager->processEvent(AvProcessHandleDublicate, &testProcessHandleDublicate);
-	manager->processEvent(AvThreadHandleCreate, &testThreadHandleCreate);
-	manager->processEvent(AvThreadHandleDublicate, &testThreadHandleDublicate);
-	manager->processEvent(AvProcessCreate, &testProcessCreate);
-	manager->processEvent(AvProcessExit, &testProcessExit);
-	manager->processEvent(AvThreadCreate, &testThreadCreateExit);
-	manager->processEvent(AvThreadExit, &testThreadCreateExit);
-	manager->processEvent(AvImageLoad, &testImageLoad);
+
+	PVOID umMessage;
+
+
+	manager->processEvent(AvFileCreate, manager->parseKMEvent(AvFileCreate, &testFileCreate), &umMessage);
+	manager->processEvent(AvProcessHandleCreate, manager->parseKMEvent(AvProcessHandleCreate, &testProcessHandleCreate), &umMessage);
+	manager->processEvent(AvProcessHandleDublicate, manager->parseKMEvent(AvProcessHandleDublicate, &testProcessHandleDublicate), &umMessage);
+	manager->processEvent(AvThreadHandleCreate, manager->parseKMEvent(AvThreadHandleCreate, &testThreadHandleCreate), &umMessage);
+	manager->processEvent(AvThreadHandleDublicate, manager->parseKMEvent(AvThreadHandleDublicate, &testThreadHandleDublicate), &umMessage);
+	manager->processEvent(AvProcessCreate, manager->parseKMEvent(AvProcessCreate, &testProcessCreate), &umMessage);
+	manager->processEvent(AvProcessExit, manager->parseKMEvent(AvProcessExit, &testProcessExit), &umMessage);
+	manager->processEvent(AvThreadCreate, manager->parseKMEvent(AvThreadCreate, &testThreadCreateExit), &umMessage);
+	manager->processEvent(AvThreadExit, manager->parseKMEvent(AvThreadExit, &testThreadCreateExit), &umMessage);
+	manager->processEvent(AvImageLoad, manager->parseKMEvent(AvImageLoad, &testImageLoad), &umMessage);
+	manager->processEvent(AvRegCreateKey, manager->parseKMEvent(AvRegCreateKey, &testOpenKey), &umMessage);
+	manager->processEvent(AvRegOpenKey, manager->parseKMEvent(AvRegOpenKey, &testOpenKey), &umMessage);
 }
 
 void AVCore::start(void)
 {
+	this->logger->log("AVCore. Starting.");
 	manager->addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
 	manager->addEventParser(AvProcessHandleCreate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleCreateParser()));
 	manager->addEventParser(AvProcessHandleDublicate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleDublicateParser()));
@@ -81,23 +93,36 @@ void AVCore::start(void)
 	manager->addEventParser(AvImageLoad, reinterpret_cast<EventParser*>(new AvEventImageLoadParser()));
 	manager->addEventParser(AvRegCreateKey, reinterpret_cast<EventParser*>(new AvEventRegCreateKeyParser()));
 	manager->addEventParser(AvRegOpenKey, reinterpret_cast<EventParser*>(new AvEventRegOpenKeyParser()));
+	manager->addEventParser(AvApcProcessInject, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
+	manager->addEventParser(AvWinApiCall, nullptr);
+	this->logger->log("AVCore. Populated parsers map.");
 
 	std::list<std::string>* plugins = manager->getConfig()->getListParam("Plugins");
+	this->logger->log("AVCore. Got plugin list.");
 	std::string pluginsFolder = manager->getConfig()->getStringParam("PluginsPath");
+	this->logger->log("AVCore. Got plugin path: " + pluginsFolder);
+
 	for (std::list<std::string>::iterator it = plugins->begin(); it != plugins->end(); it++)
+	{
+		this->logger->log("AVCore. Loading plugin from: " + pluginsFolder + (*it));
 		manager->loadPlugin(pluginsFolder + (*it));
+	}
+	this->logger->log("AVCore. Loaded all plugins.");
 
 #ifdef TESTBUILD
 	testEventsParsers(this->manager);
 #else
+
 	//portServer->start(manager);
 	pipeManager->join();
 
-
-
-
-
-
+	this->logger->log("AVCore. Starting UM events listener.");
+	this->umEventsManager = new UMEventsManager(this->manager);
+	this->logger->log("AVCore. UM events listener started.");
+	this->logger->log("AVCore. Starting KM events listener.");
+	this->portServer->start(manager);
+	this->logger->log("AVCore. KM events listener started.");
+	this->logger->log("AVCore. Startup finished.");
 #endif
 }
 

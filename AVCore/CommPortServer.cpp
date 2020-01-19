@@ -27,7 +27,7 @@ void CommPortServer::start(IManager* manager)
 	}
 
 	//  Prepare the scan communication port.
-	connectionCtx.Type = AvConnectForScan;
+	connectionCtx.Type = AvConnectForEvents;
 	connectionCtx.ProcessID = (HANDLE)GetCurrentProcessId();
 	hr = FilterConnectCommunicationPort(AV_SCAN_PORT_NAME,
 		0,
@@ -38,6 +38,7 @@ void CommPortServer::start(IManager* manager)
 	if (FAILED(hr))
 	{
 		eventsPort = NULL;
+		this->pluginManager->getLogger()->log("CommPortServer::start. Failed connecting to comm port.");
 		throw "FAILED";
 	}
 
@@ -50,6 +51,7 @@ void CommPortServer::start(IManager* manager)
 
 	if (NULL == this->completionPort)
 	{
+		this->pluginManager->getLogger()->log("CommPortServer::start. Failed creating complition port.");
 		throw "FAILED";
 	}
 
@@ -71,6 +73,7 @@ void CommPortServer::start(IManager* manager)
 		if (NULL == msg)
 		{
 			hr = MAKE_HRESULT(SEVERITY_ERROR, 0, E_OUTOFMEMORY);
+			this->pluginManager->getLogger()->log("CommPortServer::start. Failed pumping msg to completion port.");
 			throw "FAILED";
 		}
 
@@ -215,19 +218,15 @@ void CommPortListener::listen()
 			ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 			replyMsg.ReplyHeader.MessageId = message->MessageHeader.MessageId;
 			replyMsg.EventResponse.Status = AvEventStatusAllow;
+			
+			void* UMMessage = NULL;
 
 			// Process event using pluginManager.
-			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
-			switch (replyMsg.EventResponse.Status)
-			{
-			case AvEventStatusAllow:
-				this->pluginManager->getLogger()->log("Listener got status allow");
-				break;
-			case AvEventStatusBlock:
-				this->pluginManager->getLogger()->log("Listener got status block");
-				break;
-			}
-
+			replyMsg.EventResponse.Status = this->pluginManager->processEvent(
+				message->Event.EventType, 
+				this->pluginManager->parseKMEvent(message->Event.EventType, message->Event.EventBuffer),
+				&UMMessage);
+			replyMsg.EventResponse.UMMessage = UMMessage;
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,
@@ -241,6 +240,7 @@ void CommPortListener::listen()
 		}
 		else
 		{
+			this->pluginManager->getLogger()->log("CommPortListener::listen(). INVALID MESSAGE");
 			throw "INVALID MESSAGE"; // This thread should not receive other kinds of message.
 		}
 

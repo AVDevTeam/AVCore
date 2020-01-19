@@ -1,6 +1,9 @@
 #pragma once
 #include "PluginInterface.h"
 #include "EventsParser.h"
+#include "CommPortServer.h"
+#include "UMEventsListener.h"
+
 #include <string>
 #include <list>
 #include <map>
@@ -33,9 +36,11 @@ public:
 	// this function is used on PluginManager initialization in order
 	// to register parsers for implemented events.
 	void addEventParser(AV_EVENT_TYPE, EventParser*);
+
+	void* parseKMEvent(AV_EVENT_TYPE, void*);
 	// this function is called from event listeners in order to
 	// process an event by iterating through registered callbacks.
-	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
+	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*, void**);
 
 	// Syncronization methods (use shared_mutex)
 	virtual void enterCriticalEventProcessingSection() override;
@@ -77,5 +82,4 @@ private:
 
 	// logger
 	ILogger* logger;
-
 };
