@@ -8,8 +8,8 @@ class CommandsManager
 {
 
 private:
-	PluginManager * pluginManager;
-
+	PluginManager *  pluginManager;
+	MessageManager * messageManager;
 public:
 
 

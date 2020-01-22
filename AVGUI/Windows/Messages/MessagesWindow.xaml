@@ -1,0 +1,75 @@
+﻿<Window x:Class="AVGUI.Windows.Messages.MessagesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AVGUI.Windows.Messages"
+        mc:Ignorable="d"
+        Title="MessagesWindow" Height="450" Width="800">
+    <Grid>
+        
+        
+        <TabControl>
+            <TabItem Name="TabItem1">
+                <TabItem.Header>
+                    <TextBlock Name="OutputHeader" Margin="3">Output</TextBlock>
+                </TabItem.Header>
+                <TabItem.Content>
+                    <RichTextBox Name="RichTextBox1">
+                        <RichTextBox.Resources>
+                            <Style TargetType="{x:Type Paragraph}">
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </RichTextBox.Resources>
+                    </RichTextBox>
+                </TabItem.Content>
+            </TabItem>
+
+            <TabItem Name="TabItem2">
+                <TabItem.Header>
+                    <TextBlock Name="AlertsHeader" Margin="3">Alerts</TextBlock>
+                </TabItem.Header>
+                <TabItem.Content>
+                    <RichTextBox Name="RichTextBox2">
+                        <RichTextBox.Resources>
+                            <Style TargetType="{x:Type Paragraph}">
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </RichTextBox.Resources>
+                    </RichTextBox>
+                </TabItem.Content>
+            </TabItem>
+
+            <TabItem Name="TabItem3">
+                <TabItem.Header>
+                    <TextBlock Name="WarningsHeader" Margin="3">Warnings</TextBlock>
+                </TabItem.Header>
+                <TabItem.Content>
+                    <RichTextBox Name="RichTextBox3">
+                        <RichTextBox.Resources>
+                            <Style TargetType="{x:Type Paragraph}">
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </RichTextBox.Resources>
+                    </RichTextBox>
+                </TabItem.Content>
+            </TabItem>
+
+            <TabItem Name="TabItem4">
+                <TabItem.Header>
+                    <TextBlock Name="DebugHeader" Margin="3">Debug</TextBlock>
+                </TabItem.Header>
+                <TabItem.Content>
+                    <RichTextBox Name="RichTextBox4">
+                        <RichTextBox.Resources>
+                            <Style TargetType="{x:Type Paragraph}">
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </RichTextBox.Resources>
+                    </RichTextBox>
+                </TabItem.Content>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>

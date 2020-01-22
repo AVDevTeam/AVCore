@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>AVGUI</RootNamespace>
     <AssemblyName>AVGUI</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WarningLevel>4</WarningLevel>
@@ -63,6 +63,10 @@
     <Compile Include="jsonMessages\EntumeratePlugins.cs" />
     <Compile Include="jsonMessages\ScanCommand.cs" />
     <Compile Include="jsonMessages\GetPluginInfo.cs" />
+    <Compile Include="Windows\Messages\LogManager.cs" />
+    <Compile Include="Windows\Messages\MessagesWindow.xaml.cs">
+      <DependentUpon>MessagesWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Windows\Settings\PluginsPanelManager.cs" />
     <Compile Include="Windows\Settings\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -79,6 +83,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Windows\Messages\MessagesWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Windows\Settings\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

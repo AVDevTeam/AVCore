@@ -51,3 +51,205 @@ AVCore. Loading plugin from: C:\Users\kubri\source\repos\AVCore\build\x64\Releas
 PluginManager. Initializing plugin InjectPlugin
 PluginManager. Plugin was initialized.
 AVCore. Loading plugin from: C:\Users\kubri\source\repos\AVCore\build\x64\Release\Plugins\TestPlugin.dll
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.
+AVCore. Created instance.
+AVCore. Starting.
+AVCore. Populated parsers map.
+AVCore. Got plugin list.
+AVCore. Got plugin path: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\
+AVCore. Loading plugin from: C:\Users\Rustam\source\repos\AVCore\build\x64\Debug\Plugins\TestPlugin.dll
+PluginManager. Initializing plugin TestPlugin
+PluginManager. Plugin was initialized.
+AVCore. Loaded all plugins.

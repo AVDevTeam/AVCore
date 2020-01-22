@@ -2,6 +2,7 @@
 #include "CommPortServer.h"
 //#include "PluginManager.h"
 #include "EventsParser.h"
+#include "MessageManager.h"
 #include "ConfigManager.h"
 #include "FileLogger.h"
 #include "PipeManager.h"
@@ -16,10 +17,13 @@
 class AVCore : public ICoreImage, public IPluginManagerImage
 {
 public:
+	MessageManager * messageManager;
+
 	AVCore(ILogger* logger) 
 	{ 
 		this->manager = new PluginManager(logger);
 		this->logger = logger;
+		this->messageManager = new MessageManager();
 		this->commandsManager = new CommandsManager(this);
 		this->settingsManager = new SettingsManager();
 		this->pipeManager = new PipeManager(this);
@@ -64,5 +68,6 @@ private:
 
 	// Унаследовано через IPluginManagerImage
 	virtual PluginManager * getPluginManager() override;
+	virtual MessageManager * getMessageManager() override;
 	UMEventsManager* umEventsManager;
 };

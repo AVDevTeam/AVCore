@@ -39,6 +39,8 @@ int main(int argc, char* argv[])
 	avCore = new AVCore(logger);
 	avCore->start();
 
+	
+
 	printf("Enter any key to exit\n");
 	getchar();
 	getchar();

@@ -25,7 +25,7 @@ namespace AVGUI
             {
                 Pipe.Connect(_time);
             }
-            catch (TimeoutException e)
+            catch (Exception e)
             {
                 return false;
             }
@@ -49,9 +49,11 @@ namespace AVGUI
         // Принять сообщения (отдельный поток)
         public void ListenMessage()
         {
-            messageListener = new Thread(() => { message = reader.ReadLine(); });   // Поток читает сообщение и кладет его в message
-
-            messageListener.Start();
+            if(Pipe.IsConnected)
+            {
+                messageListener = new Thread(() => { message = reader.ReadLine(); });   // Поток читает сообщение и кладет его в message
+                messageListener.Start();
+            }
         }
 
         // Принять сообщения (отдельный поток)

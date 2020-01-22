@@ -80,6 +80,11 @@ void testEventsParsers(PluginManager* manager)
 
 void AVCore::start(void)
 {
+	messageManager->outAlert("test alert");
+	messageManager->outLog("test log");
+	messageManager->outDebug("test debug");
+	messageManager->outWarning("test1 warning");
+
 	this->logger->log("AVCore. Starting.");
 	manager->addEventParser(AvFileCreate, reinterpret_cast<EventParser*>(new AvFSEventCreateParser()));
 	manager->addEventParser(AvProcessHandleCreate, reinterpret_cast<EventParser*>(new AvObEventProcessHandleCreateParser()));
@@ -148,4 +153,9 @@ CommandsManager * AVCore::getCommandsManager()
 PluginManager * AVCore::getPluginManager()
 {
 	return manager;
+}
+
+MessageManager * AVCore::getMessageManager()
+{
+	return messageManager;
 }

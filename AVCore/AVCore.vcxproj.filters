@@ -78,6 +78,9 @@
     <ClCompile Include="UMEventsListener.cpp">
       <Filter>AVCore</Filter>
     </ClCompile>
+    <ClCompile Include="MessageManager.cpp">
+      <Filter>Managers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PipeServer.h">
@@ -118,6 +121,9 @@
     </ClInclude>
     <ClInclude Include="UMEventsListener.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MessageManager.h">
+      <Filter>Managers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

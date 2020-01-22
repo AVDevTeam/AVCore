@@ -8,7 +8,7 @@
         Title="MainWindow" Height="450" Width="600" ResizeMode="NoResize">
     <Grid>
         
-        
+        <!-- Кнопка настроек -->
         <Button Width="Auto" Height="Auto" Name="SettingsButton" Margin="45,25,449,296" Click="SettingsButton_Click" >
             <TextBlock Name="SettingsButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">SETTINGS</TextBlock>
 
@@ -22,6 +22,19 @@
             </Button.Template>
         </Button>
 
+        <!-- Кнопка логов и алертов -->
+        <Button Width="Auto" Height="Auto" Name="MessagesButton" Margin="45,150,449,171" Click="MessagesButton_Click" >
+            <TextBlock Name="MessagesButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">MESSAGES</TextBlock>
+
+            <Button.Template>
+                <ControlTemplate  TargetType="Button">
+                    <Grid>
+                        <Ellipse Stroke="Black" StrokeThickness="3" Fill="White" />
+                        <Label Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
 
         <!-- Кнопка сканирования -->
         <Button Width="150" Height="150" Name="ScanButton" Click="ScanButton_Click">

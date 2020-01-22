@@ -1,22 +1,15 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using AVGUI.Windows.Settings;
 
 namespace AVGUI
 {
-    /// <summary>
-    /// Логика взаимодействия для SettingsWindow.xaml
-    /// </summary>
     public partial class SettingsWindow : Window
     {
         PipeClient Pipe;
         PluginsPanelManager PPManager;          // Менеджер панели плагинов
+
 
         public SettingsWindow(PipeClient _pipe)
         {

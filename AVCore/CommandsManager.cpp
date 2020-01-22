@@ -81,4 +81,5 @@ std::string CommandsManager::manage(std::string _command)
 CommandsManager::CommandsManager(IPluginManagerImage * _core)
 {
 	pluginManager = _core->getPluginManager();
+	messageManager = _core->getMessageManager();
 }

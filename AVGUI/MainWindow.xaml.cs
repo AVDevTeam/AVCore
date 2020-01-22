@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using Newtonsoft.Json;
+using AVGUI.Windows.Messages;
 
 namespace AVGUI
 {
@@ -10,7 +11,9 @@ namespace AVGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        PipeClient Pipe;
+        PipeClient Pipe;        // Pipe для отправки 
+        PipeClient recvPipe;     // Pipe для приема сообщений
+
         int ScanMode = 1;
 
         public MainWindow()
@@ -25,9 +28,10 @@ namespace AVGUI
 
             // Подключить к сервису
             Pipe = new PipeClient("AVCoreConnection");
+            recvPipe = new PipeClient("AVCoreConnection2");
 
-            // Пока пользователь не нажем "нет" попытки подключиться будут потовряться 
-            while (!Pipe.Connect(1000))
+            // Пока пользователь не нажем "нет" попытки подключиться будут повторяться 
+            while (!Pipe.Connect(500))
             {
                 if (MessageBox.Show("Connetion to AVCover failed. Tra again?", "Connetion to AVCover failed",
                     MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
@@ -59,11 +63,18 @@ namespace AVGUI
             }
         }
 
+        // Кликнули по кнопке настроек
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             SettingsWindow settingsWindow = new SettingsWindow(Pipe);
             settingsWindow.ShowDialog();
+        }
 
+        // Кликнули по кнопке сообщений
+        private void MessagesButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessagesWindow messagesWindow = new MessagesWindow(recvPipe);
+            messagesWindow.Show();
         }
 
         // Кликнули по кнопке скана
