@@ -19,11 +19,7 @@ namespace AVGUI
         {
             Loaded -= Main;
 
-            PipeClient pipe = new PipeClient("AVCorePipe");
-            pipe.Connect();
-            pipe.SendMessage("EnumeratePlugins");
-            string message = pipe.ReciveMessage();
-            MessageBox.Show(message);
+
         }
 
         // Слайдер для изменения режима сканирования

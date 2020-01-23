@@ -1,13 +1,10 @@
-/*++
-Module Name:
-    AVComm.h
-Abstract:
-    Private header file for classpnp.sys modules.  This contains private
-    structure and function declarations as well as constant values which do
-    not need to be exported.
-Environment:
-    kernel mode only
---*/
+/**
+\file
+
+Private header file for classpnp.sys modules.  This contains private
+structure and function declarations as well as constant values which do
+not need to be exported.
+*/
 
 #include <fltKernel.h>
 
@@ -38,7 +35,5 @@ DriverEntry(
 	IN PDRIVER_OBJECT DriverObject,
 	IN PUNICODE_STRING RegistryPath
 );
-
-
 
 #pragma endregion Prototypes

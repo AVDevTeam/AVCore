@@ -1,6 +1,9 @@
 #pragma once
 #include "PluginInterface.h"
 #include "EventsParser.h"
+#include "CommPortServer.h"
+#include "UMEventsListener.h"
+
 #include <string>
 #include <list>
 #include <map>
@@ -17,23 +20,40 @@ typedef std::map <AV_EVENT_TYPE, priorityMap*> eventsMap;
 class PluginManager : public IManager
 {
 public:
+	PluginManager(ILogger* logger);
+	virtual ~PluginManager() override;
 
 	IPlugin * loadPlugin(std::string path);
 	void unloadPlugin(std::string name);
 
 	// returns IPlugin from loadedPlugins map.
 	IPlugin* getPluginByName(std::string name);
+	// returns list of pugins' IDs (names)
+	std::list<std::string>* getPluginsNames();
 	// this function is used from plugins (in IPlugin init())
 	// to register events callbacks.
 	int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority);
 	// this function is used on PluginManager initialization in order
 	// to register parsers for implemented events.
 	void addEventParser(AV_EVENT_TYPE, EventParser*);
+
+	void* parseKMEvent(AV_EVENT_TYPE, void*);
 	// this function is called from event listeners in order to
 	// process an event by iterating through registered callbacks.
-	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*);
+	AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE eventType, void*, void**);
+
+	// Syncronization methods (use shared_mutex)
+	virtual void enterCriticalEventProcessingSection() override;
+	virtual void leaveCriticalEventProcessingSection() override;
+	virtual void lockEventsProcessing() override;
+	virtual void unlockEventsProcessing() override;
+
+	virtual ILogger* getLogger() override;
+	virtual IConfig* getConfig() override;
 
 private:
+	IConfig* pluginManagerConfig;
+
 	/*
 	Callbacks map (two levels):
 	{
@@ -59,4 +79,7 @@ private:
 	// cruatial structures processed in event listeners
 	// (it is used to pause all event listening threads).
 	std::shared_mutex eventProcessingMutex;
+
+	// logger
+	ILogger* logger;
 };

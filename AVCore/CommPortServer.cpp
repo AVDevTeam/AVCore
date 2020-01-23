@@ -7,16 +7,27 @@ Method description:
 	Creates IO completion port.
 	Creates listeners and pumps initial events to completion port.
 */
-void CommPortServer::start(IManager* pluginManager)
+void CommPortServer::start(IManager* manager)
 {
+	this->pluginManager = manager;
 	HRESULT hr = S_OK;
 	this->eventsPort = NULL;
 	this->completionPort = NULL;
 	AV_CONNECTION_CONTEXT connectionCtx;
-	this->pluginManager = pluginManager;
+
+	this->pluginManager->lockEventsProcessing();
+
+	// Start listeners.
+	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
+	{
+		CommPortListener* listener = new CommPortListener(this->pluginManager);
+		std::thread* thread = new std::thread(&CommPortListener::listen, listener);
+		listener->thread = thread;
+		this->listeners.push_back(listener);
+	}
 
 	//  Prepare the scan communication port.
-	connectionCtx.Type = AvConnectForScan;
+	connectionCtx.Type = AvConnectForEvents;
 	connectionCtx.ProcessID = (HANDLE)GetCurrentProcessId();
 	hr = FilterConnectCommunicationPort(AV_SCAN_PORT_NAME,
 		0,
@@ -27,6 +38,7 @@ void CommPortServer::start(IManager* pluginManager)
 	if (FAILED(hr))
 	{
 		eventsPort = NULL;
+		this->pluginManager->getLogger()->log("CommPortServer::start. Failed connecting to comm port.");
 		throw "FAILED";
 	}
 
@@ -35,20 +47,23 @@ void CommPortServer::start(IManager* pluginManager)
 		NULL,
 		0,
 		KM_EVENTS_LISTENER_THREAD_COUNT);
+	this->pluginManager->getLogger()->log("Created completion port.");
 
 	if (NULL == this->completionPort)
 	{
+		this->pluginManager->getLogger()->log("CommPortServer::start. Failed creating complition port.");
 		throw "FAILED";
 	}
 
-	// Start listeners.
-	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
+	for (std::list<CommPortListener*>::iterator it = this->listeners.begin(); it != this->listeners.end(); it++)
 	{
-		CommPortListener * listener = new CommPortListener(this->pluginManager);
-		std::thread * thread = new std::thread(&CommPortListener::listen, listener, eventsPort, completionPort);
-		listener->thread = thread;
-		this->listeners.push_back(listener);
+		(*it)->setEventsPort(this->eventsPort);
+		(*it)->setCompletionPort(this->completionPort);
 	}
+
+	// comm port and IO completion port were set up
+	// we can resume listeners' threads.
+	this->pluginManager->unlockEventsProcessing();
 
 	//  Pump messages into queue of completion port.
 	for (int i = 0; i < KM_EVENTS_LISTENER_THREAD_COUNT; ++i)
@@ -58,6 +73,7 @@ void CommPortServer::start(IManager* pluginManager)
 		if (NULL == msg)
 		{
 			hr = MAKE_HRESULT(SEVERITY_ERROR, 0, E_OUTOFMEMORY);
+			this->pluginManager->getLogger()->log("CommPortServer::start. Failed pumping msg to completion port.");
 			throw "FAILED";
 		}
 
@@ -73,7 +89,7 @@ void CommPortServer::start(IManager* pluginManager)
 		}
 		else
 		{
-			fprintf(stderr, "[UserScanInit]: FilterGetMessage failed.\n");
+			this->pluginManager->getLogger()->log("[UserScanInit]: FilterGetMessage failed. Error: " + std::to_string(hr));
 			HeapFree(GetProcessHeap(), 0, msg);
 			throw "FAILED";
 		}
@@ -90,8 +106,6 @@ void CommPortServer::stop()
 {
 	this->signalCancel();
 	CancelIoEx(completionPort, NULL);
-	for (std::list<CommPortListener*>::iterator it = this->listeners.begin(); it != this->listeners.end(); ++it)
-		(*it)->signalStop();
 
 	for (std::list<CommPortListener*>::iterator it = this->listeners.begin(); it != this->listeners.end(); ++it)
 		(*it)->thread->join();
@@ -109,7 +123,7 @@ void CommPortServer::closePorts()
 	HRESULT  hr = S_OK;
 	if (!CloseHandle(this->eventsPort))
 	{
-		fprintf(stderr, "[UserScanFinalize]: Failed to close the connection port.\n");
+		this->pluginManager->getLogger()->log("[UserScanFinalize]: Failed to close the connection port.");
 		hr = HRESULT_FROM_WIN32(GetLastError());
 	}
 
@@ -117,7 +131,7 @@ void CommPortServer::closePorts()
 
 	if (!CloseHandle(this->completionPort))
 	{
-		fprintf(stderr, "[UserScanFinalize]: Failed to close the completion port.\n");
+		this->pluginManager->getLogger()->log("[UserScanFinalize]: Failed to close the completion port.");
 		hr = HRESULT_FROM_WIN32(GetLastError());
 	}
 
@@ -136,8 +150,11 @@ CommPortListener::CommPortListener(IManager* manager)
 	this->pluginManager = manager;
 }
 
-void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
+void CommPortListener::listen()
 {
+	this->pluginManager->enterCriticalEventProcessingSection();
+	this->pluginManager->leaveCriticalEventProcessingSection();
+
 	HRESULT hr = S_OK;
 
 	PKM_MESSAGE  message = NULL;
@@ -151,7 +168,9 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 
 	ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 
-	std::cout << "Current listnere thread id: " << this->thread->get_id() << "\n";
+	std::ostringstream ss;
+	ss << this->thread->get_id();
+	this->pluginManager->getLogger()->log("Current listnere thread id: " + ss.str());
 
 	//  This thread is waiting for scan message from the driver
 	for (;;)
@@ -171,13 +190,13 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			//  *lpOverlapped will be NULL, and GetLastError will return ERROR_ABANDONED_WAIT_0
 			if (hr == E_HANDLE)
 			{
-				printf("Completion port becomes unavailable.\n");
+				this->pluginManager->getLogger()->log("Completion port becomes unavailable.");
 				hr = S_OK;
 
 			}
 			else if (hr == HRESULT_FROM_WIN32(ERROR_ABANDONED_WAIT_0))
 			{
-				printf("Completion port was closed.\n");
+				this->pluginManager->getLogger()->log("Completion port was closed.");
 				hr = S_OK;
 			}
 
@@ -199,9 +218,15 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 			ZeroMemory(&replyMsg, UM_REPLY_MESSAGE_SIZE);
 			replyMsg.ReplyHeader.MessageId = message->MessageHeader.MessageId;
 			replyMsg.EventResponse.Status = AvEventStatusAllow;
+			
+			void* UMMessage = NULL;
 
 			// Process event using pluginManager.
-			replyMsg.EventResponse.Status = this->pluginManager->processEvent(message->Event.EventType, message->Event.EventBuffer);
+			replyMsg.EventResponse.Status = this->pluginManager->processEvent(
+				message->Event.EventType, 
+				this->pluginManager->parseKMEvent(message->Event.EventType, message->Event.EventBuffer),
+				&UMMessage);
+			replyMsg.EventResponse.UMMessage = UMMessage;
 
 			hr = FilterReplyMessage(eventsPort,
 				&replyMsg.ReplyHeader,
@@ -209,19 +234,20 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 
 			if (FAILED(hr))
 			{
-				fprintf(stderr, "[UserScanWorker]: Failed to reply thread handle to the minifilter, %lu\n", hr);
+				this->pluginManager->getLogger()->log("[UserScanWorker]: Failed to reply thread handle to the minifilter. Error: " + std::to_string(hr));
 				break;
 			}
 		}
 		else
 		{
+			this->pluginManager->getLogger()->log("CommPortListener::listen(). INVALID MESSAGE");
 			throw "INVALID MESSAGE"; // This thread should not receive other kinds of message.
 		}
 
 
 		if (FAILED(hr))
 		{
-			fprintf(stderr, "[UserScanWorker]: Failed to handle the message.\n");
+			this->pluginManager->getLogger()->log("[UserScanWorker]: Failed to handle the message. Error code: " + std::to_string(hr));
 		}
 
 		//  If fianlized flag is set from main thread, 
@@ -239,13 +265,13 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 
 		if (hr == HRESULT_FROM_WIN32(ERROR_OPERATION_ABORTED))
 		{
-			printf("FilterGetMessage aborted.\n");
+			this->pluginManager->getLogger()->log("FilterGetMessage aborted.");
 			break;
 
 		}
 		else if (hr != HRESULT_FROM_WIN32(ERROR_IO_PENDING))
 		{
-			fprintf(stderr, "[UserScanWorker]: Failed to get message from the minifilter. \n0x%x, 0x%x\n", hr, HRESULT_FROM_WIN32(GetLastError()));
+			this->pluginManager->getLogger()->log("[UserScanWorker]: Failed to get message from the minifilter. Error code: " + std::to_string(hr));
 			break;
 		}
 
@@ -257,5 +283,7 @@ void CommPortListener::listen(HANDLE eventsPort, HANDLE completionPort)
 		HeapFree(GetProcessHeap(), 0, message);
 	}
 
-	std::cout << "***Thread id " << this->thread->get_id() << " exiting\n";
+	ss.clear();
+	ss << this->thread->get_id();
+	this->pluginManager->getLogger()->log("***Thread id " + ss.str() + " exiting.");
 }

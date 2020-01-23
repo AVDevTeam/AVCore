@@ -1,31 +1,14 @@
-/*++
-Module Name:
-    AVEventsDriver.c
-Abstract:
-    This is the main module of the AVEventsDriver miniFilter driver.
-Environment:
-    Kernel mode
---*/
+/**
+@file
+\brief AVEventsDriver load and unload routines.
+
+This file implements AVEventsDriver startup and unload logic.
+AVEventsDriver initializes KM-UM communication interface that may
+be used by other drivers via AVCommDriver exports.
+*/
 
 #include "AVEventsDriver.h"
 
-#pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
-
-
-PFLT_FILTER gFilterHandle;
-
-#define PTDBG_TRACE_ROUTINES            0x00000001
-#define PTDBG_TRACE_OPERATION_STATUS    0x00000002
-
-ULONG gTraceFlags = 0;
-
-
-#define PT_DBG_PRINT( _dbgLevel, _string )          \
-    (FlagOn(gTraceFlags,(_dbgLevel)) ?              \
-        DbgPrint _string :                          \
-        ((int)0))
-
-// Prototypes
 #pragma region Prototypes
 
 EXTERN_C_START
@@ -63,12 +46,6 @@ NTSTATUS AVEventsInstanceQueryTeardown (
     _In_ FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags
     );
 
-FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
-    _Inout_ PFLT_CALLBACK_DATA Data,
-    _In_ PCFLT_RELATED_OBJECTS FltObjects,
-    _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
-    );
-
 EXTERN_C_END
 #pragma endregion Prototypes
 
@@ -83,9 +60,14 @@ EXTERN_C_END
 
 // Globals
 PFLT_FILTER GlobalFilter;
+LARGE_INTEGER RegFilterCookie;
+HANDLE ObRegistrationHandle;
 
 //  operation registration
 #pragma region operation registration
+/**
+Minifilter callbacks list.
+*/
 CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
 
     { IRP_MJ_CREATE,
@@ -97,7 +79,9 @@ CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
 };
 #pragma endregion operation registration
 
-//  This defines what we want to filter with FltMgr
+/**
+Filter registration structure.
+*/
 CONST FLT_REGISTRATION FilterRegistration = {
 
     sizeof( FLT_REGISTRATION ),         //  Size
@@ -120,134 +104,135 @@ CONST FLT_REGISTRATION FilterRegistration = {
 
 };
 
+/**
+\brief Volume attachment callback.
+
+This routine is called whenever a new instance is created on a volume. This
+gives us a chance to decide if we need to attach to this volume or not.
+
+If this routine is not defined in the registration structure, automatic
+instances are always created.
+
+\param[in] FltObjects Pointer to the FLT_RELATED_OBJECTS data structure containing 
+opaque handles to this filter, instance and its associated volume.
+
+\param[in] Flags Flags describing the reason for this attach request.
+\return STATUS_SUCCESS - attach, STATUS_FLT_DO_NOT_ATTACH - do not attach
+*/
 NTSTATUS AVEventsInstanceSetup (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_SETUP_FLAGS Flags,
     _In_ DEVICE_TYPE VolumeDeviceType,
     _In_ FLT_FILESYSTEM_TYPE VolumeFilesystemType
     )
-/*++
-Routine Description:
-    This routine is called whenever a new instance is created on a volume. This
-    gives us a chance to decide if we need to attach to this volume or not.
-
-    If this routine is not defined in the registration structure, automatic
-    instances are always created.
-Arguments:
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance and its associated volume.
-    Flags - Flags describing the reason for this attach request.
-Return Value:
-    STATUS_SUCCESS - attach
-    STATUS_FLT_DO_NOT_ATTACH - do not attach
---*/
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
     UNREFERENCED_PARAMETER( VolumeDeviceType );
     UNREFERENCED_PARAMETER( VolumeFilesystemType );
     PAGED_CODE();
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("AVEventsDriver!AVEventsDriverInstanceSetup: Entered\n") );
     return STATUS_SUCCESS;
 }
 
+/**
+\brief Minifilter driver teardown query callback.
+
+This is called when an instance is being manually deleted by a
+call to FltDetachVolume or FilterDetach thereby giving us a
+chance to fail that detach request.
+
+If this routine is not defined in the registration structure, explicit
+detach requests via FltDetachVolume or FilterDetach will always be
+failed.
+
+
+\param[in] FltObjects Pointer to the FLT_RELATED_OBJECTS data structure containing
+opaque handles to this filter, instance and its associated volume.
+
+\param[in] Flags Indicating where this detach request came from.
+
+\return	Status of this operation.
+*/
 NTSTATUS AVEventsInstanceQueryTeardown (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_QUERY_TEARDOWN_FLAGS Flags
     )
-/*++
-Routine Description:
-    This is called when an instance is being manually deleted by a
-    call to FltDetachVolume or FilterDetach thereby giving us a
-    chance to fail that detach request.
-
-    If this routine is not defined in the registration structure, explicit
-    detach requests via FltDetachVolume or FilterDetach will always be
-    failed.
-Arguments:
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance and its associated volume.
-    Flags - Indicating where this detach request came from.
-Return Value:
-    Returns the status of this operation.
---*/
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
     PAGED_CODE();
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("AVEventsDriver!AVEventsDriverInstanceQueryTeardown: Entered\n") );
     return STATUS_SUCCESS;
 }
 
+/**
+\brief Minifilter driver instance teardown callback.
+
+This routine is called at the start of instance teardown.
+
+\param[in] FltObjects Pointer to the FLT_RELATED_OBJECTS data structure containing
+opaque handles to this filter, instance and its associated volume.
+
+\param[in] Flags Reason why this instance is being deleted.
+*/
 VOID AVEventsInstanceTeardownStart (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     )
-/*++
-Routine Description:
-    This routine is called at the start of instance teardown.
-Arguments:
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance and its associated volume.
-    Flags - Reason why this instance is being deleted.
-Return Value:
-    None.
---*/
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
     PAGED_CODE();
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("AVEventsDriver!AVEventsDriverInstanceTeardownStart: Entered\n") );
 }
 
+/**
+\brief Minifilter driver teardown end callback.
+
+This routine is called at the end of instance teardown.
+
+\param[in] FltObjects Pointer to the FLT_RELATED_OBJECTS data structure containing
+opaque handles to this filter, instance and its associated volume.
+
+\param[in] Flags Reason why this instance is being deleted.
+*/
 VOID AVEventsInstanceTeardownComplete (
     _In_ PCFLT_RELATED_OBJECTS FltObjects,
     _In_ FLT_INSTANCE_TEARDOWN_FLAGS Flags
     )
-/*++
-Routine Description:
-    This routine is called at the end of instance teardown.
-Arguments:
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance and its associated volume.
-    Flags - Reason why this instance is being deleted.
-Return Value:
-    None.
---*/
 {
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( Flags );
     PAGED_CODE();
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("AVEventsDriver!AVEventsDriverInstanceTeardownComplete: Entered\n") );
 }
 
+/**
+\brief AVEventsDriver entry point.
 
-/*************************************************************************
-    MiniFilter initialization and unload routines.
-*************************************************************************/
+This is the initialization routine for AVEventsDriver. It registers
+callbacks for file system events, registry events, handle operation events
+and process/thread/imageload notifications.
 
+In case of an error during the initialization all already registered callbacks
+will be removed.
+
+This function initializes KM-UM communication interface based on the
+communication port using AVCommInit export from AVCommDriver.
+
+\param[in] DriverObject Pointer to driver object created by the system to
+represent this driver.
+
+\param[in] RegistryPath Unicode string identifying where the parameters for this
+driver are located in the registry.
+
+\return Status of driver initialization.
+*/
 NTSTATUS DriverEntry(
 	_In_ PDRIVER_OBJECT DriverObject,
 	_In_ PUNICODE_STRING RegistryPath
 )
-/*++
-Routine Description:
-	This is the initialization routine for this miniFilter driver.  This
-	registers with FltMgr and initializes all global data structures.
-Arguments:
-	DriverObject - Pointer to driver object created by the system to
-		represent this driver.
-	RegistryPath - Unicode string identifying where the parameters for this
-		driver are located in the registry.
-Return Value:
-	Returns the final status of this operation.
---*/
 {
 	UNREFERENCED_PARAMETER(RegistryPath);
+
+	DbgPrint("AVEventsDriver | DriverEntry | start");
 
 	//  Register with FltMgr to tell it our callback routines
 	NTSTATUS status = FltRegisterFilter(DriverObject,
@@ -256,6 +241,7 @@ Return Value:
 
 	if (!NT_SUCCESS(status))
 	{
+		DbgPrint("AVEventsDriver | DriverEntry | FltRegisterFilter failed");
 		return status;
 	}
 
@@ -269,161 +255,127 @@ Return Value:
 		return status;
 	}
 
+	status = CmRegisterCallback(AVEventsRegistryCallback, NULL, &RegFilterCookie);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		return status;
+	}
+
+	OB_CALLBACK_REGISTRATION obCallbackReg = { 0 };
+	OB_OPERATION_REGISTRATION obOperationReg[2] = { 0 };
+	RtlZeroMemory(&obCallbackReg, sizeof(OB_CALLBACK_REGISTRATION));
+	RtlZeroMemory(&obOperationReg, sizeof(OB_OPERATION_REGISTRATION)*2);
+
+	// setup callback registratio structure
+	obCallbackReg.Version = ObGetFilterVersion();
+	obCallbackReg.OperationRegistrationCount = 2;
+	obCallbackReg.RegistrationContext = NULL;
+	RtlInitUnicodeString(&obCallbackReg.Altitude, L"321000");
+	obCallbackReg.OperationRegistration = obOperationReg;
+
+	// setup operation registration structures
+	obOperationReg[0].ObjectType = PsProcessType;
+	obOperationReg[0].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+	obOperationReg[0].PreOperation = (POB_PRE_OPERATION_CALLBACK)AVObPreProcessCallback;
+
+	obOperationReg[1].ObjectType = PsThreadType;
+	obOperationReg[1].Operations = OB_OPERATION_HANDLE_CREATE | OB_OPERATION_HANDLE_DUPLICATE;
+	obOperationReg[1].PreOperation = (POB_PRE_OPERATION_CALLBACK)AVObPreThreadCallback;
+
+	status = ObRegisterCallbacks(&obCallbackReg, &ObRegistrationHandle);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		return status;
+	}
+
+#ifdef _WIN64
+	status = PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, FALSE);
+#else
+	status = PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, FALSE);
+#endif
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+		return status;
+	}
+
+	status = PsSetCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+#ifdef _WIN64
+		PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, TRUE);
+#else
+		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+#endif
+		return status;
+	}
+
+#ifdef _WIN64
+	status = PsSetLoadImageNotifyRoutineEx((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback, PS_IMAGE_NOTIFY_CONFLICTING_ARCHITECTURE);
+#else
+	status = PsSetLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
+#endif
+	if (!NT_SUCCESS(status))
+	{
+		AVCommStop();
+		FltUnregisterFilter(GlobalFilter);
+		CmUnRegisterCallback(RegFilterCookie);
+		ObUnRegisterCallbacks(ObRegistrationHandle);
+#ifdef _WIN64
+		PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, TRUE);
+#else
+		PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+#endif
+		PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+		return status;
+	}
+
 	return status;
 }
 
+/**
+\brief Driver unload routine.
+
+This is called when the driver is about to be unloaded. It removes
+the callbacks that were registered in DriverEntry routine and closes
+communication port.
+
+\param[in] Flags Indicating if this is a mandatory unload.
+
+\return The final status of unload operation.
+*/
 NTSTATUS DriverUnload (
     _In_ FLT_FILTER_UNLOAD_FLAGS Flags
     )
-	/*++
-	Routine Description:
-		This is the unload routine for this miniFilter driver. This is called
-		when the minifilter is about to be unloaded. We can fail this unload
-		request if this is not a mandatory unloaded indicated by the Flags
-		parameter.
-	Arguments:
-		Flags - Indicating if this is a mandatory unload.
-	Return Value:
-		Returns the final status of this operation.
-	--*/
+	
 {
 	PAGED_CODE();
 	UNREFERENCED_PARAMETER(Flags);
 
-	//  This function will wait for the user to abort the outstanding scan and 
-	//  close the section 
+	//  This function will close communication port.
 	AVCommStop();
 	FltUnregisterFilter(GlobalFilter);
-	
+	CmUnRegisterCallback(RegFilterCookie);
+	ObUnRegisterCallbacks(ObRegistrationHandle);
+#ifdef _WIN64
+	PsSetCreateProcessNotifyRoutineEx2(PsCreateProcessNotifySubsystems, (PVOID)AVCreateProcessCallback, TRUE);
+#else
+	PsSetCreateProcessNotifyRoutineEx((PCREATE_PROCESS_NOTIFY_ROUTINE_EX)AVCreateProcessCallback, TRUE);
+#endif
+	PsRemoveCreateThreadNotifyRoutine((PCREATE_THREAD_NOTIFY_ROUTINE)AVCreateThreadCallback);
+	PsRemoveLoadImageNotifyRoutine((PLOAD_IMAGE_NOTIFY_ROUTINE)AVLoadImageCallback);
 
 	return STATUS_SUCCESS;
-}
-
-/*************************************************************************
-    MiniFilter callback routines.
-*************************************************************************/
-
-FLT_PREOP_CALLBACK_STATUS AVEventsPreMjCreate(
-    _Inout_ PFLT_CALLBACK_DATA Data,
-    _In_ PCFLT_RELATED_OBJECTS FltObjects,
-    _Flt_CompletionContext_Outptr_ PVOID *CompletionContext
-    )
-/*++
-Routine Description:
-    This routine is a pre-operation dispatch routine for this miniFilter.
-    This is non-pageable because it could be called on the paging path
-Arguments:
-    Data - Pointer to the filter callbackData that is passed to us.
-    FltObjects - Pointer to the FLT_RELATED_OBJECTS data structure containing
-        opaque handles to this filter, instance, its associated volume and
-        file object.
-    CompletionContext - The context for the completion routine for this
-        operation.
-Return Value:
-    The return value is the status of the operation.
---*/
-{
-	UNREFERENCED_PARAMETER(CompletionContext);
-	UNREFERENCED_PARAMETER(FltObjects);
-
-	ULONG_PTR stackLow;
-	ULONG_PTR stackHigh;
-	PFILE_OBJECT FileObject = Data->Iopb->TargetFileObject;
-
-	PAGED_CODE();
-
-	//  Stack file objects are never scanned.
-	IoGetStackLimits(&stackLow, &stackHigh);
-
-	if (((ULONG_PTR)FileObject > stackLow) &&
-		((ULONG_PTR)FileObject < stackHigh)) 
-	{
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	HANDLE AVCorePID = AVCommGetUmPID();
-
-	if (!AVCorePID)
-	{
-		// AVCore service is not listening skip event.
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	HANDLE curProcess = PsGetCurrentProcessId();
-	if (curProcess == AVCorePID)
-	{
-		// ignore events triggered by AVCore.exe
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	UCHAR volumeInformationBuffer[256];
-	SIZE_T volumeInformationSize = sizeof(volumeInformationBuffer);
-
-	NTSTATUS status = STATUS_SUCCESS;
-	status = FltGetVolumeInformation(FltObjects->Volume, FilterVolumeBasicInformation, &volumeInformationBuffer, (ULONG)volumeInformationSize, (PULONG)&volumeInformationSize);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't get volume information
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	PFILTER_VOLUME_BASIC_INFORMATION volumeInformation = (PFILTER_VOLUME_BASIC_INFORMATION)volumeInformationBuffer;
-
-	// Start forming Event structure on KM stack
-	AV_EVENT_FILE_CREATE eventFileCreate = { 0 };
-
-	eventFileCreate.RequestorMode = Data->RequestorMode;
-	eventFileCreate.RequestorPID = (int)(__int64)curProcess;
-
-	// Put file name information to UM memory and save address in Event stucture.
-	eventFileCreate.FileNameSize = FileObject->FileName.Length;
-	SIZE_T umBuffFileNameSize;
-	status = AVCommCreateBuffer(FileObject->FileName.Buffer, FileObject->FileName.Length, &eventFileCreate.FileName, &umBuffFileNameSize);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't allocate memory in UM
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	// Put volume name information to UM memory and save address in Event stucture.
-	eventFileCreate.VolumeNameSize = volumeInformation->FilterVolumeNameLength;
-	SIZE_T umBuffVolumeNameSize;
-	status = AVCommCreateBuffer(volumeInformation->FilterVolumeName, eventFileCreate.VolumeNameSize, &eventFileCreate.VolumeName, &umBuffVolumeNameSize);
-	if (status != STATUS_SUCCESS)
-	{
-		// couldn't allocate memory in UM
-		return FLT_PREOP_SUCCESS_NO_CALLBACK;
-	}
-
-	AV_EVENT_RESPONSE UMResponse;
-	ULONG replyLength = sizeof(AV_EVENT_RESPONSE);
-
-	DbgPrint("PID %ul opens %wZ\n", curProcess, FileObject->FileName);
-
-	// Send event to the AVCore UM service and wait for the response
-	status = AVCommSendEvent(&eventFileCreate,
-		sizeof(AV_EVENT_FILE_CREATE),
-		&UMResponse,
-		&replyLength);
-
-	// Got reply. Free memory. We need to free all UM-allocated buffers.
-#pragma region free UM memory
-	
-	NTSTATUS freeStatus = AVCommFreeBuffer(&eventFileCreate.FileName, &umBuffFileNameSize);
-	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
-
-	freeStatus = AVCommFreeBuffer(&eventFileCreate.VolumeName, &umBuffVolumeNameSize);
-	if (freeStatus != STATUS_SUCCESS) { return FLT_PREOP_SUCCESS_NO_CALLBACK; }
-#pragma endregion free UM memory
-
-	if (status == STATUS_SUCCESS) // check whether communication with UM was successfull.
-	{
-		if (UMResponse.Status == AvEventStatusBlock)
-		{
-			Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-			return FLT_PREOP_COMPLETE;
-		}
-	}
-	// allow access if we were not able to communicate with UM.
-	return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }

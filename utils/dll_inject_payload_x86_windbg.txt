@@ -1,0 +1,25 @@
+// x86
+
+eq eax c3f850ff5010c083 ; eax points to the payload buffer, 8 bytes of the actual payload
+ed eax+0x8 kernel32!LoadLibraryA ; offset 0x8 - LoadLibraryA address (DWORD)
+ea eax+0x10 "C:\\Users\\user\\TestPlugin.dll" ; offset 0x10 - DLL path (arbitrary length)
+
+/* Payload assembly
+add eax, 0x10
+push eax
+call [eax-0x8]
+ret
+*/
+
+// x64
+eq rax FF18C18348C18948 ; payload
+eq rax+0x8 C31050 ; payload 19 bytes
+eq rax+0x10 kernel32!LoadLibraryA ; offset 0x10 - LoadLibrary address (QWORD)
+ea eax+0x18 "C:\\Users\\user\\TestPlugin.dll" ; offset 0x18 - DLL path
+
+/* Payload assembly
+mov rcx, rax
+add rcx, 0x18
+call [rax+0x10]
+ret
+*/

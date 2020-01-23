@@ -19,6 +19,8 @@ namespace AVGUI
     /// </summary>
     public partial class SettingsWindow : Window
     {
+        PipeClient pipe;
+
         public SettingsWindow()
         {
             InitializeComponent();
@@ -29,7 +31,18 @@ namespace AVGUI
         {
             Loaded -= Main;
 
-         
+            // Подключить к серверу с настройками
+            pipe = new PipeClient("AVCoreSettings");
+            pipe.Connect();
+
+            pipe.SendMessage("EnumeratePlugins");
         }
+
+        // Закрытие окна
+        private void SettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            pipe.Close();
+        }
+        
     }
 }

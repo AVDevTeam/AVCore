@@ -1,13 +1,9 @@
-#ifndef __EVENTS_H__
-#define __EVENTS_H__
+/**
+\file
+\brief Defines interface of principal AV components.
+*/
 
-#if defined(_MSC_VER)
-#if (_MSC_VER >= 1200)
-#pragma warning(push)
-#pragma warning(disable:4201) // nonstandard extension used : nameless struct/union
-#endif
-#endif
-
+#pragma once
 #include "EventsUMInterfaces.h"
 #include <Windows.h>
 #include "KMUMcomm.h"
@@ -17,19 +13,56 @@
 class IManager;
 class IPlugin;
 class IConfig;
+class ILogger;
 
-// Plugin manager interface
+/**
+\class
+\brief Plugin manager interface
+
+Defines interface of PluginManager.
+Plugin manager processes events flow in the system
+by passing them through the registered plugins' callbacks.
+*/
 class IManager
 {
 public:
-	virtual int registerCallback(IPlugin*, int, AV_EVENT_TYPE, int) = 0;
-	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*) = 0;
+	virtual ~IManager() {}
+	/**
+	Enables plugin to register custom callbacks for supported
+	events.
+
+	\param[in] plugin Pointer to plugin instance that registers the callback.
+
+	\param[in] callbackId Arbitrary integer value that will server to identify the callback within the plugin.
+	This value will be passed to plugin from IManager when the event occurs.
+
+	\param[in] eventType Type of event to which the callback will be attached.
+
+	\param[in] priority Integer value of callback priority. Callbacks with lesser priority will be called first.
+
+	\return reserved (always 0)
+	*/
+	virtual int registerCallback(IPlugin* plugin, int callbackId, AV_EVENT_TYPE eventType, int priority) = 0;
+
+	virtual void* parseKMEvent(AV_EVENT_TYPE, void*) = 0;
+	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*, void**) = 0;
+
+	// Syncronizationi methods
+	virtual void enterCriticalEventProcessingSection() = 0;
+	virtual void leaveCriticalEventProcessingSection() = 0;
+
+	virtual void lockEventsProcessing() = 0;
+	virtual void unlockEventsProcessing() = 0;
+
+	virtual ILogger* getLogger() = 0;
+	virtual IConfig* getConfig() = 0;
 };
 
 // Interface for plugins
 class IPlugin
 {
 public:
+	virtual ~IPlugin() {}
 	/*
 	Method description:
 		Method for plugin initialization.
@@ -51,7 +84,7 @@ public:
 		Entry point for plugin's event processing logic. This method
 		will be called from IManager in processEvent.
 	*/
-	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event) = 0;
+	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event, void** umMessage) = 0;
 	
 	// methods that provide access to the information about the plugin.
 	virtual std::string& getName() = 0;
@@ -74,6 +107,7 @@ typedef std::pair<std::string, ConfigParamType> paramPair;
 class IConfig
 {
 public:
+	virtual ~IConfig() {}
 	/*
 	Method description:
 		Initializes IConfig store (opens registry key).
@@ -99,4 +133,11 @@ public:
 	virtual void setListParam(std::string& paramName, std::list<std::string>& value) = 0;
 };
 
-#endif
+// Interface for debug loggers.
+class ILogger
+{
+public:
+	virtual ~ILogger() {}
+
+	virtual void log(std::string) = 0;
+};

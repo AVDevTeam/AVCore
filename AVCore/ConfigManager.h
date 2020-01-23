@@ -5,6 +5,7 @@
 class UMModuleConfig : public IConfig
 {
 public:
+	UMModuleConfig(ILogger* logger) { this->logger = logger; }
 	// Inherited via IConfig
 	virtual void init(std::string moduleId) override;
 	virtual void deinit() override;
@@ -28,5 +29,7 @@ private:
 	std::string regStorePath;
 	// list of parameters. This map is set in plugins in
 	// order to expose parameters available for the plugin.
-	paramMap* configParamMap;
+	paramMap* configParamMap = nullptr;
+
+	ILogger* logger;
 };
