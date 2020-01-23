@@ -4,7 +4,7 @@ using json = nlohmann::json;
 
 MessageManager::MessageManager()
 {
-	
+
 	pipe = new PipeServer(serverName);
 	pipe->createNamedPipe();
 
@@ -37,8 +37,8 @@ void MessageManager::listen()
 	{
 		pipe->waitForClient(stopSignal);
 
-		json messages;		
-	
+		json messages;
+
 		for (const auto& t : messagesList)
 		{
 			// Кладется класс и сообщение пример: ("warning", "warning message")
@@ -46,8 +46,11 @@ void MessageManager::listen()
 		}
 
 		jMessage = messages.dump();
-		pipe->sendMessage(jMessage);
-		messagesList.clear();
+		if (jMessage != "null")
+		{
+			pipe->sendMessage(jMessage);
+			messagesList.clear();
+		}
 
 		Sleep(500);
 	}

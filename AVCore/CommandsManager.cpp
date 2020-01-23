@@ -10,6 +10,7 @@ using json = nlohmann::json;
 // Парсит команды от GUI, возвращает ответ на них чтобы PipeManager отправил их обратно
 std::string CommandsManager::manage(std::string _command)
 {
+	messageManager->outWarning("Manage function were called");
 	std::string ret = "";
 	json jCommand = json::parse(_command);
 	std::string command = jCommand.find("CommandName").value();

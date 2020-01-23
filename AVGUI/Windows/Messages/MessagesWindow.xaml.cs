@@ -50,6 +50,7 @@ namespace AVGUI.Windows.Messages
                     LogManager.OutWarning(item.Value.ToString());
                 }
             }
+
         }
 
         public void Main(Object sender, EventArgs e)
