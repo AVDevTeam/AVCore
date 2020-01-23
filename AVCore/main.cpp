@@ -2,8 +2,6 @@
 #include "AVCore.h"
 #include "UMEventsListener.h"
 
-//#define TESTBUILD
-
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
 

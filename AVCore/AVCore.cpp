@@ -122,6 +122,31 @@ void AVCore::start(void)
 	this->logger->log("AVCore. UM events listener started.");
 	this->logger->log("AVCore. Startup finished.");
 
+	// Test plugin load/unload logic
+	while (1)
+	{
+		std::string str;
+		std::getline(std::cin, str);
+		if (str == "exit")
+			break;
+		IPlugin* plugin = manager->getPluginByName(str);
+		if (plugin != nullptr)
+		{
+			manager->unloadPlugin(plugin->getName());
+			std::cout << "Unloaded plugin\n";
+		}
+		else
+		{
+			std::string pluginsFolder = manager->getConfig()->getStringParam("PluginsPath");
+			plugin = manager->loadPlugin(pluginsFolder + str + ".dll");
+			if (plugin != nullptr)
+				std::cout << "Loaded plugin " << plugin->getName() << "\n";
+			else
+				std::cout << "Plugin not found\n";
+
+		}
+	}
+	
 	pipeManager->join();
 #else
 
