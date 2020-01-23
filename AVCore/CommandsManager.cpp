@@ -98,8 +98,7 @@ std::string CommandsManager::manage(std::string _command)
 		IPlugin* pluginToUnload = this->pluginManager->getPluginByName(pluginName);
 		if (pluginToUnload != nullptr)
 		{
-			pluginToUnload->deinit();
-			this->pluginManager->unloadPlugin(pluginName);
+			this->pluginManager->unloadPlugin(pluginToUnload->getName());
 			ret = "Plugin unloaded.";
 		}
 		else
