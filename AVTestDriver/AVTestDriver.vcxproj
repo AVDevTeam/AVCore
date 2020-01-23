@@ -34,17 +34,8 @@
       <Platform>ARM64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="FSCallbacks.c" />
-    <ClCompile Include="NotifyRoutines.c" />
-    <ClCompile Include="ObjectFilterCallbacks.c" />
-    <ClCompile Include="RegistryCallback.c" />
-    <ResourceCompile Include="AVEventsDriver.rc" />
-    <ClCompile Include="AVEventsDriver.c" />
-    <Inf Include="AVEventsDriver.inf" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{8B2686FB-631C-47DC-B922-30BF57554287}</ProjectGuid>
+    <ProjectGuid>{28EDEC9F-E479-4BF5-B1C7-CECBFC0EE80C}</ProjectGuid>
     <TemplateGuid>{f2f62967-0815-4fd7-9b86-6eedcac766eb}</TemplateGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
@@ -85,10 +76,10 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
-    <DriverType>WDM</DriverType>
+    <DriverType>KMDF</DriverType>
     <SpectreMitigation>false</SpectreMitigation>
-    <KMDF_VERSION_MAJOR>
-    </KMDF_VERSION_MAJOR>
+    <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
+    <DriverTargetPlatform>Desktop</DriverTargetPlatform>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -144,10 +135,10 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath);$(KMDF_INC_PATH)$(KMDF_VER_PATH)</IncludePath>
     <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
     <OutDir>$(SolutionDir)build\$(Platform)\$(ConfigurationName)\</OutDir>
-    <LibraryPath>$(SolutionDir)lib\$(Platform);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)lib\$(Platform);$(LibraryPath);$(DDK_LibraryPath_DDKPlatform);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -204,11 +195,12 @@ copy /Y "$(SolutionDir)utils\start.bat" "$(SolutionDir)build\$(Platform)\$(Confi
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Link>
-      <AdditionalDependencies>AVCommDriver.lib;fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>AVCommDriver.lib;fltmgr.lib;%(AdditionalDependencies);$(DDK_LIB_PATH)\ndis.lib;$(DDK_LIB_PATH)\wdmsec.lib;$(DDK_LIB_PATH)\fwpkclnt.lib;$(SDK_LIB_PATH)\uuid.lib</AdditionalDependencies>
       <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(IntDir);%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);BINARY_COMPATIBLE=0;NT;UNICODE;_UNICODE;NDIS60;NDIS_SUPPORT_NDIS6;POOL_NX_OPTIN_AUTO</PreprocessorDefinitions>
     </ClCompile>
     <Inf />
     <PostBuildEvent>
@@ -252,7 +244,16 @@ copy /Y "$(SolutionDir)utils\start.bat" "$(SolutionDir)build\$(Platform)\$(Confi
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AVEventsDriver.h" />
+    <Inf Include="AVTestDriver.inf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AVTestDriver.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AVTestDriver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AVTestDriver.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

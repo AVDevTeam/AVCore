@@ -412,3 +412,55 @@ private:
 	std::string functionName;
 	std::list<std::string> argumetns;
 };
+
+// AvEventRegOpenKey parser
+class AvEventNetworkParser : EventParser
+{
+public:
+	// Inherited via EventParser
+	virtual AvEvent* parse(PVOID) override;
+};
+
+class AvEventNetwork : IEventNetwork, AvEvent
+{
+public:
+	AvEventNetwork(
+		uint8_t *localAddress, 
+		uint8_t *remoteAddress, 
+		int localPort, 
+		int remotePort, 
+		int family, 
+		char* data, 
+		unsigned long long dataLength)
+	{
+		memcpy(this->localAddress, localAddress, 16);
+		memcpy(this->remoteAddress, remoteAddress, 16);
+		this->localPort = localPort;
+		this->remotePort = remotePort;
+		this->family = family;
+		this->data = data;
+		this->dataLength = dataLength;
+	}
+
+	~AvEventNetwork();
+
+	// Inherited via IEventNetwork
+	virtual void *getLocalAddress() override;
+	virtual void *getRemoteAddress() override;
+	virtual char *getLocalAddressStr() override;
+	virtual char* getRemoteAddressStr() override;
+	virtual int getLocalPort() override;
+	virtual int getRemotePort() override;
+	virtual int getFamily() override;
+	virtual char *getData() override;
+	virtual unsigned long long getDataLength() override;
+
+private:
+	uint8_t localAddress[16];
+	uint8_t remoteAddress[16];
+	int localPort;
+	int remotePort;
+	int family;
+	char* data;
+	unsigned long long dataLength;
+};

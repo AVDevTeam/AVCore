@@ -95,6 +95,8 @@ void AVCore::start(void)
 	manager->addEventParser(AvRegOpenKey, reinterpret_cast<EventParser*>(new AvEventRegOpenKeyParser()));
 	manager->addEventParser(AvApcProcessInject, reinterpret_cast<EventParser*>(new AvEventProcessCreateParser()));
 	manager->addEventParser(AvWinApiCall, nullptr);
+	manager->addEventParser(AvApcProcessInject, reinterpret_cast<EventParser*>(new AvEventNetworkParser()));
+	manager->addEventParser(AvNetwork, reinterpret_cast<EventParser*>(new AvEventNetworkParser()));
 	this->logger->log("AVCore. Populated parsers map.");
 
 	std::list<std::string>* plugins = manager->getConfig()->getListParam("Plugins");

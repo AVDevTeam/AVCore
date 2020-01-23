@@ -165,4 +165,17 @@ typedef struct _AV_EVENT_REG_CREATE_OPEN_KEY
 	int keyPathSize;
 } AV_EVENT_REG_CREATE_KEY, AV_EVENT_REG_OPEN_KEY, * PAV_EVENT_REG_CREATE_KEY, * PAV_EVENT_REG_OPEN_KEY;
 
+/**
+\brief Defines parameters of AvNetwork
+*/
+typedef struct _AV_EVENT_NETWORK
+{
+	short isIPV6;
+	char localAddress[16];
+	char remoteAddress[16];
+	short localPort;
+	short remotePort;
+	char* data;
+	unsigned long long dataLength;
+} AV_EVENT_NETWORK, *PAV_EVENT_NETWORK;
 #pragma endregion Events structures

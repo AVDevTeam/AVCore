@@ -232,6 +232,8 @@ NTSTATUS DriverEntry(
 {
 	UNREFERENCED_PARAMETER(RegistryPath);
 
+	DbgPrint("AVEventsDriver | DriverEntry | start");
+
 	//  Register with FltMgr to tell it our callback routines
 	NTSTATUS status = FltRegisterFilter(DriverObject,
 		&FilterRegistration,
@@ -239,6 +241,7 @@ NTSTATUS DriverEntry(
 
 	if (!NT_SUCCESS(status))
 	{
+		DbgPrint("AVEventsDriver | DriverEntry | FltRegisterFilter failed");
 		return status;
 	}
 

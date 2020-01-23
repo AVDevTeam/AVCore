@@ -17,43 +17,25 @@
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
-    <Filter Include="Source Files\Callbacks">
-      <UniqueIdentifier>{53a0cc57-b643-40f8-af46-71729edf896e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Network">
-      <UniqueIdentifier>{f7c0490e-d8f4-466b-a20c-1c49cbcc61d6}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="AVEventsDriver.inf">
+    <Inf Include="AVTestDriver.inf">
       <Filter>Driver Files</Filter>
     </Inf>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AVEventsDriver.c">
+    <ClCompile Include="AVTestDriver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FSCallbacks.c">
-      <Filter>Source Files\Callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="NotifyRoutines.c">
-      <Filter>Source Files\Callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectFilterCallbacks.c">
-      <Filter>Source Files\Callbacks</Filter>
-    </ClCompile>
-    <ClCompile Include="RegistryCallback.c">
-      <Filter>Source Files\Callbacks</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="AVEventsDriver.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="AVEventsDriver.h">
+    <ClInclude Include="AVTestDriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AVTestDriver.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

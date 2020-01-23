@@ -198,3 +198,23 @@ public:
 	virtual std::string getFunctionName() = 0;
 	virtual std::list<std::string> getFunctionArgs() = 0;
 };
+
+/**
+\brief IEventNetwork interface
+Interface for AvNetwork that will be used
+in plugins to access event parameters.
+*/
+class IEventNetwork
+{
+public:
+	virtual ~IEventNetwork() {}
+	virtual void *getLocalAddress() = 0;
+	virtual void *getRemoteAddress() = 0;
+	virtual char *getLocalAddressStr() = 0;
+	virtual char *getRemoteAddressStr() = 0;
+	virtual int getLocalPort() = 0;
+	virtual int getRemotePort() = 0;
+	virtual int getFamily() = 0;
+	virtual char *getData() = 0;
+	virtual unsigned long long getDataLength() = 0;
+};

@@ -150,7 +150,6 @@ NTSTATUS AVCommConnectNotifyCallback(
 {
 	PAV_CONNECTION_CONTEXT connectionCtx = (PAV_CONNECTION_CONTEXT)ConnectionContext;
 	PAV_CONNECTION_TYPE connectionCookie = NULL;
-
 	PAGED_CODE();
 
 	UNREFERENCED_PARAMETER(ServerPortCookie);
@@ -453,6 +452,7 @@ This API is blocking. Function will return after event processing in UM.
 */
 NTSTATUS AVCommSendEvent(AV_EVENT_TYPE eventType, void* eventBuffer, int eventBufferSize, PAV_EVENT_RESPONSE UMResponse, PULONG UMResponseLength)
 {
+	DbgPrint("AV | AVCommInit | AVCommSendEvent | Globals %p\n", &Globals);
 	// Prepare AV_MESSAGE structure that will be sent to UM via comm port.
 	AV_MESSAGE avMessage = { 0 };
 	avMessage.MessageType = AvMsgEvent;

@@ -59,6 +59,7 @@ void AVLoadImageCallback(
 	PIMAGE_INFO ImageInfo
 );
 
+
 EXTERN_C_END
 
 /**

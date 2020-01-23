@@ -11,7 +11,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 
 #define SERVICE_NAME  "AVCore"
 #ifdef _WIN64
-#define LOG_PATH "\\\\vmware-host\\Shared Folders\\build\\log.txt"
+#define LOG_PATH "\\\\vmware-host\\Shared Folders\\shared\\log.txt"
 #else
 #define LOG_PATH "C:\\log.txt"
 #endif
@@ -118,6 +118,7 @@ VOID WINAPI ServiceMain(DWORD argc, LPTSTR* argv)
 
 	avCore->start();
 	// Wait worker stop signal
+	OutputDebugString("AVCore: ServiceMain: started");
 	avCore->wait();
 	// Cleanup
 	delete avCore;
