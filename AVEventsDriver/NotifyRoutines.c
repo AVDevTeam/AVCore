@@ -119,8 +119,8 @@ void AVCreateProcessCallback(
 		{
 			// TODO. Maybe some exlude list logic.
 		}
-	}
 #else
+	}
 		UNREFERENCED_PARAMETER(ProcessId);
 #endif
 }

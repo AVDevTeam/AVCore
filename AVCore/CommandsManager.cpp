@@ -75,6 +75,39 @@ std::string CommandsManager::manage(std::string _command)
 
 		ret = jPluginInfo.dump();
 	}
+	// Load pluging command
+	else if (command == "LoadPlugin")
+	{
+		std::string pluginName = jCommand.find("PluginName").value();
+		if (this->pluginManager->getPluginByName(pluginName) != nullptr)
+		{
+			// plugin already loaded. Return error status.
+			ret = "Error. Plugin aleready loaded.";
+		}
+		else
+		{
+			std::string pluginsFolder = this->pluginManager->getConfig()->getStringParam("PluginsPath");
+			this->pluginManager->loadPlugin(pluginsFolder + pluginName + ".dll");
+			ret = "Plugin loaded.";
+		}
+	}
+	// Unload plugin command
+	else if (command == "UnloadPlugin")
+	{
+		std::string pluginName = jCommand.find("PluginName").value();
+		IPlugin* pluginToUnload = this->pluginManager->getPluginByName(pluginName);
+		if (pluginToUnload != nullptr)
+		{
+			pluginToUnload->deinit();
+			this->pluginManager->unloadPlugin(pluginName);
+			ret = "Plugin unloaded.";
+		}
+		else
+		{
+			// Error plugin not found.
+			ret = "Plugin not found.";
+		}
+	}
 
 	return ret;
 }

@@ -116,10 +116,14 @@ void AVCore::start(void)
 
 #ifdef TESTBUILD
 	testEventsParsers(this->manager);
-#else
 
-	//portServer->start(manager);
+	this->logger->log("AVCore. Starting UM events listener.");
+	this->umEventsManager = new UMEventsManager(this->manager);
+	this->logger->log("AVCore. UM events listener started.");
+	this->logger->log("AVCore. Startup finished.");
+
 	pipeManager->join();
+#else
 
 	this->logger->log("AVCore. Starting UM events listener.");
 	this->umEventsManager = new UMEventsManager(this->manager);

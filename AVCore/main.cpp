@@ -2,7 +2,7 @@
 #include "AVCore.h"
 #include "UMEventsListener.h"
 
-#define TESTBUILD
+//#define TESTBUILD
 
 SERVICE_STATUS        g_ServiceStatus = { 0 };
 SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
@@ -13,7 +13,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 
 #define SERVICE_NAME  "AVCore"
 #ifdef _WIN64
-#define LOG_PATH "log.txt"
+#define LOG_PATH "C:\\log.txt"
 #else
 #define LOG_PATH "C:\\log.txt"
 #endif

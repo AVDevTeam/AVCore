@@ -10,6 +10,7 @@ This header file defines the common data structure used by kernel and user.
 #pragma region EVENTS_SWITCHES
 #define REGISTRY_EVENTS
 
+/*
 #define PROCESS_HANDLE_EVENTS
 #define THREAD_HANDLE_EVENTS
 
@@ -22,6 +23,7 @@ This header file defines the common data structure used by kernel and user.
 #define IMAGE_EVENTS
 
 #define FILE_SYSTEM_EVENTS
+*/
 #pragma endregion EVENTS_SWITCHES
 
 /**

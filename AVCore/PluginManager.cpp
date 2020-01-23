@@ -139,7 +139,7 @@ Return value:
 */
 AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event, void** umMessage)
 {
-#ifdef _DEBUG 
+#ifdef TRUE 
 	switch (eventType)
 	{
 	case AvFileCreate:
