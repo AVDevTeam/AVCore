@@ -2,6 +2,7 @@
 using System;
 using System.Windows;
 using AVGUI.Windows.Settings;
+using Newtonsoft.Json.Linq;
 
 namespace AVGUI
 {
@@ -31,11 +32,18 @@ namespace AVGUI
             if (jPluginsList != "")
             {
                 // Отобразить их в панели плагинов
-                EntumeratePluginsReply PluginsListJson = JsonConvert.DeserializeObject<EntumeratePluginsReply>(jPluginsList);
-                foreach (string plugin in PluginsListJson.Plugins)
+                JObject jSonMessage = JObject.Parse(jPluginsList);
+                foreach (var plugin in jSonMessage)
                 {
-                    PPManager.AddToPluginsPanel(plugin);
+                    PPManager.AddToPluginsPanel(plugin.Key, (int)plugin.Value);
                 }
+
+
+                //    EntumeratePluginsReply PluginsListJson = JsonConvert.DeserializeObject<EntumeratePluginsReply>(jPluginsList);
+                //foreach (string plugin in PluginsListJson.Plugins)
+                //{
+                //    PPManager.AddToPluginsPanel(plugin);
+                //}
             }
         }
 
@@ -93,9 +101,9 @@ namespace AVGUI
                 string request = JsonConvert.SerializeObject(new ChangePluginSettingsRequest(item.Key, item.Value));
                 Pipe.SendMessage(request);
             }
+            this.Close();
 
 
-           
         }
     }
 }

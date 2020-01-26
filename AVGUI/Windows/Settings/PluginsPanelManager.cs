@@ -14,6 +14,8 @@ namespace AVGUI.Windows.Settings
     // Данный класс занимается работой с отображением информации о плагинах
     class PluginsPanelManager
     {
+        List<Button> panelButtonsList;               // Список кнопок с панели
+
         PipeClient Pipe;
         StackPanel PluginsPanel;                // Панель с плагинам
         StackPanel PluginsParametersPanel;      // Панелья с параметрами плагинов
@@ -28,24 +30,81 @@ namespace AVGUI.Windows.Settings
             PluginsPanel = _pluginPanel;
             PluginsParametersPanel = _pluginsParametersPanel;
 
+            panelButtonsList = new List<Button>();
             changedParams = new Dictionary<string, Dictionary<string, List<string>>>();
         }
 
         // Создать кнопку очередного плагина
-        public void AddToPluginsPanel(string _plugin)
+        public void AddToPluginsPanel(string _plugin, int _isLoaded)
         {
+            Grid DynamicGrid = new Grid();
+            DynamicGrid.Name = _plugin + "_handle_grid";
+
+            ColumnDefinition gridColumn1 = new ColumnDefinition();
+            ColumnDefinition gridColumn2 = new ColumnDefinition();
+            DynamicGrid.ColumnDefinitions.Add(gridColumn1);
+            DynamicGrid.ColumnDefinitions.Add(gridColumn2);
+
+
+            // Создали кнопку плагина
             Button btn = new Button();
             btn.Name = _plugin + "_btn";
             btn.Content = _plugin;
             btn.Margin = new Thickness(5, 2, 5, 2);
             btn.Click += Plugin_Clicked;
-            PluginsPanel.Children.Add(btn);
+            btn.IsEnabled = _isLoaded == 1;
+            panelButtonsList.Add(btn);
+
+            CheckBox chkbx = new CheckBox();
+            chkbx.Name = _plugin + "_chkbx";
+            chkbx.Click += PluginCheckBox_Clicked;
+           // chkbx.Unchecked += PluginCheckBox_Clicked;
+            chkbx.IsChecked = _isLoaded == 1;
+
+            DynamicGrid.Children.Add(btn);
+            DynamicGrid.Children.Add(chkbx);
+            Grid.SetColumn(btn, 0);
+            Grid.SetColumn(chkbx, 1);
+
+            PluginsPanel.Children.Add(DynamicGrid);
         }
 
         // Возвращает новые параметры плагинов
         public Dictionary<string, Dictionary<string, List<string>>> getNewSettings()
         {
             return changedParams;
+        }
+
+        // Когда нажали на галку от плагина
+        private void PluginCheckBox_Clicked(object sender, RoutedEventArgs e)
+        {
+            CheckBox thisCheckbox = (CheckBox)e.Source;
+            Button pluginBtn = null;
+            string pluginBtnName = thisCheckbox.Name.Substring(0, thisCheckbox.Name.IndexOf("_")) + "_btn";
+
+            // Найти соответствующую кнопку
+            foreach(Button btn in panelButtonsList)
+            {
+                if(btn.Name == pluginBtnName)
+                {
+                    pluginBtn = btn;
+                }
+            }
+
+            // Сделать ее валидной/невалидной
+            pluginBtn.IsEnabled = thisCheckbox.IsChecked == true;
+
+            string request;
+            if (pluginBtn.IsEnabled == true)
+            {
+                request = JsonConvert.SerializeObject(new LoadPluginRequest(pluginBtn.Content.ToString()));
+            }
+            else
+            {
+                request = JsonConvert.SerializeObject(new UnloadPluginRequest(pluginBtn.Content.ToString()));
+            }
+
+            Pipe.SendMessage(request);
         }
 
         // Когда нажали на плагин
@@ -63,6 +122,13 @@ namespace AVGUI.Windows.Settings
             Pipe.ListenMessage();
             string reply = Pipe.GetMessage();
             Pipe.StopListening();
+
+            // Если такой модуль почему-то не запущен
+            if(reply == null)
+            {
+                MessageBox.Show($"Error: Cant get plugin {thisBtn.Content.ToString()} info");
+                return;
+            }
 
             // Парсим информацию о модулях
             JObject jPluginInfo = JObject.Parse(reply);
@@ -181,10 +247,10 @@ namespace AVGUI.Windows.Settings
 
             string groupboxName = btn.Name.Substring(0, btn.Name.IndexOf("_")) + "_groupbox";
 
-            Grid grid           = null;
-            GroupBox groupBox   = null;
-            ListBox listBox     = null;
-            TextBox textBox     = null;
+            Grid grid = null;
+            GroupBox groupBox = null;
+            ListBox listBox = null;
+            TextBox textBox = null;
 
             // Нашли нужный параметр среди всех параметров в стакпанел
             foreach (GroupBox child in PluginsParametersPanel.Children)
@@ -241,13 +307,13 @@ namespace AVGUI.Windows.Settings
                 changedParams[ChosenModuleName].Add(groupBox.Header.ToString(), value);
             }
             // Если для данного модуля еще не было настроек, то заводим ключ с именем модуля
-            catch(KeyNotFoundException ex)
+            catch (KeyNotFoundException ex)
             {
                 changedParams.Add(ChosenModuleName, null);
                 changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
             }
             // Если у данного модуля данная настройка уже изменялась, то нужно ее перетереть
-            catch(System.ArgumentException ex2)
+            catch (System.ArgumentException ex2)
             {
                 changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
             }
@@ -286,7 +352,7 @@ namespace AVGUI.Windows.Settings
             }
 
             // Удалили выделенный элемент
-            if(listBox.SelectedIndex != -1)
+            if (listBox.SelectedIndex != -1)
             {
                 listBox.Items.RemoveAt(listBox.SelectedIndex);
             }

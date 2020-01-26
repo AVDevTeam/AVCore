@@ -21,7 +21,7 @@ namespace AVGUI.Windows.Messages
             ContentRendered += Main;
         }
 
-        // Парсит json и пишет ouut сообщения
+        // Парсит json и пишет out сообщения
         private void parseJSonMessage(string _jSonMessage)
         {
             if(_jSonMessage == "")

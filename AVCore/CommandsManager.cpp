@@ -18,22 +18,32 @@ std::string CommandsManager::manage(std::string _command)
 	// Команда перечислить модули
 	if (command == "EnumeratePlugins")
 	{
-		std::list<std::string>* pluginsNamesList = pluginManager->getPluginsNames();
-		
+		std::list<std::string>* pluginsNamesList = pluginManager->getConfig()->getListParam("Plugins");
+		std::list<std::string>* loadedPluginsNamesList = pluginManager->getPluginsNames();
+
 		json jEnumeratedPlugins;
-		json jPluginsArray;
 
-		for (const auto& pluginName : *pluginsNamesList)
+		// Пройтись по всем плагинам
+		for (std::string pluginName : *pluginsNamesList)
 		{
-			jPluginsArray.push_back(pluginName);
+			// Убрать .dll и записать их в строку на отправку
+			pluginName.erase(pluginName.find(".dll"), 4);
+			jEnumeratedPlugins[pluginName] = 0;
+
+			// Если какие-то из плагинов прогруженны, то выставить им 1
+			for (const auto& loadedPluginName : *loadedPluginsNamesList)
+			{
+				if (pluginName == loadedPluginName)
+				{
+					jEnumeratedPlugins[pluginName] = 1;
+					break;
+				}
+			}
 		}
-
-		jEnumeratedPlugins["Plugins"] = jPluginsArray;
-
 		ret = jEnumeratedPlugins.dump();
 	}
 	// Команда получить информацию конкретному по модулю
-	else if(command == "GetPluginInfo")
+	else if (command == "GetPluginInfo")
 	{
 		json jPluginInfo;
 
@@ -41,7 +51,7 @@ std::string CommandsManager::manage(std::string _command)
 		std::string pluginName = jCommand.find("PluginName").value();
 		IPlugin* plugin = pluginManager->getPluginByName(pluginName);
 		IConfig* pluginConfig = plugin->getConfig();
-		
+
 		// Получили список его параметров
 		std::map<std::string, ConfigParamType>* paramMap = pluginConfig->getParamMap();
 
@@ -107,7 +117,6 @@ std::string CommandsManager::manage(std::string _command)
 			ret = "Plugin not found.";
 		}
 	}
-
 	return ret;
 }
 
