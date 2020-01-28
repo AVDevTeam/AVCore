@@ -23,16 +23,16 @@ public:
 	PluginManager(ILogger* logger);
 	virtual ~PluginManager() override;
 
-	IPlugin * loadPlugin(std::string path);
-	void unloadPlugin(std::string name);
+	virtual IPlugin * loadPlugin(std::string path) override;
+	virtual void unloadPlugin(std::string name) override;
 
 	// returns IPlugin from loadedPlugins map.
-	IPlugin* getPluginByName(std::string name);
+	virtual IPlugin* getPluginByName(std::string name) override;
 	// returns list of pugins' IDs (names)
-	std::list<std::string>* getPluginsNames();
+	virtual std::list<std::string>* getPluginsNames() override;
 	// this function is used from plugins (in IPlugin init())
 	// to register events callbacks.
-	int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority);
+	virtual int registerCallback(IPlugin * plugin, int callbackId, AV_EVENT_TYPE eventType, int priority) override;
 	// this function is used on PluginManager initialization in order
 	// to register parsers for implemented events.
 	void addEventParser(AV_EVENT_TYPE, EventParser*);

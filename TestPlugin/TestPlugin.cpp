@@ -6,8 +6,6 @@
 #include <fstream>
 #include <mutex>
 
-std::mutex fdump_mutex;
-
 /*
 This file contains the actual plugin logic.
 */

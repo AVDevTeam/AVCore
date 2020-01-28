@@ -44,6 +44,14 @@ public:
 	*/
 	virtual int registerCallback(IPlugin* plugin, int callbackId, AV_EVENT_TYPE eventType, int priority) = 0;
 
+	virtual IPlugin* loadPlugin(std::string path) = 0;
+	virtual void unloadPlugin(std::string name) = 0;
+
+	// returns IPlugin from loadedPlugins map.
+	virtual IPlugin* getPluginByName(std::string name) = 0;
+	// returns list of pugins' IDs (names)
+	virtual std::list<std::string>* getPluginsNames() = 0;
+
 	virtual void* parseKMEvent(AV_EVENT_TYPE, void*) = 0;
 	virtual AV_EVENT_RETURN_STATUS processEvent(AV_EVENT_TYPE, void*, void**) = 0;
 
@@ -89,6 +97,7 @@ public:
 	// methods that provide access to the information about the plugin.
 	virtual std::string& getName() = 0;
 	virtual std::string& getDescription() = 0;
+	virtual unsigned int getVersion() = 0;
 	virtual HMODULE getModule() = 0;
 	virtual IConfig* getConfig() = 0;
 };

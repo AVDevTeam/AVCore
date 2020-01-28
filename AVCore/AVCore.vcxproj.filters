@@ -27,9 +27,6 @@
     <Filter Include="Loggers">
       <UniqueIdentifier>{1b082301-f2ef-45c5-9ffe-7abd6e9301a9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Loggers\FileLogger">
-      <UniqueIdentifier>{167f2c42-c8ea-43a8-9bf1-2acd525ddcad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="AVCore">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
@@ -39,6 +36,9 @@
     </Filter>
     <Filter Include="AVCore\Images">
       <UniqueIdentifier>{d34141d6-b963-4aac-83c0-7ea7a4fc016d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\FileLogger">
+      <UniqueIdentifier>{167f2c42-c8ea-43a8-9bf1-2acd525ddcad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -61,7 +61,7 @@
       <Filter>ConfigurationManagers</Filter>
     </ClCompile>
     <ClCompile Include="FileLogger.cpp">
-      <Filter>Loggers\FileLogger</Filter>
+      <Filter>Managers\FileLogger</Filter>
     </ClCompile>
     <ClCompile Include="AVCore.cpp">
       <Filter>AVCore</Filter>
@@ -99,7 +99,7 @@
       <Filter>ConfigurationManagers</Filter>
     </ClInclude>
     <ClInclude Include="FileLogger.h">
-      <Filter>Loggers\FileLogger</Filter>
+      <Filter>Managers\FileLogger</Filter>
     </ClInclude>
     <ClInclude Include="AVCore.h">
       <Filter>AVCore</Filter>

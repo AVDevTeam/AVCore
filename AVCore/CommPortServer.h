@@ -21,7 +21,7 @@
     ((HRESULT) (((unsigned long)(sev)<<31) | ((unsigned long)(fac)<<16) | ((unsigned long)(code))) )
 #endif
 
-#define  KM_EVENTS_LISTENER_THREAD_COUNT   4 // DEBUG !!!      // the number of scanning worker threads.
+#define  KM_EVENTS_LISTENER_THREAD_COUNT   4 // the number of scanning worker threads.
 
 /*
 Implements logic of the worker thread that receives events

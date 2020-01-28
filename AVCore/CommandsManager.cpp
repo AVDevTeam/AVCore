@@ -1,7 +1,7 @@
 
 #include "CommandsManager.h"
 #include "IPluginManagerImage.h"
-#include "../Dependencies/json.hpp"
+#include "json.hpp"
 using json = nlohmann::json;
 
 //https://habr.com/ru/company/infopulse/blog/254075/	- guide

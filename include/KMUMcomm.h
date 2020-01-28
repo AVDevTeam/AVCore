@@ -21,9 +21,10 @@ This header file defines the common data structure used by kernel and user.
 #define THREAD_EXIT_EVENTS
 
 #define IMAGE_EVENTS
+*/
 
 #define FILE_SYSTEM_EVENTS
-*/
+
 #pragma endregion EVENTS_SWITCHES
 
 /**

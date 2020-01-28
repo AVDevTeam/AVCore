@@ -37,8 +37,6 @@ int main(int argc, char* argv[])
 	avCore = new AVCore(logger);
 	avCore->start();
 
-	
-
 	printf("Enter any key to exit\n");
 	getchar();
 	getchar();
@@ -46,8 +44,6 @@ int main(int argc, char* argv[])
 #else
 int main(int argc, char* argv[])
 {
-
-
 	SERVICE_TABLE_ENTRY ServiceTable[] =
 	{
 		{(LPSTR)SERVICE_NAME, (LPSERVICE_MAIN_FUNCTION)ServiceMain},

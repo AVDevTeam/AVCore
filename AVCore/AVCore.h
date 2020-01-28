@@ -1,6 +1,5 @@
 #pragma once
 #include "CommPortServer.h"
-//#include "PluginManager.h"
 #include "EventsParser.h"
 #include "MessageManager.h"
 #include "ConfigManager.h"
@@ -10,7 +9,7 @@
 #include "UMEventsListener.h"
 #include <mutex>
 
-#define TESTBUILD
+//#define TESTBUILD
 
 class AVCore : public ICoreImage, public IPluginManagerImage
 {

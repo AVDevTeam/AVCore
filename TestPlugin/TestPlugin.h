@@ -29,6 +29,10 @@ public:
 
 	virtual std::string& getName() override;
 	virtual HMODULE getModule() override;
+	virtual unsigned int getVersion() override
+	{
+		return 1;
+	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
 private:

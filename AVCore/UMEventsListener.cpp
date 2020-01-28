@@ -15,7 +15,7 @@ void UMEventsManager::listen()
 		// Пока сообщения валятся
 		while (pipe->receiveMessage(message) != -1 && !stopSignal)
 		{
-			//TODO обработка сообщений
+			// обработка сообщений
 			if (message != "")
 			{
 				std::cout << "Message: " << message << std::endl;
