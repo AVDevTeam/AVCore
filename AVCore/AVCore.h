@@ -10,7 +10,7 @@
 #include "UMEventsListener.h"
 #include <mutex>
 
-#define TESTBUILD
+// #define TESTBUILD
 
 class AVCore : public ICoreImage, public IPluginManagerImage
 {

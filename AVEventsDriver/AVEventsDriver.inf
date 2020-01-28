@@ -10,7 +10,7 @@ Signature   = "$Windows NT$"
 Class = "ContentScreener"
 ClassGuid = {3e3f0674-c83c-4558-bb26-9820e1eba5c5}
 Provider    = %ManufacturerName%
-DriverVer   = 01/01/2018,0.0.0.1
+DriverVer = 01/28/2020,12.54.1.957
 CatalogFile = AVEventsDriver.cat
 
 [DestinationDirs]
@@ -97,3 +97,4 @@ Instance1.Name          = "AVEventsDriver Instance"
 ; TODO - Change the altitude value, see https://msdn.microsoft.com/en-us/windows/hardware/drivers/ifs/load-order-groups-and-altitudes-for-minifilter-drivers
 Instance1.Altitude       = "265010"
 Instance1.Flags         = 0x0              ; Allow all attachments
+

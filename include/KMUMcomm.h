@@ -8,22 +8,20 @@ This header file defines the common data structure used by kernel and user.
 
 // debug switches for KM event generators.
 #pragma region EVENTS_SWITCHES
-#define REGISTRY_EVENTS
-
-/*
-#define PROCESS_HANDLE_EVENTS
-#define THREAD_HANDLE_EVENTS
-
-#define PROCESS_CREATE_EVENTS
-#define PROCESS_EXIT_EVENTS
-
-#define THREAD_CREATE_EVENTS
-#define THREAD_EXIT_EVENTS
-
-#define IMAGE_EVENTS
-
-#define FILE_SYSTEM_EVENTS
-*/
+//#define REGISTRY_EVENTS
+//
+//#define PROCESS_HANDLE_EVENTS
+//#define THREAD_HANDLE_EVENTS
+//
+//#define PROCESS_CREATE_EVENTS
+//#define PROCESS_EXIT_EVENTS
+//
+//#define THREAD_CREATE_EVENTS
+//#define THREAD_EXIT_EVENTS
+//
+//#define IMAGE_EVENTS
+//
+//#define FILE_SYSTEM_EVENTS
 #pragma endregion EVENTS_SWITCHES
 
 /**
@@ -64,6 +62,7 @@ typedef enum _AV_EVENT_TYPE
 	AvRegOpenKey, /*!< Registry key open operation (RegNtPreOpenKey[Ex]) */
 	AvApcProcessInject, /*!< Internal event for APC injection control (PsSetCreateProcessNotifyRoutineEx sent from injdrv) */
 	AvWinApiCall, /*!< UM event passed from injected hooking engine (detours hooks) */
+	AvNetwork, /*!< New network packet notification */
 } AV_EVENT_TYPE;
 
 /**
