@@ -140,7 +140,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 	switch (CtrlCode)
 	{
 	case SERVICE_CONTROL_STOP:
-		
+
 		OutputDebugString("AVCore: ServiceCtrlHandler: SERVICE_CONTROL_STOP Request");
 
 		if (g_ServiceStatus.dwCurrentState != SERVICE_RUNNING)

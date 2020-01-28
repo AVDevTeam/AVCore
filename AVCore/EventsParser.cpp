@@ -1,3 +1,4 @@
+#include <ws2tcpip.h>
 #include "EventsParser.h"
 
 AvFSEventCreate::AvFSEventCreate(char requestorMode, int requestorPID, std::string FilePath)
@@ -533,4 +534,78 @@ std::string AvEventWinApiCall::getFunctionName()
 std::list<std::string> AvEventWinApiCall::getFunctionArgs()
 {
 	return this->argumetns;
+}
+
+AvEvent* AvEventNetworkParser::parse(PVOID event)
+{
+	PAV_EVENT_NETWORK eventnetwork = (PAV_EVENT_NETWORK)event;
+	char* data = NULL;
+	if (eventnetwork->data != NULL && eventnetwork->dataLength != 0) {
+		data = new char[eventnetwork->dataLength];
+		if (data != NULL) {
+			memcpy_s(data, eventnetwork->dataLength, eventnetwork->data, eventnetwork->dataLength);
+		}
+	}
+	
+	AvEvent* instance = reinterpret_cast<AvEvent*>(new AvEventNetwork(
+		(uint8_t*)eventnetwork->localAddress, (uint8_t*)eventnetwork->remoteAddress,
+		eventnetwork->localPort, eventnetwork->remotePort,
+		eventnetwork->isIPV6 ? AF_INET6 : AF_INET,
+		data, eventnetwork->dataLength
+	));
+	return instance;
+}
+
+AvEventNetwork::~AvEventNetwork() {
+	delete this->data;
+}
+
+void *AvEventNetwork::getLocalAddress()
+{
+	return (void*)this->localAddress;
+}
+
+void *AvEventNetwork::getRemoteAddress()
+{
+	return (void*)this->remoteAddress;
+}
+
+char *AvEventNetwork::getLocalAddressStr()
+{
+	char *buffer = new char[64];
+	memset(buffer, 0, 64);
+	InetNtopA(this->family, this->localAddress, buffer, 64);
+	return buffer;
+}
+
+char *AvEventNetwork::getRemoteAddressStr()
+{
+	char* buffer = new char[64];
+	memset(buffer, 0, 64);
+	InetNtopA(this->family, this->remoteAddress, buffer, 64);
+	return buffer;
+}
+
+int AvEventNetwork::getLocalPort()
+{
+	return this->localPort;
+}
+
+int AvEventNetwork::getRemotePort()
+{
+	return this->remotePort;
+}
+
+int AvEventNetwork::getFamily()
+{
+	return this->family;
+}
+
+char* AvEventNetwork::getData()
+{
+	return this->data;
+}
+unsigned long long AvEventNetwork::getDataLength()
+{
+	return this->dataLength;
 }
