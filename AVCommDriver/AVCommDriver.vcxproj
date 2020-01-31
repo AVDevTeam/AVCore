@@ -320,6 +320,7 @@ copy /Y "$(SolutionDir)build\$(Platform)\$(ConfigurationName)\$(TargetName).lib"
     <None Exclude="@(None)" Include="AVCommDriver.def" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\EventsKMStructures.h" />
     <ClInclude Include="AVComm.h" />
     <ClInclude Include="Globals.h" />
   </ItemGroup>

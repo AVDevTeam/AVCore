@@ -186,20 +186,6 @@ public:
 };
 
 /**
-\brief AvWinApiCall interface
-Interface for AvWinApiCall that will be used
-in plugins to access event parameters.
-*/
-class IEventWinApiCall
-{
-public:
-	virtual ~IEventWinApiCall() {}
-	virtual int getPID() = 0;
-	virtual std::string getFunctionName() = 0;
-	virtual std::list<std::string> getFunctionArgs() = 0;
-};
-
-/**
 \brief IEventNetwork interface
 Interface for AvNetwork that will be used
 in plugins to access event parameters.
@@ -217,4 +203,18 @@ public:
 	virtual int getFamily() = 0;
 	virtual char *getData() = 0;
 	virtual unsigned long long getDataLength() = 0;
+};
+
+/**
+\brief AvWinApiCall interface
+Interface for AvWinApiCall that will be used
+in plugins to access event parameters.
+*/
+class IEventWinApiCall
+{
+public:
+	virtual ~IEventWinApiCall() {}
+	virtual int getPID() = 0;
+	virtual std::string getFunctionName() = 0;
+	virtual std::list<std::string> getFunctionArgs() = 0;
 };

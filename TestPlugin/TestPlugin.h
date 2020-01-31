@@ -35,6 +35,8 @@ public:
 	}
 	virtual std::string& getDescription() override;
 	virtual IConfig* getConfig() override;
+
+	virtual int processCommand(std::string name, std::string args) override;
 private:
 	std::string name = std::string("TestPlugin");
 	std::string description = std::string("Just a test plugin.");

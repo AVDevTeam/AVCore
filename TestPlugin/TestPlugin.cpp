@@ -206,3 +206,8 @@ IConfig* TestPlugin::getConfig()
 {
 	return this->configManager;
 }
+
+int TestPlugin::processCommand(std::string name, std::string args)
+{
+	return 0;
+}

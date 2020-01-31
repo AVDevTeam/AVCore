@@ -15,15 +15,6 @@
     <Filter Include="CommPortServer">
       <UniqueIdentifier>{2aa6c985-1dde-4262-9f24-6c0c1328558f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="PluginManager">
-      <UniqueIdentifier>{a63de55a-240f-449f-8acc-379f67234af2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="PluginManager\EventParsers">
-      <UniqueIdentifier>{8622c304-db17-423d-bc2d-57bfcee26474}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ConfigurationManagers">
-      <UniqueIdentifier>{d04efef8-8157-4260-b82f-4ba930ade44c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Loggers">
       <UniqueIdentifier>{1b082301-f2ef-45c5-9ffe-7abd6e9301a9}</UniqueIdentifier>
     </Filter>
@@ -37,7 +28,16 @@
     <Filter Include="AVCore\Images">
       <UniqueIdentifier>{d34141d6-b963-4aac-83c0-7ea7a4fc016d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Managers\FileLogger">
+    <Filter Include="Managers\PluginManager">
+      <UniqueIdentifier>{a63de55a-240f-449f-8acc-379f67234af2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\PluginManager\EventParsers">
+      <UniqueIdentifier>{8622c304-db17-423d-bc2d-57bfcee26474}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Managers\ConfigurationManagers">
+      <UniqueIdentifier>{d04efef8-8157-4260-b82f-4ba930ade44c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Loggers\FileLogger">
       <UniqueIdentifier>{167f2c42-c8ea-43a8-9bf1-2acd525ddcad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -52,16 +52,16 @@
       <Filter>CommPortServer</Filter>
     </ClCompile>
     <ClCompile Include="PluginManager.cpp">
-      <Filter>PluginManager</Filter>
+      <Filter>Managers\PluginManager</Filter>
     </ClCompile>
     <ClCompile Include="EventsParser.cpp">
-      <Filter>PluginManager\EventParsers</Filter>
+      <Filter>Managers\PluginManager\EventParsers</Filter>
     </ClCompile>
     <ClCompile Include="ConfigManager.cpp">
-      <Filter>ConfigurationManagers</Filter>
+      <Filter>Managers\ConfigurationManagers</Filter>
     </ClCompile>
     <ClCompile Include="FileLogger.cpp">
-      <Filter>Managers\FileLogger</Filter>
+      <Filter>Loggers\FileLogger</Filter>
     </ClCompile>
     <ClCompile Include="AVCore.cpp">
       <Filter>AVCore</Filter>
@@ -90,16 +90,16 @@
       <Filter>CommPortServer</Filter>
     </ClInclude>
     <ClInclude Include="PluginManager.h">
-      <Filter>PluginManager</Filter>
+      <Filter>Managers\PluginManager</Filter>
     </ClInclude>
     <ClInclude Include="EventsParser.h">
-      <Filter>PluginManager\EventParsers</Filter>
+      <Filter>Managers\PluginManager\EventParsers</Filter>
     </ClInclude>
     <ClInclude Include="ConfigManager.h">
-      <Filter>ConfigurationManagers</Filter>
+      <Filter>Managers\ConfigurationManagers</Filter>
     </ClInclude>
     <ClInclude Include="FileLogger.h">
-      <Filter>Managers\FileLogger</Filter>
+      <Filter>Loggers\FileLogger</Filter>
     </ClInclude>
     <ClInclude Include="AVCore.h">
       <Filter>AVCore</Filter>
@@ -119,11 +119,11 @@
     <ClInclude Include="IPluginManagerImage.h">
       <Filter>AVCore\Images</Filter>
     </ClInclude>
-    <ClInclude Include="UMEventsListener.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MessageManager.h">
       <Filter>Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="UMEventsListener.h">
+      <Filter>AVCore</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

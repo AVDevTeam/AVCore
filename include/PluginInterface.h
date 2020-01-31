@@ -28,22 +28,21 @@ class IManager
 public:
 	virtual ~IManager() {}
 	/**
-	Enables plugin to register custom callbacks for supported
-	events.
+	\brief Method for callbacks registration
+
+	Enables plugin to register custom callbacks for supported events.
 
 	\param[in] plugin Pointer to plugin instance that registers the callback.
-
 	\param[in] callbackId Arbitrary integer value that will server to identify the callback within the plugin.
 	This value will be passed to plugin from IManager when the event occurs.
 
 	\param[in] eventType Type of event to which the callback will be attached.
-
 	\param[in] priority Integer value of callback priority. Callbacks with lesser priority will be called first.
 
 	\return reserved (always 0)
 	*/
 	virtual int registerCallback(IPlugin* plugin, int callbackId, AV_EVENT_TYPE eventType, int priority) = 0;
-
+	
 	virtual IPlugin* loadPlugin(std::string path) = 0;
 	virtual void unloadPlugin(std::string name) = 0;
 
@@ -71,34 +70,54 @@ class IPlugin
 {
 public:
 	virtual ~IPlugin() {}
-	/*
-	Method description:
-		Method for plugin initialization.
-	Arguments:
-		IManager * - pointer to the pluginManager instance that will
-		be used to set callbacks via registerCallback method.
-
-		HMODULE - module handle received via LoadLibrary in loadPlugin
-		method of IManager. Plugins shoud provide access to it via
-		getModule method.
+	/**
+	\brief Method for plugin initialization.
+	\param[in] manager pointer to the pluginManager instance that will be used to set callbacks via registerCallback method.
+	\param[in] module module handle received via LoadLibrary in loadPlugin method of IManager. Plugins shoud provide access to it via getModule method.
+	\param[in] configManager instant of configuration manager that is used to access plugin's registry key.
 	*/
-	virtual void init(IManager*, HMODULE, IConfig*) = 0;
-	// Plugins should implement resources dealocation in this method.
+	virtual void init(IManager* manager, HMODULE module, IConfig* configManager) = 0;
+	/**
+	Plugins should implement resources dealocation in this method.
 	// deinit() should be called on pluginUnload in IManager.
+	*/
 	virtual void deinit() = 0;
 
-	/*
-	Method description:
-		Entry point for plugin's event processing logic. This method
-		will be called from IManager in processEvent.
+	/**
+	\brief Enables access to registered callbacks from IManager
+	
+	Entry point for plugin's event processing logic. This method
+	will be called from IManager in processEvent.
+
+	\param[in] callbackId callback identifier that was registered via registerCallback method.
+	\param[in] pointer to the event instance.
+	\param[out] pointer to the message that will be passed back to the event source.
 	*/
 	virtual AV_EVENT_RETURN_STATUS callback(int callbackId, void* event, void** umMessage) = 0;
-	
-	// methods that provide access to the information about the plugin.
+
+	virtual int processCommand(std::string name, std::string args) = 0;
+		
+	/**
+	\brief methods that provide access to the information about the plugin.
+	*/
 	virtual std::string& getName() = 0;
+	/**
+	\brief returns brief plugin description.
+	*/
 	virtual std::string& getDescription() = 0;
+	/**
+	\brief returns plugin version.
+
+	This method is used to implement plugins updates.
+	*/
 	virtual unsigned int getVersion() = 0;
+	/**
+	\brief returns stored module handle.
+	*/
 	virtual HMODULE getModule() = 0;
+	/**
+	\brief returns plugin's configuration manager.
+	*/
 	virtual IConfig* getConfig() = 0;
 };
 
@@ -112,37 +131,53 @@ typedef enum _ConfigParamType {
 typedef std::map<std::string, ConfigParamType> paramMap;
 typedef std::pair<std::string, ConfigParamType> paramPair;
 
-// Interface for configuration managers
+/**
+\class
+\brief Interface for configuration managers
+
+This interface defines basic functionality of config stores.
+Different implementations of this interface should implement
+configs serrialization in different formats (different storages)
+such as: registry, file system, etc.
+*/
 class IConfig
 {
 public:
 	virtual ~IConfig() {}
-	/*
-	Method description:
-		Initializes IConfig store (opens registry key).
-	Arguments:
-		moduleId - string that identifies a module that will
+	/**
+	\brief Initializes IConfig store
+	
+	\param[in] moduleId string that identifies a module that will
 		use this IConfig. It shoud be unique because it will
 		make up the reg key path.
 	*/
 	virtual void init(std::string moduleId) = 0;
-	// releases IConfig store.
+	/**
+	\brief releases IConfig store.
+	*/
 	virtual void deinit() = 0;
-	// this function is used by plugins to set their parameters' lists.
+	/**
+	\brief this function is used by plugins to set their parameters' lists.
+	*/
 	virtual void setParamMap(paramMap*) = 0;
-	// this function should be used to query parameter list for the IConfig.
+	/**
+	\brief this function should be used to query parameter list for the IConfig.
+	*/
 	virtual paramMap* getParamMap() = 0;
-	// parameter getters
+	
 	virtual DWORD getDwordParam(std::string paramName) = 0;
 	virtual std::string getStringParam(std::string paramName) = 0;
 	virtual std::list<std::string>* getListParam(std::string paramName) = 0;
-	// parameter setters
+	
 	virtual void setDwordParam(std::string& paramName, DWORD value) = 0;
 	virtual void setStringParam(std::string& paramName, std::string& value) = 0;
 	virtual void setListParam(std::string& paramName, std::list<std::string>& value) = 0;
 };
 
-// Interface for debug loggers.
+/**
+\class
+\brief Interface for debug loggers.
+*/
 class ILogger
 {
 public:

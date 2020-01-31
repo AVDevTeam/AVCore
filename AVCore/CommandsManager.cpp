@@ -97,8 +97,10 @@ std::string CommandsManager::manage(std::string _command)
 		else
 		{
 			std::string pluginsFolder = this->pluginManager->getConfig()->getStringParam("PluginsPath");
-			this->pluginManager->loadPlugin(pluginsFolder + pluginName + ".dll");
-			ret = "Plugin loaded.";
+			if (this->pluginManager->loadPlugin(pluginsFolder + pluginName + ".dll") != nullptr)
+				ret = "Plugin loaded.";
+			else
+				ret = "Plugin not found.";
 		}
 	}
 	// Unload plugin command
@@ -114,6 +116,24 @@ std::string CommandsManager::manage(std::string _command)
 		else
 		{
 			// Error plugin not found.
+			ret = "Plugin not found.";
+		}
+	}
+	// Plugin command
+	else if (command == "PluginCommand")
+	{
+		std::string pluginName = jCommand.find("PluginName").value();
+		std::string command = jCommand.find("Command").value();
+		std::string args = jCommand.find("Args").value();
+
+		IPlugin* pluginForCommand = this->pluginManager->getPluginByName(pluginName);
+		if (pluginForCommand != nullptr)
+		{ // if target plugin is loaded
+			int status = pluginForCommand->processCommand(command, args);
+			ret = std::to_string(status);
+		}
+		else
+		{
 			ret = "Plugin not found.";
 		}
 	}

@@ -413,7 +413,7 @@ private:
 	std::list<std::string> argumetns;
 };
 
-// AvEventRegOpenKey parser
+// AvEventNetworkParser parser
 class AvEventNetworkParser : EventParser
 {
 public:

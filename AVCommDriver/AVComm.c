@@ -374,7 +374,7 @@ given KM memory block there.
 
 \param[in] srcBuffer Pointer to the source buffer located in KM address space.
 \param[in] srcSize Number of bytes to move from srcBuffer to UM.
-\param[out] outUmBuffer Pointer to the pointer that will recieve the address
+\param[out] outUmBuffer Pointer to the pointer that will recieve the address of created buffer.
 \param[out\ outUmSize Pointer to the variable where the size of allocated UM buffer will be stored.
 of the buffer allocated in the UM address space. Should be zero.
 
