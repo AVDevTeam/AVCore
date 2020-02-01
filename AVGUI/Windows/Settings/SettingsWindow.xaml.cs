@@ -37,13 +37,6 @@ namespace AVGUI
                 {
                     PPManager.AddToPluginsPanel(plugin.Key, (int)plugin.Value);
                 }
-
-
-                //    EntumeratePluginsReply PluginsListJson = JsonConvert.DeserializeObject<EntumeratePluginsReply>(jPluginsList);
-                //foreach (string plugin in PluginsListJson.Plugins)
-                //{
-                //    PPManager.AddToPluginsPanel(plugin);
-                //}
             }
         }
 
@@ -92,9 +85,6 @@ namespace AVGUI
         // Настройки решили применить
         private void acceptBtn_Clicked(object sender, RoutedEventArgs e)
         {
-           // Dictionary<string, Dictionary<string, List<string>>> changedParams = new Dictionary<string, Dictionary<string, List<string>>>();
-           // changedParams = PPManager.getNewSettings();
-
             // Отправили сообщение об изменении параметров для каждого модуля
             foreach(var item in PPManager.getNewSettings())
             {

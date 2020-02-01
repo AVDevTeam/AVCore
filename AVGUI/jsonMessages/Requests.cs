@@ -10,6 +10,22 @@ namespace AVGUI
     //id 0 - На запрос требуется ответ
     //id 1 - На запрос не требуется ответ
 
+    class CustomPluginRequest
+    {
+        public int id;
+        public string PluginName;
+        public string CommandName;
+        public string Args;
+
+        public CustomPluginRequest(int _id, string _commandName, string _pluginName, string _args)
+        {
+            id = _id;
+            CommandName = _commandName;
+            PluginName = _pluginName;
+            Args = _args;
+        }
+    }
+
     // Выгрузить плагин
     class UnloadPluginRequest
     {

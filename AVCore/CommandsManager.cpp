@@ -1,7 +1,9 @@
 
 #include "CommandsManager.h"
 #include "IPluginManagerImage.h"
-#include "json.hpp"
+#include "../Dependencies/json.hpp"
+#include <map>
+
 using json = nlohmann::json;
 
 //https://habr.com/ru/company/infopulse/blog/254075/	- guide
@@ -137,6 +139,32 @@ std::string CommandsManager::manage(std::string _command)
 			ret = "Plugin not found.";
 		}
 	}
+	// Change plugins settings
+	else if (command == "ChangePluginSettings")
+	{
+		std::string pluginName = jCommand.find("PluginName").value();
+		
+		// Мапа с параметрами
+		// Пример содержимого - Param1 : [p1, p2], Param2 : [p1]
+		std::map<std::string, std::list<std::string>>changedParams;
+		
+		// Заполнение мапы с параметрами
+		json jsonChangedParams = jCommand.find("ChangedParams").value();
+		for (json::iterator it = jsonChangedParams.begin(); it != jsonChangedParams.end(); ++it) 
+		{
+			std::list<std::string> list;
+			for (json::iterator it2 = it.value().begin(); it2 != it.value().end(); ++it2)
+			{
+				list.push_back(it2.value());
+			}
+			changedParams[it.key()] = list;
+		}
+
+
+	}
+
+
+
 	return ret;
 }
 
