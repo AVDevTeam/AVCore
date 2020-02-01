@@ -143,28 +143,74 @@ std::string CommandsManager::manage(std::string _command)
 	else if (command == "ChangePluginSettings")
 	{
 		std::string pluginName = jCommand.find("PluginName").value();
-		
-		// Мапа с параметрами
-		// Пример содержимого - Param1 : [p1, p2], Param2 : [p1]
-		std::map<std::string, std::list<std::string>>changedParams;
-		
-		// Заполнение мапы с параметрами
-		json jsonChangedParams = jCommand.find("ChangedParams").value();
-		for (json::iterator it = jsonChangedParams.begin(); it != jsonChangedParams.end(); ++it) 
+		IPlugin* plugin = this->pluginManager->getPluginByName(pluginName);
+		if (plugin != nullptr)
 		{
-			std::list<std::string> list;
-			for (json::iterator it2 = it.value().begin(); it2 != it.value().end(); ++it2)
+			// Мапа с параметрами
+			// Пример содержимого - Param1 : [p1, p2], Param2 : [p1]
+			std::map<std::string, std::list<std::string>> changedParams;
+
+			// Заполнение мапы с параметрами
+			json jsonChangedParams = jCommand.find("ChangedParams").value();
+			for (json::iterator it = jsonChangedParams.begin(); it != jsonChangedParams.end(); ++it)
 			{
-				list.push_back(it2.value());
+				std::list<std::string> list;
+				for (json::iterator it2 = it.value().begin(); it2 != it.value().end(); ++it2)
+				{
+					list.push_back(it2.value());
+				}
+				changedParams[it.key()] = list;
 			}
-			changedParams[it.key()] = list;
+
+			for (std::map<std::string, std::list<std::string>>::iterator it = changedParams.begin(); it != changedParams.end(); ++it)
+			{
+				std::string param = (*it).first;
+				std::list<std::string> values = (*it).second;
+				paramMap* pluginParams = plugin->getConfig()->getParamMap();
+				if (pluginParams->find(param) != pluginParams->end())
+				{ // valid param name
+					switch (pluginParams->at(param))
+					{
+					case DwordParam:
+						if (values.size() > 0)
+						{
+							DWORD value = 0;
+							try
+							{
+								value = std::stoi(values.front());
+								plugin->getConfig()->setDwordParam(param, value);
+							}
+							catch (std::invalid_argument const& e)
+							{
+								continue;
+							}
+							catch (std::out_of_range const& e)
+							{
+								continue;
+							}
+						}
+						break;
+					case StringParam:
+						if (values.size() > 0)
+						{
+							plugin->getConfig()->setStringParam(param, values.front());
+						}
+						break;
+					case ListParam:
+						plugin->getConfig()->setListParam(param, values);
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			ret = "Configs set";
 		}
-
-
+		else
+		{
+			ret = "Plugin not found.";
+		}
 	}
-
-
-
 	return ret;
 }
 
