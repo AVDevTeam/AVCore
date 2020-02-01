@@ -93,6 +93,8 @@ int PipeServer::createNamedPipe()
 		std::cout << "CreateNamedPipe failed: " << GetLastError() << std::endl;
 		return -1;
 	}
+
+	return 1;
 }
 
 int PipeServer::waitForClient(int &_stopSignal)
@@ -115,6 +117,8 @@ int PipeServer::waitForClient(int &_stopSignal)
 
 		Sleep(300);
 	}
+
+	return 0;
 }
 
 int PipeServer::receiveMessage(std::string & _message)
@@ -175,6 +179,8 @@ int PipeServer::sendMessage(const std::string & _message)
 		std::cout << "WriteFile failed: " << GetLastError() << std::endl;
 		return -1;
 	}
+
+	return 1;
 }
 
 

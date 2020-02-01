@@ -11,8 +11,6 @@ private:
 	PluginManager *  pluginManager;
 	MessageManager * messageManager;
 public:
-
-
 	std::string manage(std::string _command);	// Обработка поступающих запросов
 
 	CommandsManager(IPluginManagerImage * _core);

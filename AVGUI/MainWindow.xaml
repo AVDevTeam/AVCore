@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AVGUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="600" ResizeMode="NoResize">
+        Title="MainWindow" Height="470" Width="620" ResizeMode="NoResize">
     <Grid>
         
         <!-- Кнопка настроек -->
@@ -57,6 +57,9 @@
                 Margin="222,305,222,66" 
                 Name="ScanModeSlider"
                 ValueChanged="ScanModeSlider_ValueChanged"/>
+        <TextBox Name="textbox1"  HorizontalAlignment="Left" Height="23" Margin="455,145,0,0" TextWrapping="Wrap" Text="Plugin" VerticalAlignment="Top" Width="120"/>
+        <TextBox Name="textbox2" HorizontalAlignment="Left" Height="23" Margin="455,185,0,0" TextWrapping="Wrap" Text="Command" VerticalAlignment="Top" Width="120"/>
+        <TextBox Name="textbox3" HorizontalAlignment="Left" Height="23" Margin="455,225,0,0" TextWrapping="Wrap" Text="Args" VerticalAlignment="Top" Width="120"/>
 
     </Grid>
 </Window>

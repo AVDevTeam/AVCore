@@ -315,7 +315,9 @@ namespace AVGUI.Windows.Settings
             // Если у данного модуля данная настройка уже изменялась, то нужно ее перетереть
             catch (System.ArgumentException ex2)
             {
-                changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
+               // changedParams[ChosenModuleName].Remove(groupBox.Header.ToString());
+                changedParams[ChosenModuleName][groupBox.Header.ToString()] = value;
+               //changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
             }
         }
 
@@ -376,7 +378,7 @@ namespace AVGUI.Windows.Settings
             }
             catch (System.ArgumentException ex2)
             {
-                changedParams[ChosenModuleName] = new Dictionary<string, List<string>> { { groupBox.Header.ToString(), value } };
+                changedParams[ChosenModuleName][groupBox.Header.ToString()] = value;
             }
         }
     }

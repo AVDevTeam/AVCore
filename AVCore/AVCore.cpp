@@ -120,7 +120,7 @@ void AVCore::start(void)
 	testEventsParsers(this->manager);
 
 	this->logger->log("AVCore. Starting UM events listener.");
-	this->umEventsManager = new UMEventsManager(this->manager);
+	//this->umEventsManager = new UMEventsManager(this->manager);
 	this->logger->log("AVCore. UM events listener started.");
 	this->logger->log("AVCore. Startup finished.");
 

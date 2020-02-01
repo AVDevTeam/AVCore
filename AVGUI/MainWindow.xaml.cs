@@ -81,8 +81,15 @@ namespace AVGUI
         private void ScanButton_Click(object sender, RoutedEventArgs e)
         {
             // Отправить команду на сканирование
-            string command = JsonConvert.SerializeObject(new ScanCommand(ScanMode));
-            Pipe.SendMessage(command);
+            //string command = JsonConvert.SerializeObject(new ScanCommand(ScanMode));
+            //Pipe.SendMessage(command);
+
+            string PluginName = textbox1.Text.ToString();
+            string CommandName = textbox2.Text.ToString();
+            string Args = textbox3.Text.ToString();
+
+            string request = JsonConvert.SerializeObject(new CustomPluginRequest(1, CommandName, PluginName, Args));
+            Pipe.SendMessage(request);
         }
     }
 }
