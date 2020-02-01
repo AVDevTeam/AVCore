@@ -31,28 +31,40 @@ void MessageManager::join()
 
 void MessageManager::listen()
 {
-	std::string jMessage;
+	std::string message;
 
 	while (!stopSignal)
 	{
 		pipe->waitForClient(stopSignal);
 
-		json messages;
-
-		for (const auto& t : messagesList)
+		while (pipe->receiveMessage(message) != -1 && !stopSignal)
 		{
-			// Кладется класс и сообщение пример: ("warning", "warning message")
-			messages[std::get<0>(t)] = std::get<1>(t);
+			if (message == "ready\r\n")
+			{
+				std::cout << "GUI asking messages" << message << std::endl;
+
+				json messages;
+				std::string jMessage;
+
+				for (const auto& t : messagesList)
+				{
+					// Кладется класс и сообщение пример: ("warning", "warning message")
+					messages[std::get<0>(t)] = std::get<1>(t);
+				}
+
+				jMessage = messages.dump();
+				if (jMessage != "null")
+				{
+					pipe->sendMessage(jMessage);
+					messagesList.clear();
+				}
+
+			}
+			Sleep(500);
 		}
 
-		jMessage = messages.dump();
-		if (jMessage != "null")
-		{
-			pipe->sendMessage(jMessage);
-			messagesList.clear();
-		}
 
-		Sleep(500);
+
 	}
 }
 

@@ -15,12 +15,14 @@ namespace AVGUI
         public int id;
         public string PluginName;
         public string CommandName;
+        public string Command;
         public string Args;
 
         public CustomPluginRequest(int _id, string _commandName, string _pluginName, string _args)
         {
+            CommandName = "PluginCommand";
             id = _id;
-            CommandName = _commandName;
+            Command = _commandName;
             PluginName = _pluginName;
             Args = _args;
         }

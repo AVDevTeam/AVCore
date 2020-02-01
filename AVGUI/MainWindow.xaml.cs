@@ -11,8 +11,8 @@ namespace AVGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        PipeClient Pipe;        // Pipe для отправки 
-        PipeClient recvPipe;     // Pipe для приема сообщений
+        PipeClient Pipe;            // Pipe для отправки 
+        PipeClient recvPipe;        // Pipe для приема сообщений
 
         int ScanMode = 1;
 
@@ -31,7 +31,7 @@ namespace AVGUI
             recvPipe = new PipeClient("AVCoreConnection2");
 
             // Пока пользователь не нажем "нет" попытки подключиться будут повторяться 
-            while (!Pipe.Connect(500))
+            while (!(Pipe.Connect(400) && recvPipe.Connect(400)))
             {
                 if (MessageBox.Show("Connetion to AVCover failed. Tra again?", "Connetion to AVCover failed",
                     MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)

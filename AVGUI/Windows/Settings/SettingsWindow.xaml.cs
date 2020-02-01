@@ -9,6 +9,7 @@ namespace AVGUI
     public partial class SettingsWindow : Window
     {
         PipeClient Pipe;
+
         PluginsPanelManager PPManager;          // Менеджер панели плагинов
 
 

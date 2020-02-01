@@ -57,8 +57,8 @@
                 Margin="222,305,222,66" 
                 Name="ScanModeSlider"
                 ValueChanged="ScanModeSlider_ValueChanged"/>
-        <TextBox Name="textbox1"  HorizontalAlignment="Left" Height="23" Margin="455,145,0,0" TextWrapping="Wrap" Text="Plugin" VerticalAlignment="Top" Width="120"/>
-        <TextBox Name="textbox2" HorizontalAlignment="Left" Height="23" Margin="455,185,0,0" TextWrapping="Wrap" Text="Command" VerticalAlignment="Top" Width="120"/>
+        <TextBox Name="textbox1"  HorizontalAlignment="Left" Height="23" Margin="455,145,0,0" TextWrapping="Wrap" Text="TestPlugin" VerticalAlignment="Top" Width="120"/>
+        <TextBox Name="textbox2" HorizontalAlignment="Left" Height="23" Margin="455,185,0,0" TextWrapping="Wrap" Text="TestCommand" VerticalAlignment="Top" Width="120"/>
         <TextBox Name="textbox3" HorizontalAlignment="Left" Height="23" Margin="455,225,0,0" TextWrapping="Wrap" Text="Args" VerticalAlignment="Top" Width="120"/>
 
     </Grid>

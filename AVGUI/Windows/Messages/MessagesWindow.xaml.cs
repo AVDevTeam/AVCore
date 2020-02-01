@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -58,11 +59,12 @@ namespace AVGUI.Windows.Messages
             ContentRendered -= Main;
             LogManager = new LogManager(OutputHeader, RichTextBox1, AlertsHeader, RichTextBox2, WarningsHeader, RichTextBox3, DebugHeader, RichTextBox4);
 
-            Pipe.Connect(500);
+            string reply = "";
+            string request = "ready";
 
+            Pipe.SendMessage(request);
             Pipe.ListenMessage();
 
-            string reply = "";
             reply = Pipe.GetMessage(500, 2);
             parseJSonMessage(reply);
         }
