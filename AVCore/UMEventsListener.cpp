@@ -1,7 +1,7 @@
 #include "UMEventsListener.h"
 #include "EventsKMStructures.h"
-
 #include "json.hpp"
+
 using json = nlohmann::json;
 
 void UMEventsManager::listen()
