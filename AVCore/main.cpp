@@ -27,6 +27,8 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 // GLOBALS
 AVCore* avCore;
 
+
+
 #ifdef TESTBUILD
 int main(int argc, char* argv[])
 {
