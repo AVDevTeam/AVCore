@@ -20,7 +20,7 @@ typedef std::map <AV_EVENT_TYPE, priorityMap*> eventsMap;
 class PluginManager : public IManager
 {
 public:
-	PluginManager(ILogger* logger);
+	PluginManager(ILogger* logger, IMessageManager *messageManager);
 	virtual ~PluginManager() override;
 
 	virtual IPlugin * loadPlugin(std::string path) override;
@@ -50,6 +50,7 @@ public:
 
 	virtual ILogger* getLogger() override;
 	virtual IConfig* getConfig() override;
+	virtual IMessageManager* getMessageManager() override;
 
 private:
 	IConfig* pluginManagerConfig;
@@ -82,4 +83,5 @@ private:
 
 	// logger
 	ILogger* logger;
+	IMessageManager* messageManager;
 };

@@ -11,7 +11,7 @@ VOID WINAPI ServiceCtrlHandler(DWORD);
 
 #define SERVICE_NAME  "AVCore"
 #ifdef _WIN64
-#define LOG_PATH "C:\\log.txt"
+#define LOG_PATH "\\\\vmware-host\\Shared Folders\\shared\\log.txt"
 #else
 #define LOG_PATH "C:\\log.txt"
 #endif

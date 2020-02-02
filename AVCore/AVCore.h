@@ -9,18 +9,16 @@
 #include "UMEventsListener.h"
 #include <mutex>
 
-#define TESTBUILD
+//#define TESTBUILD
 
 class AVCore : public ICoreImage, public IPluginManagerImage
 {
 public:
-	MessageManager * messageManager;
-
 	AVCore(ILogger* logger) 
 	{ 
-		this->manager = new PluginManager(logger);
-		this->logger = logger;
 		this->messageManager = new MessageManager();
+		this->manager = new PluginManager(logger, (IMessageManager*)this->messageManager);
+		this->logger = logger;
 		this->commandsManager = new CommandsManager(this);
 		this->settingsManager = new SettingsManager();
 		this->pipeManager = new PipeManager(this);
@@ -56,6 +54,7 @@ private:
 	PluginManager * manager;
 	CommPortServer * portServer;
 	ILogger* logger;
+	MessageManager* messageManager;
 	HANDLE stopEvent = INVALID_HANDLE_VALUE;
 
 	// Унаследовано через ICoreImage

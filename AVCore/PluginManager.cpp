@@ -4,9 +4,10 @@
 
 typedef IPlugin* (* GetPlugin)();
 
-PluginManager::PluginManager(ILogger* logger)
+PluginManager::PluginManager(ILogger* logger, IMessageManager* messageManager)
 {
 	this->logger = logger;
+	this->messageManager = messageManager;
 	this->pluginManagerConfig = new UMModuleConfig(logger);
 	this->pluginManagerConfig->init("PluginManager");
 	paramMap* params = new paramMap();
@@ -139,7 +140,7 @@ Return value:
 */
 AV_EVENT_RETURN_STATUS PluginManager::processEvent(AV_EVENT_TYPE eventType, void* event, void** umMessage)
 {
-#ifdef TRUE 
+#ifdef NOTTRUE 
 	switch (eventType)
 	{
 	case AvFileCreate:
@@ -245,6 +246,11 @@ ILogger* PluginManager::getLogger()
 IConfig* PluginManager::getConfig()
 {
 	return this->pluginManagerConfig;
+}
+
+IMessageManager* PluginManager::getMessageManager()
+{
+	return this->messageManager;
 }
 
 void PluginManager::addEventParser(AV_EVENT_TYPE eventType, EventParser* parser)

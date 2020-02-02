@@ -14,6 +14,7 @@ class IManager;
 class IPlugin;
 class IConfig;
 class ILogger;
+class IMessageManager;
 
 /**
 \class
@@ -63,6 +64,7 @@ public:
 
 	virtual ILogger* getLogger() = 0;
 	virtual IConfig* getConfig() = 0;
+	virtual IMessageManager* getMessageManager() = 0;
 };
 
 // Interface for plugins
@@ -184,4 +186,17 @@ public:
 	virtual ~ILogger() {}
 
 	virtual void log(std::string) = 0;
+};
+
+/**
+\class
+\brief Interface GUI messages.
+*/
+class IMessageManager
+{
+public:
+	virtual void outLog(std::string) = 0;
+	virtual void outAlert(std::string) = 0;
+	virtual void outWarning(std::string) = 0;
+	virtual void outDebug(std::string) = 0;
 };

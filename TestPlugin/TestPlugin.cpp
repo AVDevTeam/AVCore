@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "TestPlugin.h"
 #include "EventsUMInterfaces.h"
 #include "KMUMcomm.h"
