@@ -76,6 +76,10 @@ void testEventsParsers(PluginManager* manager)
 	manager->processEvent(AvImageLoad, manager->parseKMEvent(AvImageLoad, &testImageLoad), &umMessage);
 	manager->processEvent(AvRegCreateKey, manager->parseKMEvent(AvRegCreateKey, &testOpenKey), &umMessage);
 	manager->processEvent(AvRegOpenKey, manager->parseKMEvent(AvRegOpenKey, &testOpenKey), &umMessage);
+
+	manager->processEvent(AvWinApiCall, 
+		(void*)(new AvEventWinApiCall(111, "CreateProcessW", std::list<std::string> {"some.exe", "some.exe /c net UsEr	"})), 
+			&umMessage);
 }
 
 void AVCore::start(void)
