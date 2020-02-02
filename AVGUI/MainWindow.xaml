@@ -23,7 +23,7 @@
         </Button>
 
         <!-- Кнопка логов и алертов -->
-        <Button Width="Auto" Height="Auto" Name="MessagesButton" Margin="45,150,449,171" Click="MessagesButton_Click" >
+        <Button Width="Auto" Height="Auto" Name="MessagesButton" Margin="245,25,249,296" Click="MessagesButton_Click" >
             <TextBlock Name="MessagesButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">MESSAGES</TextBlock>
 
             <Button.Template>
@@ -36,8 +36,22 @@
             </Button.Template>
         </Button>
 
+        <!-- Кнопка обновления -->
+        <Button Width="Auto" Height="Auto" Name="UpdateButton" Margin="449,25,45,296" Click="UpdateButton_Click" >
+            <TextBlock Name="UpdateButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">UPDATE</TextBlock>
+
+            <Button.Template>
+                <ControlTemplate  TargetType="Button">
+                    <Grid>
+                        <Ellipse Stroke="Black" StrokeThickness="3" Fill="White" />
+                        <Label Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+
         <!-- Кнопка сканирования -->
-        <Button Width="150" Height="150" Name="ScanButton" Click="ScanButton_Click">
+        <Button Width="150" Height="150" Name="ScanButton" Click="ScanButton_Click" >
             <TextBlock Name="ScanButtonTextBlock" TextAlignment="Center" TextWrapping="Wrap" FontSize="17">БЫСТРОЕ СКАНИРОВАНИЕ</TextBlock>
 
             <Button.Template>
@@ -50,16 +64,14 @@
             </Button.Template>
         </Button>
 
+        <!--
         <Slider Orientation="Horizontal"
                 Minimum="0" Maximum="2" Value="1"
                 IsSnapToTickEnabled="True"
                 TickFrequency="1" 
-                Margin="222,305,222,66" 
+                Margin="222,323,222,48" 
                 Name="ScanModeSlider"
                 ValueChanged="ScanModeSlider_ValueChanged"/>
-        <TextBox Name="textbox1"  HorizontalAlignment="Left" Height="23" Margin="455,145,0,0" TextWrapping="Wrap" Text="TestPlugin" VerticalAlignment="Top" Width="120"/>
-        <TextBox Name="textbox2" HorizontalAlignment="Left" Height="23" Margin="455,185,0,0" TextWrapping="Wrap" Text="TestCommand" VerticalAlignment="Top" Width="120"/>
-        <TextBox Name="textbox3" HorizontalAlignment="Left" Height="23" Margin="455,225,0,0" TextWrapping="Wrap" Text="Args" VerticalAlignment="Top" Width="120"/>
-
+         -->
     </Grid>
 </Window>

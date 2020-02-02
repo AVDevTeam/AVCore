@@ -574,7 +574,7 @@ char *AvEventNetwork::getLocalAddressStr()
 {
 	char *buffer = new char[64];
 	memset(buffer, 0, 64);
-	InetNtopA(this->family, this->localAddress, buffer, 64);
+	//InetNtopA(this->family, this->localAddress, buffer, 64);
 	return buffer;
 }
 
@@ -582,7 +582,7 @@ char *AvEventNetwork::getRemoteAddressStr()
 {
 	char* buffer = new char[64];
 	memset(buffer, 0, 64);
-	InetNtopA(this->family, this->remoteAddress, buffer, 64);
+	//InetNtopA(this->family, this->remoteAddress, buffer, 64);
 	return buffer;
 }
 

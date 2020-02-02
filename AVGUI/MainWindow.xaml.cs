@@ -41,6 +41,7 @@ namespace AVGUI
             }
         }
 
+        /*
         // Слайдер для изменения режима сканирования
         private void ScanModeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
@@ -62,6 +63,7 @@ namespace AVGUI
                     break;
             }
         }
+        */
 
         // Кликнули по кнопке настроек
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
@@ -77,18 +79,21 @@ namespace AVGUI
             messagesWindow.Show();
         }
 
+        // Кликнули по кнопке обновления
+        private void UpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            string request = JsonConvert.SerializeObject(new CustomPluginRequest(1, "Update", "UpdatePlugin", ""));
+            Pipe.SendMessage(request);
+        }
+
         // Кликнули по кнопке скана
         private void ScanButton_Click(object sender, RoutedEventArgs e)
         {
-            // Отправить команду на сканирование
-            //string command = JsonConvert.SerializeObject(new ScanCommand(ScanMode));
-            //Pipe.SendMessage(command);
+            // Отправить команды на сканирование
+            string request = JsonConvert.SerializeObject(new CustomPluginRequest(1, "scan", "CloudPlugin", ""));
+            Pipe.SendMessage(request);
 
-            string PluginName = textbox1.Text.ToString();
-            string CommandName = textbox2.Text.ToString();
-            string Args = textbox3.Text.ToString();
-
-            string request = JsonConvert.SerializeObject(new CustomPluginRequest(1, CommandName, PluginName, Args));
+            request = JsonConvert.SerializeObject(new CustomPluginRequest(1, "scan", "FileScanner", ""));
             Pipe.SendMessage(request);
         }
     }
