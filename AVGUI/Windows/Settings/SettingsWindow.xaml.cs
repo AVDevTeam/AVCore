@@ -36,7 +36,17 @@ namespace AVGUI
                 JObject jSonMessage = JObject.Parse(jPluginsList);
                 foreach (var plugin in jSonMessage)
                 {
-                    PPManager.AddToPluginsPanel(plugin.Key, (int)plugin.Value);
+                    int isRun = (int)plugin.Value["IsRun"];
+                    int version = 0;
+                    string description = "";
+
+                    if (isRun == 1)
+                    {
+                        version = (int)plugin.Value["Version"];
+                        description = (string)plugin.Value["Description"];
+                    }
+
+                    PPManager.AddToPluginsPanel(plugin.Key, isRun, version, description);
                 }
             }
         }

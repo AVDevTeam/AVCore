@@ -23,21 +23,29 @@ std::string CommandsManager::manage(std::string _command)
 		std::list<std::string>* pluginsNamesList = pluginManager->getConfig()->getListParam("Plugins");
 		std::list<std::string>* loadedPluginsNamesList = pluginManager->getPluginsNames();
 
-		json jEnumeratedPlugins;
+		json jEnumeratedPlugins;	// Плагины и их свойства
+		json jPropList;				// Свойства - включен ли, описание, версия
 
 		// Пройтись по всем плагинам
 		for (std::string pluginName : *pluginsNamesList)
 		{
 			// Убрать .dll и записать их в строку на отправку
 			pluginName.erase(pluginName.find(".dll"), 4);
-			jEnumeratedPlugins[pluginName] = 0;
+			jPropList["IsRun"] = 0;
+			jEnumeratedPlugins[pluginName] = jPropList;
 
 			// Если какие-то из плагинов прогруженны, то выставить им 1
 			for (const auto& loadedPluginName : *loadedPluginsNamesList)
 			{
 				if (pluginName == loadedPluginName)
 				{
-					jEnumeratedPlugins[pluginName] = 1;
+					IPlugin* plugin = pluginManager->getPluginByName(pluginName);
+					
+					jPropList["IsRun"] = 1;
+					jPropList["Version"] = plugin->getVersion();
+					jPropList["Description"] = plugin->getDescription();
+
+					jEnumeratedPlugins[pluginName] = jPropList;
 					break;
 				}
 			}

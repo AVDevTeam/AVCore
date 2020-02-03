@@ -14,7 +14,7 @@ namespace AVGUI.Windows.Settings
     // Данный класс занимается работой с отображением информации о плагинах
     class PluginsPanelManager
     {
-        List<Button> panelButtonsList;               // Список кнопок с панели
+        List<Button> panelButtonsList;          // Список кнопок с панели
 
         PipeClient Pipe;
         StackPanel PluginsPanel;                // Панель с плагинам
@@ -35,16 +35,18 @@ namespace AVGUI.Windows.Settings
         }
 
         // Создать кнопку очередного плагина
-        public void AddToPluginsPanel(string _plugin, int _isLoaded)
+        public void AddToPluginsPanel(string _plugin, int _isLoaded, int _version, string _description)
         {
             Grid DynamicGrid = new Grid();
             DynamicGrid.Name = _plugin + "_handle_grid";
 
             ColumnDefinition gridColumn1 = new ColumnDefinition();
             ColumnDefinition gridColumn2 = new ColumnDefinition();
+            ColumnDefinition gridColumn3 = new ColumnDefinition();
+
             DynamicGrid.ColumnDefinitions.Add(gridColumn1);
             DynamicGrid.ColumnDefinitions.Add(gridColumn2);
-
+            DynamicGrid.ColumnDefinitions.Add(gridColumn3);
 
             // Создали кнопку плагина
             Button btn = new Button();
@@ -55,16 +57,29 @@ namespace AVGUI.Windows.Settings
             btn.IsEnabled = _isLoaded == 1;
             panelButtonsList.Add(btn);
 
+            // Создали галку к нему
             CheckBox chkbx = new CheckBox();
             chkbx.Name = _plugin + "_chkbx";
             chkbx.Click += PluginCheckBox_Clicked;
            // chkbx.Unchecked += PluginCheckBox_Clicked;
             chkbx.IsChecked = _isLoaded == 1;
 
+            // Создали строку с версией и подсказку 
+            Label lbl = new Label();
+            lbl.Name = _plugin + "_lbl";
+            if(_version != 0)
+            {
+                lbl.Content = _version.ToString();
+                DynamicGrid.ToolTip = _description;
+
+            }
+
             DynamicGrid.Children.Add(btn);
             DynamicGrid.Children.Add(chkbx);
+            DynamicGrid.Children.Add(lbl);
             Grid.SetColumn(btn, 0);
             Grid.SetColumn(chkbx, 1);
+            Grid.SetColumn(lbl, 2);
 
             PluginsPanel.Children.Add(DynamicGrid);
         }
