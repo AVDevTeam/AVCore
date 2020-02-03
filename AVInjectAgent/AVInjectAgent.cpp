@@ -42,12 +42,64 @@ HANDLE WINAPI CreateFileWstub(
 		hTemplateFile);
 }
 
+BOOL(WINAPI* CreateProcessWorig) (
+	LPCWSTR               lpApplicationName,
+	LPWSTR                lpCommandLine,
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL                  bInheritHandles,
+	DWORD                 dwCreationFlags,
+	LPVOID                lpEnvironment,
+	LPCWSTR               lpCurrentDirectory,
+	LPSTARTUPINFOW        lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation
+	) = CreateProcessW;
+
+BOOL CreateProcessWstub(
+	LPCWSTR               lpApplicationName,
+	LPWSTR                lpCommandLine,
+	LPSECURITY_ATTRIBUTES lpProcessAttributes,
+	LPSECURITY_ATTRIBUTES lpThreadAttributes,
+	BOOL                  bInheritHandles,
+	DWORD                 dwCreationFlags,
+	LPVOID                lpEnvironment,
+	LPCWSTR               lpCurrentDirectory,
+	LPSTARTUPINFOW        lpStartupInfo,
+	LPPROCESS_INFORMATION lpProcessInformation
+)
+{
+	json j;
+	j["func"] = "CreateProcessW";
+	std::wstring wApplicationName(lpApplicationName);
+	std::wstring wCommandLine(lpCommandLine);
+	j["args"] = { std::string(wApplicationName.begin(), wApplicationName.end()), std::string(wCommandLine.begin(), wCommandLine.end()) };
+
+	AV_EVENT_RETURN_STATUS status = InjectAgent::sendUMEvent(j.dump());
+	if (status == AvEventStatusBlock)
+	{
+		return FALSE;
+	}
+	return CreateProcessWorig(
+		lpApplicationName,
+		lpCommandLine,
+		lpProcessAttributes,
+		lpThreadAttributes,
+		bInheritHandles,
+		dwCreationFlags,
+		lpEnvironment,
+		lpCurrentDirectory,
+		lpStartupInfo,
+		lpProcessInformation
+	);
+}
+
 void InjectAgent::hook()
 {
 	DetourRestoreAfterWith();
 	DetourTransactionBegin();
 	DetourUpdateThread(GetCurrentThread());
 	DetourAttach(&(PVOID&)CreateFileWorig, CreateFileWstub);
+	DetourAttach(&(PVOID&)CreateProcessWorig, CreateProcessWstub);
 	DetourTransactionCommit();
 }
 

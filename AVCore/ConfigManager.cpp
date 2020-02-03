@@ -126,3 +126,16 @@ std::map<std::string, ConfigParamType>* UMModuleConfig::getParamMap()
 {
 	return this->configParamMap;
 }
+
+/**
+\brief checks if parameter exists in registry.
+
+TODO! Check param type.
+*/
+bool UMModuleConfig::checkParamSet(std::string paramName)
+{
+	DWORD size = 0;
+	DWORD type = 0;
+	LSTATUS status = RegQueryValueExA(this->configKey, paramName.c_str(), NULL, &type, NULL, &size);
+	return (status != ERROR_FILE_NOT_FOUND);
+}

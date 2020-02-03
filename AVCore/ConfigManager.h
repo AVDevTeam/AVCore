@@ -13,6 +13,9 @@ public:
 	virtual void setParamMap(paramMap*) override;
 	virtual paramMap* getParamMap() override;
 
+	// checks weather parameter exists
+	bool checkParamSet(std::string paramName);
+
 	// parameter getters
 	DWORD getDwordParam(std::string paramName);
 	std::string getStringParam(std::string paramName);

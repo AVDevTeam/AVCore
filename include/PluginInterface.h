@@ -166,6 +166,8 @@ public:
 	\brief this function should be used to query parameter list for the IConfig.
 	*/
 	virtual paramMap* getParamMap() = 0;
+
+	virtual bool checkParamSet(std::string paramName) = 0;
 	
 	virtual DWORD getDwordParam(std::string paramName) = 0;
 	virtual std::string getStringParam(std::string paramName) = 0;
