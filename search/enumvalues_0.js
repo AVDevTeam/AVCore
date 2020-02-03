@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['avapcprocessinject',['AvApcProcessInject',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a99ca2d1f5d0b4fc9bf35ea1eb4dbd06a',1,'KMUMcomm.h']]],
+  ['aveventstatusallow',['AvEventStatusAllow',['../EventsKMStructures_8h.html#a2b870c639696dc62058561a5fc6aa5ebaa9bb2d9d7f29ae2ebd58b40f1dd3b84a',1,'EventsKMStructures.h']]],
+  ['aveventstatusblock',['AvEventStatusBlock',['../EventsKMStructures_8h.html#a2b870c639696dc62058561a5fc6aa5eba58731bc6cd832602eb586a7992627db0',1,'EventsKMStructures.h']]],
+  ['aveventstatusinjectapc',['AvEventStatusInjectAPC',['../EventsKMStructures_8h.html#a2b870c639696dc62058561a5fc6aa5eba66b7d994b36a7d272a76c72662c12275',1,'EventsKMStructures.h']]],
+  ['avfilecreate',['AvFileCreate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a1c22af064541d906c1da52b04bb43e3b',1,'KMUMcomm.h']]],
+  ['avimageload',['AvImageLoad',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38ac3758b01e33d0a7161d9b2bbd8dfe0d2',1,'KMUMcomm.h']]],
+  ['avnetwork',['AvNetwork',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a62ea5f9aa71802f77ab9746631f0acf7',1,'KMUMcomm.h']]],
+  ['avprocesscreate',['AvProcessCreate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a2ef00a1d4817a7386cda12db8b676f0d',1,'KMUMcomm.h']]],
+  ['avprocessexit',['AvProcessExit',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a1ef37e8f4604d35e0f82c6eca6a8689c',1,'KMUMcomm.h']]],
+  ['avprocesshandlecreate',['AvProcessHandleCreate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38ad5f9fb1191be036c2afa77548fd09de3',1,'KMUMcomm.h']]],
+  ['avprocesshandledublicate',['AvProcessHandleDublicate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a1df2d20cccc3d96236157bee25b207c4',1,'KMUMcomm.h']]],
+  ['avregcreatekey',['AvRegCreateKey',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a02cdf2b57e1dd3f19059257f2ef7e3a9',1,'KMUMcomm.h']]],
+  ['avregopenkey',['AvRegOpenKey',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38abfa2e605717b2f2a25b11ee7782d7ac4',1,'KMUMcomm.h']]],
+  ['avthreadcreate',['AvThreadCreate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a66d676f1983211e2d4bac0cb40e8b562',1,'KMUMcomm.h']]],
+  ['avthreadexit',['AvThreadExit',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a3887568662c08c21fd8a7bf25ca5df84',1,'KMUMcomm.h']]],
+  ['avthreadhandlecreate',['AvThreadHandleCreate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a40bd3fe8c7d0654904b57c0c82ce2c4d',1,'KMUMcomm.h']]],
+  ['avthreadhandledublicate',['AvThreadHandleDublicate',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a1cb132f0deef71012435ab9f72cfc173',1,'KMUMcomm.h']]],
+  ['avwinapicall',['AvWinApiCall',['../KMUMcomm_8h.html#a2a199749754b09452e728ed818875e38a802ad2ec9d49f41f461178264456b586',1,'KMUMcomm.h']]]
+];
