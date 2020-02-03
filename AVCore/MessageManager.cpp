@@ -49,7 +49,7 @@ void MessageManager::listen()
 				for (const auto& t : messagesList)
 				{
 					// Кладется класс и сообщение пример: ("warning", "warning message")
-					messages[std::get<0>(t)] = std::get<1>(t);
+					messages[std::get<0>(t)] += std::get<1>(t);
 				}
 
 				jMessage = messages.dump();
