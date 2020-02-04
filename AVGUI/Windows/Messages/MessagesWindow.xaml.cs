@@ -36,19 +36,35 @@ namespace AVGUI.Windows.Messages
             {
                 if (item.Key == "alert")
                 {
-                    LogManager.OutAlert(item.Value.ToString());
+                    foreach (var item2 in item.Value)
+                    {
+                        LogManager.OutAlert(item2.ToString());
+                    }
+                       
                 }
                 else if(item.Key == "log")
                 {
-                    LogManager.OutLog(item.Value.ToString());
+                    foreach (var item2 in item.Value)
+                    {
+                        LogManager.OutLog(item2.ToString());
+                    }
+                    //LogManager.OutLog(item.Value.ToString());
                 }
                 else if (item.Key == "debug")
                 {
-                    LogManager.OutDebug(item.Value.ToString());
+                    foreach (var item2 in item.Value)
+                    {
+                        LogManager.OutDebug(item2.ToString());
+                    }
+                    //LogManager.OutDebug(item.Value.ToString());
                 }
                 else if (item.Key == "warning")
                 {
-                    LogManager.OutWarning(item.Value.ToString());
+                    foreach (var item2 in item.Value)
+                    {
+                        LogManager.OutWarning(item2.ToString());
+                    }
+                    //LogManager.OutWarning(item.Value.ToString());
                 }
             }
 

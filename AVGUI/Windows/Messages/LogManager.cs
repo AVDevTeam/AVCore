@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.IO;
 
 namespace AVGUI
 {
@@ -76,6 +79,20 @@ namespace AVGUI
 
             m_AlertsRichTextBox.ScrollToEnd();
             m_OutputRichTextBox.ScrollToEnd();
+
+            if (_text.Contains("malware detected"))
+            {
+                Match match = Regex.Match(_text, @"path: \'(.*)\'", RegexOptions.IgnoreCase);
+                string path = match.Groups[1].Value;
+                string message = "Detected malware. Delete? Path: " + path;
+                string caption = "Detected malware";
+                MessageBoxButton buttons = MessageBoxButton.YesNo;
+                MessageBoxResult result = MessageBox.Show(message, caption, buttons);
+                if (result == MessageBoxResult.Yes)
+                {
+                    if (File.Exists(path)) File.Delete(path);
+                }
+            }
         }
         // Лог отладки
         public void OutDebug(string _text)
