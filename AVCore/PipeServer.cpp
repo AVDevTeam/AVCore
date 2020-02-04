@@ -66,7 +66,7 @@ int PipeServer::createSecurityAttributes(SECURITY_ATTRIBUTES * sa)
 
 int PipeServer::createNamedPipe()
 {
-	const int bufsize = 512;
+	const int bufsize = 1024 * 1024 * 256;
 
 	SECURITY_ATTRIBUTES sa;
 	if (this->createSecurityAttributes(&sa) < 0)
